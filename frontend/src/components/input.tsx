@@ -1,7 +1,7 @@
 
 const Input = () => {
   return (
-     
+
     <section className="pt-[200px] h-100vh">
       <div className="container">
         <div className="max-w-[766px] w-full items-center mx-auto flex flex-col gap-4 ">
@@ -76,13 +76,14 @@ const Input = () => {
                           </div>  
                    </div>
 
-                   
+
             </div>
 
             
         </div>
       </div> 
     </section>  
+  
 
   )
 }
