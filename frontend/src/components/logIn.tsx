@@ -14,7 +14,12 @@ const LogIn = () => {
                 <button className="bnt"><a href="#">Continue</a></button>
                 <p>Don't have an account? <span>Sign up</span></p>
                 <div className="div">
-                  <div className="div"></div>
+                     <div></div>
+                     <h6>OR</h6>
+                     <div></div>
+                </div>
+                <div className="div">
+                   
                 </div>
               </div>
           </div>
