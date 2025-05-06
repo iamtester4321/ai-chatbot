@@ -4,87 +4,41 @@ const Input = () => {
 
     <section className="pt-[200px] h-100vh">
       <div className="container">
-        <div className="max-w-[766px] w-full items-center mx-auto flex flex-col gap-4 ">
-            <h3 className="text-[28px] text-[#FFFFFF] font-semibold text-center">What can i halp with?</h3>
+        <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6 ">
+            <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">perplexity</h3>
+            <h3 className="text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter block md:hidden">What do you want to konw?</h3>
 
-            <div className="bg-[#303030] border border-[#fff3] flex flex-col rounded-3xl p-3 w-full"> 
-                 <input type="text" className="outline-none w-full text-lg text-gray-200 py-1.5 pl-1.5" placeholder="Ask anything" />  
+            <div className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"> 
+                 <input type="text" className="outline-none w-full h-12 text-lg text-gray-200 pb-1.5 pl-1.5 text-start items-start" placeholder="Ask anything..." />    
 
-                   <div className="max-w-[742px]  w-full flex flex-row gap-10 items-center justify-between pt-1">
-                          <div className="max-w-[285px] w-full flex flex-row gap-3 items-center">
-                            <div className="group cursor-pointer">
-                              <div className="bg-transparent border border-[#ffffff1a] rounded-full p-2 relative">
-                                <div className="flex flex-row items-center">
-                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="" className="h-[18px] w-[18px]">
-                                          <path fill-rule="evenodd" clip-rule="evenodd" d="M9 7C9 4.23858 11.2386 2 14 2C16.7614 2 19 4.23858 19 7V15C19 18.866 15.866 22 12 22C8.13401 22 5 18.866 5 15V9C5 8.44772 5.44772 8 6 8C6.55228 8 7 8.44772 7 9V15C7 17.7614 9.23858 20 12 20C14.7614 20 17 17.7614 17 15V7C17 5.34315 15.6569 4 14 4C12.3431 4 11 5.34315 11 7V15C11 15.5523 11.4477 16 12 16C12.5523 16 13 15.5523 13 15V9C13 8.44772 13.4477 8 14 8C14.5523 8 15 8.44772 15 9V15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15V7Z" fill="white"></path>
-                                   </svg>
-                                   <a href="#" className="px-1 text-[13px] text-[#F3F3F3] font-medium">Attach</a>
-                                </div>
-                              </div>  
-                              <div className="absolute top-[423px] left-[550px] hidden group-hover:block">
-                                <div className="arrow-top max-w-[173px] w-full bg-[#1f1f1f] border border-[#ffffff26] p-3 rounded-lg  ">
-                                   <h6 className="text-sm text-[#FFF] font-medium">Upload files and more</h6>
-                                </div>
-                              </div>
-                            </div> 
+                   <div className="max-w-[640px]  w-full flex flex-row gap-10 items-center justify-between pt-1">
+                       <div className="bg-[#1e1c1c] rounded-lg max-w-[88px] w-full flex flex-row items-center">
+                          <button className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center  cursor-pointer py-1.5 px-2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" color="currentColor" className="max-w-4 w-full h-4 group-hover:fill-[#20b8cd] transition-all duration-200" fill="#e8e8e6b3" fillRule="evenodd">
+                            <path d="M3.752 9.895a6.145 6.145 0 0 1 6.143-6.143 6.145 6.145 0 0 1 6.142 6.143c0 .568-.074 1.105-.219 1.612a.875.875 0 0 0 1.683.48c.192-.67.286-1.37.286-2.092a7.895 7.895 0 0 0-7.892-7.893 7.895 7.895 0 0 0-7.893 7.893 7.895 7.895 0 0 0 7.893 7.892c1.902 0 3.654-.68 5.018-1.802l5.582 5.748a.875.875 0 0 0 1.255-1.22l-6.175-6.358a.875.875 0 0 0-1.256.001 6.151 6.151 0 0 1-4.424 1.881 6.145 6.145 0 0 1-6.143-6.142ZM9.895 8.49a1.403 1.403 0 1 1 0 2.807 1.403 1.403 0 0 1 0-2.807Z"></path>
+                            </svg> 
+                            <a href="#" className="text-[#e8e8e6b3] group-hover:text-[#20b8cd] transition-all duration-200 text-sm font-medium">Search</a> 
+                          </button>
+                       </div>
 
-                            <div className="group cursor-pointer">
-                               <div className="bg-transparent border border-[#ffffff1a] rounded-full p-2">
-                                <div className="flex flex-row items-center">
-                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/ svg" className="h-[18px] w-[18px]">
-                                       <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM11.9851 4.00291C11.9933 4.00046 11.9982 4.00006 11.9996 4C12.001 4.00006 12.0067 4.00046 12.0149 4.00291C12.0256 4.00615 12.047 4.01416 12.079 4.03356C12.2092 4.11248 12.4258 4.32444 12.675 4.77696C12.9161 5.21453 13.1479 5.8046 13.3486 6.53263C13.6852 7.75315 13.9156 9.29169 13.981 11H10.019C10.0844 9.29169 10.3148 7.75315 10.6514 6.53263C10.8521 5.8046 11.0839 5.21453 11.325 4.77696C11.5742 4.32444 11.7908 4.11248 11.921 4.03356C11.953 4.01416 11.9744 4.00615 11.9851 4.00291ZM8.01766 11C8.08396 9.13314 8.33431 7.41167 8.72334 6.00094C8.87366 5.45584 9.04762 4.94639 9.24523 4.48694C6.48462 5.49946 4.43722 7.9901 4.06189 11H8.01766ZM4.06189 13H8.01766C8.09487 15.1737 8.42177 17.1555 8.93 18.6802C9.02641 18.9694 9.13134 19.2483 9.24522 19.5131C6.48461 18.5005 4.43722 16.0099 4.06189 13ZM10.019 13H13.981C13.9045 14.9972 13.6027 16.7574 13.1726 18.0477C12.9206 18.8038 12.6425 19.3436 12.3823 19.6737C12.2545 19.8359 12.1506 19.9225 12.0814 19.9649C12.0485 19.9852 12.0264 19.9935 12.0153 19.9969C12.0049 20.0001 11.9999 20 11.9999 20C11.9999 20 11.9948 20 11.9847 19.9969C11.9736 19.9935 11.9515 19.9852 11.9186 19.9649C11.8494 19.9225 11.7455 19.8359 11.6177 19.6737C11.3575 19.3436 11.0794 18.8038 10.8274 18.0477C10.3973 16.7574 10.0955 14.9972 10.019 13ZM15.9823 13C15.9051 15.1737 15.5782 17.1555 15.07 18.6802C14.9736 18.9694 14.8687 19.2483 14.7548 19.5131C17.5154 18.5005 19.5628 16.0099 19.9381 13H15.9823ZM19.9381 11C19.5628 7.99009 17.5154 5.49946 14.7548 4.48694C14.9524 4.94639 15.1263 5.45584 15.2767 6.00094C15.6657 7.41167 15.916 9.13314 15.9823   11H19.9381Z" fill="white"></path>
-                                     </svg>
-                                     <a href="#" className="px-1 text-[13px] text-[#F3F3F3] font-medium">Search</a>
-                                </div>
-                               </div>
-                               <div className="absolute top-[423px] left-[665px] hidden group-hover:block">
-                                  <div className="arrow-top max-w-[130px] w-full bg-[#1f1f1f] border border-[#ffffff26] p-3 rounded-lg  ">
-                                   <h6 className="text-sm text-[#FFF] font-medium">Search the web</h6>
-                                  </div>  
-                              </div>
-                            </div>
+                       <div className="max-w-[188px] w-full flex flex-row items-center justify-end">
+                           <div className="group bg-none hover:bg-[#2d2f2f] transition-all duration-200 rounded-lg flex justify-center items-center max-w-[36px] w-full h-[32px] cursor-pointer">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8d9191" stroke-width="1.7999999999999998" stroke-linecap="round" stroke-linejoin="round" className="w-4 h-4 group-hover:stroke-white">
+                               <path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"></path>
+                             </svg>
+                           </div>
 
-                            <div className="group cursor-pointer">
-                               <div className="bg-transparent border border-[#ffffff1a] rounded-full p-2">
-                                <div className="flex flex-row items-center">
-                                    <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]">
-                                       <path d="m12 3c-3.585 0-6.5 2.9225-6.5 6.5385 0 2.2826 1.162 4.2913 2.9248 5.4615h7.1504c1.7628-1.1702 2.9248-3.1789 2.9248-5.4615 0-3.6159-2.915-6.5385-6.5-6.5385zm2.8653 14h-5.7306v1h5.7306v-1zm-1.1329 3h-3.4648c0.3458 0.5978 0.9921 1 1.7324 1s1.3866-0.4022 1.7324-1zm-5.6064 0c0.44403 1.7252 2.0101 3 3.874 3s3.43-1.2748 3.874-3c0.5483-0.0047 0.9913-0.4506 0.9913-1v-2.4593c2.1969-1.5431 3.6347-4.1045 3.6347-7.0022 0-4.7108-3.8008-8.5385-8.5-8.5385-4.6992 0-8.5 3.8276-8.5 8.5385 0 2.8977 1.4378 5.4591 3.6347 7.0022v2.4593c0 0.5494 0.44301 0.9953 0.99128 1z" clip-rule="evenodd" fill="white" fill-rule="evenodd"></path>
-                                    </svg>
-                                   <a href="#" className="px-1 text-[13px] text-[#F3F3F3] font-medium">Reason</a>
-                                </div>
-                               </div>
-                               <div className="absolute top-[423px] left-[735px] hidden group-hover:block">
-                                 <div className="arrow-top max-w-[190px] w-full bg-[#1f1f1f] border border-[#ffffff26] p-3 rounded-lg  ">
-                                   <h6 className="text-sm text-[#FFF] font-medium">Think before responding</h6>
-                                 </div>  
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="bg-[#FFFFFF] border border-[#ffffff] rounded-full p-2 hidden">
-                                <div className="flex flex-row items-center">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
-                                        <path d="M9.5 4C8.67157 4 8 4.67157 8 5.5V18.5C8 19.3284 8.67157 20 9.5 20C10.3284 20 11 19.3284 11 18.5V5.5C11 4.67157 10.3284 4 9.5 4Z" fill="currentColor"></path><path d="M13 8.5C13 7.67157 13.6716 7 14.5 7C15.3284 7 16 7.67157 16 8.5V15.5C16 16.3284 15.3284 17 14.5 17C13.6716 17 13 16.3284 13 15.5V8.5Z" fill="currentColor"></path><path d="M4.5 9C3.67157 9 3 9.67157 3 10.5V13.5C3 14.3284 3.67157 15 4.5 15C5.32843 15 6 14.3284 6 13.5V10.5C6 9.67157 5.32843 9 4.5 9Z" fill="currentColor"></path><path d="M19.5 9C18.6716 9 18 9.67157 18 10.5V13.5C18 14.3284 18.6716 15 19.5 15C20.3284 15 21 14.3284 21 13.5V10.5C21 9.67157 20.3284 9 19.5 9Z" fill="currentColor"></path>
-                                    </svg>
-                                    <a href="#" className="px-1 text-[13px] text-[#000000] font-medium">Voice</a>
-                                </div>
-                          </div>  
-                          <div className="max-w-[36px] w-full h-[36px] bg-white rounded-full flex items-center justify-center cursor-pointer">
-                               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="max-w-[32px] w-full h-[34px]">  
-                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M15.1918 8.90615C15.6381 8.45983 16.3618 8.45983 16.8081 8.90615L21.9509 14.049C22.3972 14.4953 22.3972 15.2189 21.9509 15.6652C21.5046 16.1116 20.781 16.1116 20.3347 15.6652L17.1428 12.4734V22.2857C17.1428 22.9169 16.6311 23.4286 15.9999 23.4286C15.3688 23.4286 14.8571 22.9169 14.8571 22.2857V12.4734L11.6652 15.6652C11.2189 16.1116 10.4953 16.1116 10.049 15.6652C9.60265 15.2189 9.60265 14.4953 10.049 14.049L15.1918 8.90615Z" fill="currentColor"></path>
-                               </svg>  
-                          </div>  
+                           <div className="bg-[#20b8cd] max-w-[36px] w-full h-[32px] cursor-pointer rounded-lg flex justify-center items-center ml-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7999999999999998" stroke-linecap="round" stroke-linejoin="round" className="w-4 h-4">
+                                 <path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path>
+                              </svg>
+                           </div>
+                       </div>
                    </div>
-
-
-            </div>
-
-            
+            </div>  
         </div>
       </div> 
     </section>  
-  
-
   )
 }
 
