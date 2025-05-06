@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../prisma/generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -14,44 +14,46 @@ enum ChatType {
 }
 
 model User {
-  id         Int          @id @default(autoincrement())
+  id         String          @id @default(uuid())
   email      String       @unique
   password   String
   createdAt  DateTime     @default(now())
+  updatedAt  DateTime @updatedAt
   chats      Chat[]
   files      FileUpload[]
 }
 
 model Chat {
-  id        Int          @id @default(autoincrement())
+  id        String          @id @default(uuid())
+  name     String
   type      ChatType
   createdAt DateTime     @default(now())
   user      User         @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
   messages  Message[]
   files     FileUpload[]
 }
 
 model Message {
-  id         Int       @id @default(autoincrement())
+  id         String          @id @default(uuid())
   content    String
   isFromUser Boolean
   createdAt  DateTime  @default(now())
   liked      Boolean   @default(false)
   disliked   Boolean   @default(false)
   chat       Chat      @relation(fields: [chatId], references: [id])
-  chatId     Int
+  chatId     String
 }
 
 model FileUpload {
-  id         Int       @id @default(autoincrement())
+  id         String          @id @default(uuid())
   fileName   String
   mimeType   String
   data       Bytes
   uploadedAt DateTime  @default(now())
   user       User      @relation(fields: [userId], references: [id])
-  userId     Int
+  userId     String
   chat       Chat?     @relation(fields: [chatId], references: [id])
-  chatId     Int?
+  chatId     String?
 }
 

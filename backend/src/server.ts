@@ -4,8 +4,14 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
-import authRoutes from "./modules/auth/auth.routes";
-import userRoutes from "./modules/user/user.routes";
+import authRoutes from "./routes/auth.routes";
+import chatRoutes from "./routes/chat.routes";
+
+import { ensureAuthenticated } from "./middlewares/auth.middleware";
+
+/* ------- */
+import { google } from "@ai-sdk/google"; // 1️⃣
+import { streamText, generateText } from "ai";
 
 dotenv.config();
 
@@ -22,7 +28,21 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/chats", ensureAuthenticated, chatRoutes);
+
+app.post("/api/strem", async (req: any, res: any) => {
+  const { prompt } = req.body;
+  const model = google("gemini-1.5-pro");
+
+  const result = streamText({
+    model,
+    prompt,
+    onFinish: (res) => {},
+    onError: (err) => {},
+  });
+
+  result.pipeTextStreamToResponse(res);
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
