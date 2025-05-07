@@ -1,6 +1,15 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { loginUser } from "../../actions/auth.actions";
+import Google from "../../assets/icons/Google";
+import useToast from "../../hooks/useToast";
+
+const LoginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -8,61 +17,57 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isValid, setIsValid] = useState(false);
-  const [apiError, setApiError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
+  const navigate = useNavigate();
+  const showToast = useToast();
 
   useEffect(() => {
-    let valid = true;
-
-    // Email validation
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setEmailError("Please enter a valid email address");
-      valid = false;
-    } else {
+    try {
+      LoginSchema.parse({ email, password });
       setEmailError("");
-    }
-
-    // Password non-empty validation
-    if (!password) {
-      setPasswordError("Password cannot be empty");
-      valid = false;
-    } else {
       setPasswordError("");
+      setIsValid(true);
+    } catch (err) {
+      setIsValid(false);
+      if (err instanceof z.ZodError) {
+        const issues = err.flatten().fieldErrors;
+        setEmailError(touched.email ? issues.email?.[0] || "" : "");
+        setPasswordError(touched.password ? issues.password?.[0] || "" : "");
+      }
     }
-
-    // Ensure non-empty fields
-    if (!email || !password) {
-      valid = false;
-    }
-
-    setIsValid(valid);
-  }, [email, password]);
+  }, [email, password, touched]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isValid) return;
 
     try {
-      setApiError("");
-      console.log("login 1");
+      setIsLoading(true);
+      LoginSchema.parse({ email, password });
 
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
-      console.log("Login successful", response.data);
-    } catch (error) {
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        setApiError(error.response.data.message);
-      } else {
-        setApiError("Login failed. Please try again.");
+      const { success, message } = await loginUser(email, password);
+
+      if (!success) {
+        showToast.error(message || "Login failed");
+        return;
       }
+
+      showToast.success("Login successful!");
+      navigate("/");
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const issues = err.flatten().fieldErrors;
+        setEmailError(issues.email?.[0] || "");
+        setPasswordError(issues.password?.[0] || "");
+        showToast.error("Please check your input fields");
+      } else {
+        showToast.error("An unknown error occurred");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,7 +76,7 @@ const Login = () => {
   };
 
   return (
-    <section className="pt-[200px]">
+    <section className="min-h-screen flex items-center justify-center">
       <div className="container">
         <div className="max-w-[350px] w-full flex flex-col items-center mx-auto">
           <h2 className="text-center text-4xl text-[#e8e8e6] font-medium mb-6">
@@ -82,44 +87,39 @@ const Login = () => {
             onClick={handelGoogole}
             className="w-full bg-[#e8e8e6] flex flex-row gap-[5px] justify-center items-center py-4 px-5 cursor-pointer rounded-lg mb-3"
           >
-            {/* Google OAuth placeholder */}
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              data-prefix="fab"
-              data-icon="google"
-              className="w-[22px] h-6"
-              role="img"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 488 512"
-            >
-              <path
-                fill="currentColor"
-                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-              ></path>
-            </svg>
+            <Google className="w-[22px] h-6" />
             <a href="#" className="text-base text-[#13343b] font-medium">
               Continue with Google
             </a>
           </button>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col">
+            <label htmlFor="email" className="text-sm text-[#e8e8e6] mb-1">
+              Email
+            </label>
             <input
+              id="email"
               type="text"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
             {emailError && (
               <p className="text-red-500 text-sm mb-2">{emailError}</p>
             )}
 
+            <label htmlFor="password" className="text-sm text-[#e8e8e6] mb-1">
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
             {passwordError && (
@@ -128,16 +128,22 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={!isValid}
-              className={`w-full py-3 px-4 rounded-lg cursor-pointer mt-2 ${
-                isValid ? "bg-white text-black" : "bg-gray-500 text-gray-300"
+              disabled={!isValid || isLoading}
+              className={`w-full py-3 px-4 rounded-lg cursor-pointer mt-2 flex items-center justify-center ${
+                isValid && !isLoading
+                  ? "bg-white text-black"
+                  : "bg-gray-500 text-gray-300"
               }`}
             >
-              Submit
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Continuing...
+                </>
+              ) : (
+                "Continue with email"
+              )}
             </button>
-            {apiError && (
-              <p className="text-red-500 text-sm mt-2">{apiError}</p>
-            )}
           </form>
 
           <p className="text-base text-[#ffffffd4] font-medium mt-4">
