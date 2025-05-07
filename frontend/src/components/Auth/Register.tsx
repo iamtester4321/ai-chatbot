@@ -2,14 +2,16 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  // Validate inputs on every change
   useEffect(() => {
     let valid = true;
 
@@ -22,21 +24,21 @@ const Login = () => {
       setEmailError("");
     }
 
-    // Password non-empty validation
-    if (!password) {
-      setPasswordError("Password cannot be empty");
+    // Password match validation
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
       valid = false;
     } else {
       setPasswordError("");
     }
 
     // Ensure non-empty fields
-    if (!email || !password) {
+    if (!email || !password || !confirmPassword) {
       valid = false;
     }
 
     setIsValid(valid);
-  }, [email, password]);
+  }, [email, password, confirmPassword]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,24 +46,26 @@ const Login = () => {
 
     try {
       setApiError("");
-      console.log("login 1");
 
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email, password },
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/register",
+        {
+          email,
+          password,
+        },
         { withCredentials: true }
       );
-      console.log("Login successful", response.data);
-    } catch (error) {
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        setApiError(error.response.data.message);
+
+      const { data } = res;
+      if (res.status !== 201) {
+        throw new Error(data.message || "Registration failed");
+      }
+      console.log("Registration successful", data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setApiError(err.message);
       } else {
-        setApiError("Login failed. Please try again.");
+        setApiError("An unknown error occurred");
       }
     }
   };
@@ -75,7 +79,7 @@ const Login = () => {
       <div className="container">
         <div className="max-w-[350px] w-full flex flex-col items-center mx-auto">
           <h2 className="text-center text-4xl text-[#e8e8e6] font-medium mb-6">
-            Log in
+            Register
           </h2>
 
           <button
@@ -122,6 +126,14 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
+            />
             {passwordError && (
               <p className="text-red-500 text-sm mb-2">{passwordError}</p>
             )}
@@ -141,9 +153,9 @@ const Login = () => {
           </form>
 
           <p className="text-base text-[#ffffffd4] font-medium mt-4">
-            Don&apos;t have an account?{" "}
-            <Link to="/register" className="underline text-white">
-              Sign up
+            Already a user?{" "}
+            <Link to="/login" className="underline text-white">
+              Login
             </Link>
           </p>
         </div>
@@ -152,4 +164,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

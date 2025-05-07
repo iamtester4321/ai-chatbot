@@ -1,3 +1,4 @@
+import "./config/passport";
 import express from "express";
 import http from "http";
 import cors from "cors";
@@ -11,7 +12,7 @@ import { ensureAuthenticated } from "./middlewares/auth.middleware";
 
 /* ------- */
 import { google } from "@ai-sdk/google"; // 1️⃣
-import { streamText, generateText } from "ai";
+import { streamText } from "ai";
 
 dotenv.config();
 
@@ -32,13 +33,17 @@ app.use("/api/chats", ensureAuthenticated, chatRoutes);
 
 app.post("/api/strem", async (req: any, res: any) => {
   const { prompt } = req.body;
-  const model = google("gemini-1.5-pro");
+  const model = google("gemini-2.0-flash");
 
   const result = streamText({
     model,
     prompt,
-    onFinish: (res) => {},
-    onError: (err) => {},
+    onFinish: (res) => {
+      console.log("heloo");
+    },
+    onError: (err) => {
+      console.log("error", err);
+    },
   });
 
   result.pipeTextStreamToResponse(res);
