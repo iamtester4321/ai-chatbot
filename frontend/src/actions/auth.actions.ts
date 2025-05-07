@@ -1,4 +1,4 @@
-import { LOGIN_API, REGISTER_API } from "../lib/apiUrl";
+import { GOOGLE_AUTH_API, LOGIN_API, REGISTER_API } from "../lib/apiUrl";
 
 export const registerUser = async (email: string, password: string) => {
   try {
@@ -60,6 +60,17 @@ export const loginUser = async (email: string, password: string) => {
     return {
       success: false,
       message: "Network error. Please try again later.",
+    };
+  }
+};
+
+export const googleAuth = () => {
+  try {
+    window.location.href = GOOGLE_AUTH_API;
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to initiate Google authentication",
     };
   }
 };

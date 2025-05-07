@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { loginUser } from "../../actions/auth.actions";
+import { googleAuth, loginUser } from "../../actions/auth.actions";
 import Google from "../../assets/icons/Google";
 import useToast from "../../hooks/useToast";
 
@@ -62,7 +62,6 @@ const Login = () => {
         const issues = err.flatten().fieldErrors;
         setEmailError(issues.email?.[0] || "");
         setPasswordError(issues.password?.[0] || "");
-        showToast.error("Please check your input fields");
       } else {
         showToast.error("An unknown error occurred");
       }
@@ -71,8 +70,8 @@ const Login = () => {
     }
   };
 
-  const handelGoogole = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+  const handleGoogleAuth = () => {
+    googleAuth();
   };
 
   return (
@@ -84,13 +83,13 @@ const Login = () => {
           </h2>
 
           <button
-            onClick={handelGoogole}
+            onClick={handleGoogleAuth}
             className="w-full bg-[#e8e8e6] flex flex-row gap-[5px] justify-center items-center py-4 px-5 cursor-pointer rounded-lg mb-3"
           >
             <Google className="w-[22px] h-6" />
-            <a href="#" className="text-base text-[#13343b] font-medium">
+            <span className="text-base text-[#13343b] font-medium">
               Continue with Google
-            </a>
+            </span>
           </button>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col">
