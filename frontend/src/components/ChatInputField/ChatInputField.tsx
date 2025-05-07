@@ -1,4 +1,4 @@
-import { SetStateAction, useState, useCallback } from "react";
+import { SetStateAction, useState, useCallback, useEffect } from "react";
 import useSWR from 'swr';
 import { fetcher } from '../../utils/streamProcessor';
 import { STREAM_CHAT_RESPONSE } from "../../constants";
@@ -8,7 +8,7 @@ import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 import 'github-markdown-css/github-markdown-dark.css';
 
-// ✅ Create custom renderer
+// ✅ Create custom renderer for code block with Copy button
 const renderer = new marked.Renderer();
 renderer.code = ({ text, lang }) => {
   const validLang = lang && hljs.getLanguage(lang);
@@ -16,10 +16,18 @@ renderer.code = ({ text, lang }) => {
     ? hljs.highlight(text, { language: lang }).value
     : hljs.highlightAuto(text).value;
 
-  return `<pre><code class="hljs ${lang ?? ''}">${highlighted}</code></pre>`;
+  const languageClass = lang ? `language-${lang}` : '';
+
+  return `
+    <div class="code-block-wrapper relative group">
+      <button class="copy-button absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-xs text-white bg-[#444] rounded hover:bg-[#666]">
+        Copy
+      </button>
+      <pre><code class="hljs ${languageClass}">${highlighted}</code></pre>
+    </div>
+  `;
 };
 
-// ✅ Set renderer globally
 marked.setOptions({ renderer });
 
 const ChatInputField = () => {
@@ -42,10 +50,38 @@ const ChatInputField = () => {
     { revalidateOnFocus: false }
   );
 
+  // ✅ Format and sanitize markdown with HTML
   const formatResponse = (text: string): string => {
     const html = marked.parse(text) as string;
     return DOMPurify.sanitize(html);
   };
+
+  // ✅ Copy button handler
+  useEffect(() => {
+    const handleCopyClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains("copy-button")) {
+        const code = target.parentElement?.querySelector("pre code");
+        if (code) {
+          const text = code.textContent || "";
+          navigator.clipboard.writeText(text).then(() => {
+            target.textContent = "Copied!";
+            setTimeout(() => {
+              target.textContent = "Copy";
+            }, 2000);
+          });
+        }
+      }
+    };
+
+    // Listen to click event on copy buttons
+    document.addEventListener("click", handleCopyClick);
+
+    return () => {
+      // Cleanup event listener
+      document.removeEventListener("click", handleCopyClick);
+    };
+  }, [streamedResponse]);
 
   const handleInputChange = (e: { target: { value: SetStateAction<string> } }) => {
     setInputValue(e.target.value);
