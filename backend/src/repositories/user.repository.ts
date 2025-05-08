@@ -3,7 +3,7 @@ import { Prisma, User } from "@prisma/client";
 
 interface CreateUserDTO {
   email: string;
-  password: string;
+  password?: string;
 }
 
 export const findByEmail = async (email: string): Promise<User | null> => {
@@ -16,7 +16,13 @@ export const createUser = async ({
   email,
   password,
 }: CreateUserDTO): Promise<User> => {
-  return prisma.user.create({
-    data: { email, password },
-  });
+  if (password) {
+    return prisma.user.create({
+      data: { email, password },
+    });
+  } else {
+    return prisma.user.create({
+      data: { email },
+    });
+  }
 };

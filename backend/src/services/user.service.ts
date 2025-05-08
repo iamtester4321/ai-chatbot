@@ -7,11 +7,10 @@ export async function findOrCreateUser(payload: {
   email: string;
   name: string;
 }): Promise<User> {
-  const { googleId, email, name } = payload;
+  const { googleId, email } = payload;
 
-  // 1) Try to find an existing user by Google ID
   let user = await prisma.user.findUnique({
-    where: { email: googleId },
+    where: { email },
   });
 
   if (user) {
@@ -25,16 +24,15 @@ export async function findOrCreateUser(payload: {
   if (user) {
     user = await prisma.user.update({
       where: { email },
-      data: { email: googleId },
+      data: { email },
     });
     return user;
   }
 
-  // 3) Otherwise, create a new user record
   user = await prisma.user.create({
     data: {
       email,
-      password: "defaultPassword123",
+      password: null,
     },
   });
 
