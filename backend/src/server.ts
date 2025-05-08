@@ -26,8 +26,12 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", ensureAuthenticated, chatRoutes);
 
-app.post("/api/strem", async (req: any, res: any) => {
+app.post("/api/stream", async (req: any, res: any) => {
   const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
+  
   const model = google("gemini-2.0-flash");
 
   const result = streamText({
@@ -41,7 +45,51 @@ app.post("/api/strem", async (req: any, res: any) => {
     },
   });
 
-  result.pipeTextStreamToResponse(res);
+  try {
+    const result = streamText({
+      model,
+      prompt,
+      onFinish: (response) => {
+        // console.log('Stream finished:', response);
+      },
+      onError: (err) => {
+        console.error('Stream error:', err);
+      }
+    });
+
+    result.pipeTextStreamToResponse(res);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+app.post("/api/stream", async (req: any, res: any) => {
+  const messages = req.body.messages;
+  const prompt = req.body.prompt || messages?.[messages.length - 1]?.content;
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
+
+  const model = google("gemini-2.0-flash");
+
+  try {
+    const result = streamText({
+      model,
+      prompt,
+      onFinish: () => {},
+      onError: (err) => {
+        console.error('Stream error:', err);
+      },
+    });
+
+    result.pipeTextStreamToResponse(res);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

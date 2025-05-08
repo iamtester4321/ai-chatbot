@@ -1,0 +1,1 @@
+export const STREAM_CHAT_RESPONSE = '/api/stream';
