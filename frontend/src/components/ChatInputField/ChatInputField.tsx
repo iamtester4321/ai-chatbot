@@ -1,9 +1,11 @@
 import { SetStateAction, useState } from "react";
 
+
 const ChatInputField = () => {
   const [inputValue, setInputValue] = useState("");
   const [currentMessage, setCurrentMessage] = useState("");
   const [isMessageSent, setIsMessageSent] = useState(false);
+  const [activeTab, setActiveTab] = useState<"answer" | "images" | "sources">("answer");
 
   const handleInputChange = (e: {
     target: { value: SetStateAction<string> };
@@ -36,105 +38,38 @@ const ChatInputField = () => {
               {currentMessage}
             </h2>
 
-            {/* Tabs section */}
+            {/* Tabs */}
             <div className="border-b border-[#e8e8e61a] mb-4">
               <div className="flex space-x-4">
-                <button className="py-2 px-1 border-b-2 border-[#20b8cd] text-white flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
-                  >
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  Answer
+                <button
+                  onClick={() => setActiveTab("answer")}
+                  className={`py-2 px-1 flex items-center gap-2 ${
+                    activeTab === "answer" ? "border-b-2 border-[#20b8cd] text-white" : "text-gray-400"
+                  }`}
+                >
+                  {/* Answer Icon */} Answer
                 </button>
-                <button className="py-2 px-1 text-gray-400 flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
-                  >
-                    <rect
-                      x="3"
-                      y="3"
-                      width="18"
-                      height="18"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <path d="M21 15l-5-5L5 21"></path>
-                  </svg>
-                  Images
+                <button
+                  onClick={() => setActiveTab("images")}
+                  className={`py-2 px-1 flex items-center gap-2 ${
+                    activeTab === "images" ? "border-b-2 border-[#20b8cd] text-white" : "text-gray-400"
+                  }`}
+                >
+                  {/* Images Icon */} Images
                 </button>
-                <button className="py-2 px-1 text-gray-400 flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
-                  >
-                    <path d="M21 10H3M21 6H3M21 14H3M21 18H3"></path>
-                  </svg>
-                  Sources
+                <button
+                  onClick={() => setActiveTab("sources")}
+                  className={`py-2 px-1 flex items-center gap-2 ${
+                    activeTab === "sources" ? "border-b-2 border-[#20b8cd] text-white" : "text-gray-400"
+                  }`}
+                >
+                  {/* Sources Icon */} Sources
                 </button>
               </div>
             </div>
 
-            {/* News sources */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-[#202222] p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs mr-2">
-                    B
-                  </div>
-                  <span className="text-sm text-gray-300">BBC News</span>
-                </div>
-                <p className="text-sm">Loading search results...</p>
-              </div>
-
-              <div className="bg-[#202222] p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs mr-2">
-                    R
-                  </div>
-                  <span className="text-sm text-gray-300">Reuters</span>
-                </div>
-                <p className="text-sm">Loading search results...</p>
-              </div>
-
-              <div className="bg-[#202222] p-4 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs mr-2">
-                    Y
-                  </div>
-                  <span className="text-sm text-gray-300">Yahoo</span>
-                </div>
-                <p className="text-sm">Loading search results...</p>
-              </div>
-            </div>
-
+            {/* Tab Content */}
+           
             {/* Answer loading placeholder */}
             <div className="bg-[#202222] rounded-lg p-4 mb-12">
               <p className="text-gray-300">Loading answer...</p>
@@ -152,12 +87,12 @@ const ChatInputField = () => {
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
             {!isMessageSent && (
-              <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
+              <h3 className="text-[48px] text-[#ffffffd6]  text-center  hidden md:block">
                 perplexity
               </h3>
             )}
             <h3
-              className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter ${
+              className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center ${
                 isMessageSent ? "hidden" : "block md:hidden"
               }`}
             >
