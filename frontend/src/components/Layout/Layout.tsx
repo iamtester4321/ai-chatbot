@@ -3,7 +3,7 @@ import Sidebar from "../Sidebar/Sidebar";
 
 function Layout() {
   return (
-    <div className="flex min-h-screen bg-[#121212]">
+    <div className="flex max-h-screen bg-[#121212]">
       <div className="fixed top-0 left-0 w-[72px] h-full bg-[#2c3e50] text-white z-[1000]">
         <Sidebar />
       </div>

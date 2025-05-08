@@ -1,30 +1,30 @@
-import "github-markdown-css/github-markdown-dark.css";
-import "highlight.js/styles/github-dark.css";
-import { SetStateAction, useCallback, useEffect, useState } from "react";
-import useSWR from "swr";
-import { STREAM_CHAT_RESPONSE } from "../../lib/apiUrl";
+import { useEffect, useState } from "react";
+import { useChat } from "@ai-sdk/react";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
+import "highlight.js/styles/github-dark.css";
+import "github-markdown-css/github-markdown-dark.css";
+import { STREAM_CHAT_RESPONSE } from "../../lib/apiUrl";
 import { fetcher } from "../../utils/streamProcessor";
 
 const ChatInputField = () => {
-  const [inputValue, setInputValue] = useState<string>("");
-  const [currentMessage, setCurrentMessage] = useState<string>("");
-  const [isMessageSent, setIsMessageSent] = useState<boolean>(false);
-  const [streamedResponse, setStreamedResponse] = useState<string>("");
-  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [chatResponse, setChatResponse] = useState<string>("");
+  const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
+    useChat({
+      api: STREAM_CHAT_RESPONSE,
+      onResponse: async () => {
+        const processStream = await fetcher(STREAM_CHAT_RESPONSE, input);
+        processStream((text: string) => {
+          setChatResponse(text);
+          console.log("Streaming Response text:", text);
+        });
+      },
+    });
 
-  const { mutate } = useSWR(
-    isMessageSent ? [STREAM_CHAT_RESPONSE, currentMessage] : null,
-    async ([url, prompt]: [string, string]) => {
-      setIsStreaming(true);
-      const streamProcessor = await fetcher(url, prompt);
-      await streamProcessor((text: string) => {
-        setStreamedResponse(text);
-      });
-      setIsStreaming(false);
-    },
-    { revalidateOnFocus: false }
-  );
+  useEffect(() => {
+    if (data) {
+      console.log("Data from Stream:", data);
+    }
+  }, [data]);
 
   useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
@@ -45,88 +45,93 @@ const ChatInputField = () => {
 
     document.addEventListener("click", handleCopyClick);
     return () => document.removeEventListener("click", handleCopyClick);
-  }, [streamedResponse]);
+  }, [messages]);
 
-  const handleInputChange = (e: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleSendMessage = useCallback(() => {
-    if (inputValue.trim()) {
-      setCurrentMessage(inputValue);
-      setIsMessageSent(true);
-      setInputValue("");
-      setStreamedResponse("");
-      mutate();
-    }
-  }, [inputValue, mutate]);
-
-  const handleKeyDown = (e: { key: string }) => {
-    if (e.key === "Enter") {
-      handleSendMessage();
-    }
-  };
+  const lastUserMessage = messages
+    .filter((msg) => msg.role === "user")
+    .slice(-1)[0];
 
   return (
     <div className="bg-[#121212] min-h-screen text-white">
-      {isMessageSent && (
+      {messages.length > 0 && (
         <div className="w-full pt-4 px-4 md:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-white">
-              {currentMessage}
+              {lastUserMessage?.content}
             </h2>
+
+
             <div className="markdown-body prose prose-invert max-w-none">
-              <div
-                className="text-gray-300"
-                dangerouslySetInnerHTML={{
-                  __html: formatMarkdownResponse(streamedResponse),
-                }}
-              />
-              {isStreaming && (
+              {messages
+                .filter((msg) => msg.role === "assistant")
+                .map((msg, index) => (
+                  <div
+                    key={index}
+                    className="text-gray-300"
+                    dangerouslySetInnerHTML={{
+                      __html: formatMarkdownResponse(msg.content),
+                    }}
+                  />
+                ))}
+              {isLoading && (
                 <span className="inline-block w-2 h-4 ml-1 bg-[#20b8cd] animate-pulse">
                   |
                 </span>
               )}
             </div>
+            {chatResponse && (
+              <div className="mt-6 text-gray-300">
+                <div
+                  className="markdown-body prose prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: formatMarkdownResponse(chatResponse),
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
 
       <section
         className={`${
-          isMessageSent ? "pt-8" : "pt-[200px]"
+          messages.length > 0 ? "pt-8" : "pt-[200px]"
         } h-100vh transition-all duration-300`}
       >
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-            {!isMessageSent && (
+            {messages.length === 0 && (
               <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
-                Ai-Chatbot
+                Ai-chatbot
               </h3>
             )}
             <h3
               className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter ${
-                isMessageSent ? "hidden" : "block md:hidden"
+                messages.length > 0 ? "hidden" : "block md:hidden"
               }`}
             >
               What do you want to know?
             </h3>
 
-            <div className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full">
+            <form
+              onSubmit={handleSubmit}
+              className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"
+            >
               <input
                 type="text"
                 className="outline-none w-full h-12 text-lg text-gray-200 pb-1.5 pl-1.5 text-start items-start bg-transparent"
                 placeholder="Ask anything..."
-                value={inputValue}
+                value={input}
                 onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
               />
 
               <div className="max-w-[640px] w-full flex flex-row gap-10 items-center justify-between pt-1">
                 <div className="bg-[#1e1c1c] rounded-lg max-w-[88px] w-full flex flex-row items-center">
-                  <button className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5"
+                  >
                     <span className="text-[#e8e8e6b3] group-hover:text-[#20b8cd] transition-all duration-200 text-sm font-medium">
                       Search
                     </span>
@@ -135,7 +140,8 @@ const ChatInputField = () => {
 
                 <div className="max-w-[188px] w-full flex flex-row items-center justify-end">
                   <button
-                    onClick={handleSendMessage}
+                    type="submit"
+                    disabled={isLoading}
                     className="bg-[#20b8cd] max-w-[36px] w-full h-[32px] cursor-pointer rounded-lg flex justify-center items-center ml-2 hover:bg-[#1a9eb2] transition-all duration-200"
                   >
                     <svg
@@ -157,7 +163,7 @@ const ChatInputField = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </section>
