@@ -7,14 +7,18 @@ import SunIcon from "../../assets/icons/SunIcon";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const sidebarRef = useRef(null);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+
       if (
         sidebarRef.current &&
-        !sidebarRef.current.contains(event.target) &&
-        !event.target.closest("button")
+        !(
+          sidebarRef.current.contains(target) ||
+          (target instanceof Element && target.closest("button"))
+        )
       ) {
         setIsOpen(false);
       }
@@ -65,7 +69,12 @@ const Sidebar = () => {
   );
 };
 
-const SidebarItem = ({ icon, label }) => {
+interface SidebarItemProps {
+  icon: React.ReactNode;
+  label: string;
+}
+
+const SidebarItem = ({ icon, label }: SidebarItemProps) => {
   return (
     <div className="flex items-center gap-0.5 flex-col p-2 cursor-pointer">
       <div className="flex items-center justify-center w-10 h-10 bg-transparent hover:bg-[#2D2F2F] group transform transition duration-300 hover:scale-110 rounded-[6px]">
