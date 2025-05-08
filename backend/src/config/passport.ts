@@ -11,8 +11,7 @@ passport.use(
       clientSecret: env.GOOGLE_CLIENT_SECRET,
       callbackURL: env.GOOGLE_CALLBACK_URL,
     },
-    // verify callback
-    async (accessToken, refreshToken, profile, done) => {
+    async (_, __, profile, done) => {
       try {
         // your logic to find or create a user in DB:
         const user = await findOrCreateUser({
@@ -20,6 +19,7 @@ passport.use(
           email: profile.emails?.[0].value!,
           name: profile.displayName,
         });
+
         done(null, user);
       } catch (err) {
         done(err, undefined);

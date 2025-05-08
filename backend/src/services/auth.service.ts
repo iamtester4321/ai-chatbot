@@ -24,7 +24,10 @@ export const registerUser = async ({ email, password }: RegisterDTO) => {
     }
     const hashed = await hashPassword(password);
     const user = await userRepo.createUser({ email, password: hashed });
-    return { success: true, data: { id: user.id, email: user.email } };
+
+    const token = signToken({ userId: user.id, email: user.email });
+
+    return { success: true, data: { id: user.id, email: user.email }, token };
   } catch (error) {
     return {
       success: false,
@@ -43,7 +46,9 @@ export const loginUser = async ({ email, password }: LoginDTO) => {
       };
     }
 
-    const valid = await comparePassword(password, user.password);
+    const valid = !user.password
+      ? false
+      : await comparePassword(password, user.password);
     if (!valid) {
       return {
         success: false,
@@ -69,17 +74,26 @@ export const googleCallback = (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    passport.authenticate("google", (err: any, user: any) => {
-      if (err) return next(err);
-      if (!user) return res.redirect("/login");
-      const token = signToken({ userId: user.id, email: user.email });
-      res.cookie("authToken", token, { httpOnly: true });
-      res.redirect("/");
-    })(req, res, next);
-  } catch (error) {
-    res.redirect("/login?error=auth_failed");
-  }
+  passport.authenticate("google", async (err: any, googleUser: any) => {
+    if (err) return next(err);
+    if (!googleUser) return res.redirect("http://localhost:5173/login");
+
+    try {
+      let user = await userRepo.findByEmail(googleUser.email);
+
+      let token = null;
+      if (user) token = signToken({ userId: user.id, email: user.email });
+
+      res.cookie("authToken", token, {
+        httpOnly: true,
+      });
+
+      res.redirect("http://localhost:5173/");
+    } catch (err) {
+      console.error("OAuth callback error:", err);
+      res.redirect("http://localhost:5173/login?error=oauth_failed");
+    }
+  })(req, res, next);
 };
 
 export const googleAuth = passport.authenticate("google", {

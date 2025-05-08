@@ -5,12 +5,13 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const result = await authService.registerUser({ email, password });
-    
+
     if (!result.success) {
       res.status(400).json(result);
       return;
     }
 
+    res.cookie("authToken", result?.token, { httpOnly: true });
     res.status(201).json({ success: true, user: result.data });
   } catch (err) {
     res.status(500).json({
