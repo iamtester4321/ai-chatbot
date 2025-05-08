@@ -1,12 +1,10 @@
-import { SetStateAction, useState, useCallback, useEffect } from "react";
-import useSWR from 'swr';
-import { fetcher } from '../../utils/streamProcessor';
-
-import { formatMarkdownResponse } from '../../utils/responseRenderer';
-import { NewsSourcesGrid } from '../NewsSourcesGrid/NewsSourcesGrid';
-import 'highlight.js/styles/github-dark.css';
-import 'github-markdown-css/github-markdown-dark.css';
+import "github-markdown-css/github-markdown-dark.css";
+import "highlight.js/styles/github-dark.css";
+import { SetStateAction, useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { STREAM_CHAT_RESPONSE } from "../../lib/apiUrl";
+import { formatMarkdownResponse } from "../../utils/responseRenderer";
+import { fetcher } from "../../utils/streamProcessor";
 
 const ChatInputField = () => {
   const [inputValue, setInputValue] = useState<string>("");
@@ -49,7 +47,9 @@ const ChatInputField = () => {
     return () => document.removeEventListener("click", handleCopyClick);
   }, [streamedResponse]);
 
-  const handleInputChange = (e: { target: { value: SetStateAction<string> } }) => {
+  const handleInputChange = (e: {
+    target: { value: SetStateAction<string> };
+  }) => {
     setInputValue(e.target.value);
   };
 
@@ -77,47 +77,40 @@ const ChatInputField = () => {
             <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-white">
               {currentMessage}
             </h2>
-
-            <div className="border-b border-[#e8e8e61a] mb-4">
-              <div className="flex space-x-4">
-                <button className="py-2 px-1 border-b-2 border-[#20b8cd] text-white flex items-center gap-2">
-                  Answer
-                </button>
-                <button className="py-2 px-1 text-gray-400 flex items-center gap-2">
-                  Images
-                </button>
-                <button className="py-2 px-1 text-gray-400 flex items-center gap-2">
-                  Sources
-                </button>
-              </div>
-            </div>
-
-            <NewsSourcesGrid />
-
             <div className="markdown-body prose prose-invert max-w-none">
               <div
                 className="text-gray-300"
                 dangerouslySetInnerHTML={{
-                  __html: formatMarkdownResponse(streamedResponse)
+                  __html: formatMarkdownResponse(streamedResponse),
                 }}
               />
               {isStreaming && (
-                <span className="inline-block w-2 h-4 ml-1 bg-[#20b8cd] animate-pulse">|</span>
+                <span className="inline-block w-2 h-4 ml-1 bg-[#20b8cd] animate-pulse">
+                  |
+                </span>
               )}
             </div>
           </div>
         </div>
       )}
 
-      <section className={`${isMessageSent ? "pt-8" : "pt-[200px]"} h-100vh transition-all duration-300`}>
+      <section
+        className={`${
+          isMessageSent ? "pt-8" : "pt-[200px]"
+        } h-100vh transition-all duration-300`}
+      >
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
             {!isMessageSent && (
               <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
-                perplexity
+                Ai-Chatbot
               </h3>
             )}
-            <h3 className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter ${isMessageSent ? "hidden" : "block md:hidden"}`}>
+            <h3
+              className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter ${
+                isMessageSent ? "hidden" : "block md:hidden"
+              }`}
+            >
               What do you want to know?
             </h3>
 
