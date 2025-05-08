@@ -38,7 +38,7 @@ app.post("/api/stream", async (req: any, res: any) => {
     model,
     prompt,
     onFinish: () => {
-      console.log("Finished streaming");
+      // console.log("Finished streaming");
     },
     onError: (err) => {
       console.log("Stream error", err);
@@ -50,7 +50,6 @@ app.post("/api/stream", async (req: any, res: any) => {
       model,
       prompt,
       onFinish: (response) => {
-        // console.log('Stream finished:', response);
       },
       onError: (err) => {
         console.error('Stream error:', err);

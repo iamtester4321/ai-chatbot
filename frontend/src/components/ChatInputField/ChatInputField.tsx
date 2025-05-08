@@ -1,11 +1,12 @@
 import { SetStateAction, useState, useCallback, useEffect } from "react";
 import useSWR from 'swr';
 import { fetcher } from '../../utils/streamProcessor';
-import { STREAM_CHAT_RESPONSE } from "../../constants";
+
 import { formatMarkdownResponse } from '../../utils/responseRenderer';
 import { NewsSourcesGrid } from '../NewsSourcesGrid/NewsSourcesGrid';
 import 'highlight.js/styles/github-dark.css';
 import 'github-markdown-css/github-markdown-dark.css';
+import { STREAM_CHAT_RESPONSE } from "../../lib/apiUrl";
 
 const ChatInputField = () => {
   const [inputValue, setInputValue] = useState<string>("");
