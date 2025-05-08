@@ -7,7 +7,8 @@ import http from "http";
 import "./config/passport";
 import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
-import chatRoutes from "./routes/chat.routes";
+import { findChatById, streamChat } from "./controllers/chat.controller";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -21,36 +22,15 @@ app.use(
   })
 );
 
+app.use(cookieParser());
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/chats", ensureAuthenticated, chatRoutes);
-app.post("/api/stream", async (req: any, res: any) => {
-  const messages = req.body.messages;
-  const prompt = req.body.prompt || messages?.[messages.length - 1]?.content;
+//app.use("/api/chats", ensureAuthenticated, chatRoutes);
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'Prompt is required' });
-  }
-
-  const model = google("gemini-2.0-flash");
-
-  try {
-    const result = streamText({
-      model,
-      prompt,
-      onFinish: () => {},
-      onError: (err) => {
-        console.error('Stream error:', err);
-      },
-    });
-
-    result.pipeTextStreamToResponse(res);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+app.post("/api/stream", ensureAuthenticated, streamChat);
+app.get("/api/chat/:chatId", findChatById);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

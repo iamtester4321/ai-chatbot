@@ -10,6 +10,7 @@ const ChatInputField = () => {
   const [chatResponse, setChatResponse] = useState<string>("");
   const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
     useChat({
+      initialMessages: [],
       api: STREAM_CHAT_RESPONSE,
       onResponse: async () => {
         const processStream = await fetcher(STREAM_CHAT_RESPONSE, input);
@@ -59,7 +60,6 @@ const ChatInputField = () => {
             <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-white">
               {lastUserMessage?.content}
             </h2>
-
 
             <div className="markdown-body prose prose-invert max-w-none">
               {messages

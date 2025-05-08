@@ -14,7 +14,7 @@ import { verifyToken } from "../utils/token.util";
 type User = { id: string };
 
 export const ensureAuthenticated: RequestHandler = (req, res, next) => {
-  const token = req.cookies.token as string | undefined;
+  const token = req.cookies?.authToken as string | undefined;
 
   if (!token) {
     console.log("Token missing");

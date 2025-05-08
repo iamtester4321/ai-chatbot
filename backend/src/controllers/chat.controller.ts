@@ -1,62 +1,66 @@
-import { Request, Response, NextFunction } from "express";
-import * as chatService from "../services/chat.service";
+import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
+import {
+  saveChat,
+  findChatById as findChatByIdService,
+} from "../services/chat.service";
 
-export async function getAllChats(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export const streamChat = async (req: any, res: any) => {
+  const userId = req.user.id;
+  const chatId = req.body.chatId;
+  const messages = req.body.messages || [];
+  let assistantReply = "";
+
+  const model = google("gemini-2.0-flash");
+
   try {
-    const userId = (req.user as { id: string })?.id;
-    const chats = await chatService.getChatsByUser(userId);
-    res.json(chats);
+    const result = streamText({
+      model,
+
+      messages: [...messages, { role: "user", content: req.body.prompt }],
+
+      onChunk: ({ chunk }) => {
+        if (chunk.type === "text-delta") {
+          assistantReply += chunk.textDelta;
+        }
+      },
+
+      onFinish: async ({ text, response }) => {
+        const allMessages = [
+          ...messages,
+          { role: "user", content: req.body.prompt },
+          { role: "assistant", content: assistantReply },
+        ];
+
+        await saveChat(userId, allMessages, chatId);
+      },
+
+      onError: (err) => console.error("Stream error:", err),
+    });
+    result.pipeTextStreamToResponse(res);
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).json({ error: "Internal error" });
   }
+};
+
+import { Request, Response } from "express";
+
+interface ChatRequestParams {
+  chatId: string;
 }
 
-export async function createChat(
-  req: Request,
-  res: Response,
-  next: NextFunction
+export async function findChatById(
+  req: Request<ChatRequestParams>,
+  res: Response
 ) {
   try {
-    const userId = (req.user as { id: string })?.id;
-    const { name, type } = req.body;
-    const chat = await chatService.createChat(userId, name, type);
-    res.status(201).json(chat);
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function renameChat(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const userId = (req.user as { id: string })?.id;
     const { chatId } = req.params;
-    const { name } = req.body;
-    const updated = await chatService.renameChat(chatId, name, userId);
-    res.json(updated);
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function deleteChat(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const userId = (req.user as { id: string })?.id;
-    const { chatId } = req.params;
-    await chatService.deleteChat(userId, chatId);
-    res.status(204).send();
-  } catch (err) {
-    next(err);
+    const chat = await findChatByIdService(chatId);
+    res.status(200).json(chat);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch chat";
+    res.status(404).json({ message: errorMessage });
   }
 }

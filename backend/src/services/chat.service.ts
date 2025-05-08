@@ -1,17 +1,17 @@
 import * as chatRepo from "../repositories/chat.repository";
 
-export async function getChatsByUser(userId: string) {
-  return chatRepo.findChatsByUserId(userId);
+export async function saveChat(
+  userId: string,
+  messages: { role: string; content: string }[],
+  chatId: string
+) {
+  return chatRepo.createChatWithMessages(userId, messages, chatId);
 }
 
-export async function createChat(userId: string, name: string, type: string) {
-  return chatRepo.saveChat({ userId, name: name || "", type: type });
+export async function listChats(userId: string) {
+  return chatRepo.getChatsByUser(userId);
 }
 
-export async function renameChat(chatId: string, name: string, userId: string) {
-  return chatRepo.updateChatName({ chatId, name, userId });
-}
-
-export async function deleteChat(userId: string, chatId: string) {
-  return chatRepo.deleteChatById({ userId, chatId });
+export async function findChatById(chatId: string) {
+  return chatRepo.findById(chatId);
 }

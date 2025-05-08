@@ -16,7 +16,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Chat" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" "ChatType" NOT NULL,
+    "type" "ChatType" NOT NULL DEFAULT 'text',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT NOT NULL,
 
@@ -27,10 +27,10 @@ CREATE TABLE "Chat" (
 CREATE TABLE "Message" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "isFromUser" BOOLEAN NOT NULL,
+    "role" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "liked" BOOLEAN NOT NULL DEFAULT false,
-    "disliked" BOOLEAN NOT NULL DEFAULT false,
+    "isLiked" BOOLEAN NOT NULL DEFAULT false,
+    "isDisliked" BOOLEAN NOT NULL DEFAULT false,
     "chatId" TEXT NOT NULL,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
