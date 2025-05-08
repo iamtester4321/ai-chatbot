@@ -1,18 +1,13 @@
-import "./config/passport";
+import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
+import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
 import http from "http";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
-
+import "./config/passport";
+import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
-
-import { ensureAuthenticated } from "./middlewares/auth.middleware";
-
-/* ------- */
-import { google } from "@ai-sdk/google"; // 1️⃣
-import { streamText } from "ai";
 
 dotenv.config();
 
@@ -25,8 +20,8 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
-app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", ensureAuthenticated, chatRoutes);
@@ -38,11 +33,11 @@ app.post("/api/strem", async (req: any, res: any) => {
   const result = streamText({
     model,
     prompt,
-    onFinish: (res) => {
-      console.log("heloo");
+    onFinish: () => {
+      console.log("Finished streaming");
     },
     onError: (err) => {
-      console.log("error", err);
+      console.log("Stream error", err);
     },
   });
 

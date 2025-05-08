@@ -1,37 +1,47 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
 
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const register = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await authService.registerUser({ email, password });
-    res.status(201).json({ user });
+    const result = await authService.registerUser({ email, password });
+    
+    if (!result.success) {
+      res.status(400).json(result);
+      return;
+    }
+
+    res.status(201).json({ success: true, user: result.data });
   } catch (err) {
-    next(err);
+    res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : "Registration failed",
+    });
   }
 };
 
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const { user, token } = await authService.loginUser({ email, password });
-    res.cookie("token", token, { httpOnly: true });
-    res.json({ user });
+    const result = await authService.loginUser({ email, password });
+
+    if (!result.success) {
+      res.status(401).json(result);
+      return;
+    }
+
+    res.cookie("authToken", result.data?.token, { httpOnly: true });
+    res.json({ success: true, user: result.data?.user });
   } catch (err) {
-    next(err);
+    res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : "Login failed",
+    });
   }
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie("token");
+  res.clearCookie("authToken");
   res.status(200).json({ message: "Logged out" });
 };
 
