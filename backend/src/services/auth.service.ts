@@ -17,7 +17,10 @@ export const registerUser = async ({ email, password }: RegisterDTO) => {
   try {
     const existing = await userRepo.findByEmail(email);
     if (existing) {
-      throw new Error("User already exists");
+      return {
+        success: false,
+        message: "User already exists",
+      };
     }
     const hashed = await hashPassword(password);
     const user = await userRepo.createUser({ email, password: hashed });

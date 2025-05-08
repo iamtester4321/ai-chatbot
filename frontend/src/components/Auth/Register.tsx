@@ -1,68 +1,77 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
 import { z } from "zod";
-import { registerUser } from "../../actions/auth.actions";
+import { googleAuth, registerUser } from "../../actions/auth.actions";
 import Google from "../../assets/icons/Google";
 import useToast from "../../hooks/useToast";
-
-const RegisterSchema = z
-  .object({
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+import { RegisterSchema } from "../../validations/auth.schema";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [isValid, setIsValid] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [touched, setTouched] = useState({
     email: false,
     password: false,
     confirmPassword: false,
   });
-  const navigate = useNavigate();
+
+  const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
   const showToast = useToast();
 
   useEffect(() => {
     try {
-      RegisterSchema.parse({ email, password, confirmPassword });
-      setEmailError("");
-      setPasswordError("");
-      setConfirmPasswordError("");
+      RegisterSchema.parse(form);
+      setErrors({ email: "", password: "", confirmPassword: "" });
       setIsValid(true);
     } catch (err) {
       setIsValid(false);
       if (err instanceof z.ZodError) {
         const issues = err.flatten().fieldErrors;
-        setEmailError(touched.email ? issues.email?.[0] || "" : "");
-        setPasswordError(touched.password ? issues.password?.[0] || "" : "");
-        setConfirmPasswordError(
-          touched.confirmPassword ? issues.confirmPassword?.[0] || "" : ""
-        );
+        setErrors({
+          email: touched.email ? issues.email?.[0] || "" : "",
+          password: touched.password ? issues.password?.[0] || "" : "",
+          confirmPassword: touched.confirmPassword
+            ? issues.confirmPassword?.[0] || ""
+            : "",
+        });
       }
     }
-  }, [email, password, confirmPassword, touched]);
+  }, [form, touched]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       setIsLoading(true);
-      RegisterSchema.parse({ email, password, confirmPassword });
+      RegisterSchema.parse(form);
 
-      const { success, message } = await registerUser(email, password);
+      const { success, message } = await registerUser(
+        form.email,
+        form.password
+      );
       if (!success) {
         showToast.error(message || "Registration failed");
         return;
@@ -75,10 +84,11 @@ const Register = () => {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const issues = err.flatten().fieldErrors;
-        setEmailError(issues.email?.[0] || "");
-        setPasswordError(issues.password?.[0] || "");
-        setConfirmPasswordError(issues.confirmPassword?.[0] || "");
-        showToast.error("Please check your input fields");
+        setErrors({
+          email: issues.email?.[0] || "",
+          password: issues.password?.[0] || "",
+          confirmPassword: issues.confirmPassword?.[0] || "",
+        });
       } else {
         showToast.error("An unknown error occurred");
       }
@@ -87,8 +97,8 @@ const Register = () => {
     }
   };
 
-  const handelGoogole = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+  const handleGoogleAuth = () => {
+    googleAuth();
   };
 
   return (
@@ -100,13 +110,13 @@ const Register = () => {
           </h2>
 
           <button
-            onClick={handelGoogole}
+            onClick={handleGoogleAuth}
             className="w-full bg-[#e8e8e6] flex flex-row gap-[5px] justify-center items-center py-4 px-5 cursor-pointer rounded-lg mb-3"
           >
             <Google className="w-[22px] h-6" />
-            <a href="#" className="text-base text-[#13343b] font-medium">
+            <span className="text-base text-[#13343b] font-medium">
               Continue with Google
-            </a>
+            </span>
           </button>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col">
@@ -117,13 +127,13 @@ const Register = () => {
               id="email"
               type="text"
               placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+              value={form.email}
+              onChange={handleChange}
+              onBlur={() => handleBlur("email")}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
-            {emailError && (
-              <p className="text-red-500 text-sm mb-2">{emailError}</p>
+            {errors.email && (
+              <p className="text-red-500 text-sm mb-2">{errors.email}</p>
             )}
 
             <label htmlFor="password" className="text-sm text-[#e8e8e6] mb-1">
@@ -133,13 +143,13 @@ const Register = () => {
               id="password"
               type="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+              value={form.password}
+              onChange={handleChange}
+              onBlur={() => handleBlur("password")}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
-            {passwordError && (
-              <p className="text-red-500 text-sm mb-2">{passwordError}</p>
+            {errors.password && (
+              <p className="text-red-500 text-sm mb-2">{errors.password}</p>
             )}
 
             <label
@@ -152,16 +162,14 @@ const Register = () => {
               id="confirmPassword"
               type="password"
               placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onBlur={() =>
-                setTouched((prev) => ({ ...prev, confirmPassword: true }))
-              }
+              value={form.confirmPassword}
+              onChange={handleChange}
+              onBlur={() => handleBlur("confirmPassword")}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
-            {confirmPasswordError && (
+            {errors.confirmPassword && (
               <p className="text-red-500 text-sm mb-2">
-                {confirmPasswordError}
+                {errors.confirmPassword}
               </p>
             )}
 
@@ -177,7 +185,7 @@ const Register = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Submiting...
+                  Submitting...
                 </>
               ) : (
                 "Submit"

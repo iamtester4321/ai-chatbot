@@ -5,50 +5,51 @@ import { z } from "zod";
 import { googleAuth, loginUser } from "../../actions/auth.actions";
 import Google from "../../assets/icons/Google";
 import useToast from "../../hooks/useToast";
-
-const LoginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+import { LoginSchema } from "../../validations/auth.schema";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [touched, setTouched] = useState({ email: false, password: false });
   const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [touched, setTouched] = useState({
-    email: false,
-    password: false,
-  });
+
   const navigate = useNavigate();
   const showToast = useToast();
 
   useEffect(() => {
     try {
-      LoginSchema.parse({ email, password });
-      setEmailError("");
-      setPasswordError("");
+      LoginSchema.parse(form);
+      setErrors({ email: "", password: "" });
       setIsValid(true);
     } catch (err) {
       setIsValid(false);
       if (err instanceof z.ZodError) {
         const issues = err.flatten().fieldErrors;
-        setEmailError(touched.email ? issues.email?.[0] || "" : "");
-        setPasswordError(touched.password ? issues.password?.[0] || "" : "");
+        setErrors({
+          email: touched.email ? issues.email?.[0] || "" : "",
+          password: touched.password ? issues.password?.[0] || "" : "",
+        });
       }
     }
-  }, [email, password, touched]);
+  }, [form, touched]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleBlur = (field: "email" | "password") => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
       setIsLoading(true);
-      LoginSchema.parse({ email, password });
+      LoginSchema.parse(form);
 
-      const { success, message } = await loginUser(email, password);
+      const { success, message } = await loginUser(form.email, form.password);
 
       if (!success) {
         showToast.error(message || "Login failed");
@@ -60,8 +61,10 @@ const Login = () => {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const issues = err.flatten().fieldErrors;
-        setEmailError(issues.email?.[0] || "");
-        setPasswordError(issues.password?.[0] || "");
+        setErrors({
+          email: issues.email?.[0] || "",
+          password: issues.password?.[0] || "",
+        });
       } else {
         showToast.error("An unknown error occurred");
       }
@@ -100,13 +103,13 @@ const Login = () => {
               id="email"
               type="text"
               placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+              value={form.email}
+              onChange={handleChange}
+              onBlur={() => handleBlur("email")}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
-            {emailError && (
-              <p className="text-red-500 text-sm mb-2">{emailError}</p>
+            {errors.email && (
+              <p className="text-red-500 text-sm mb-2">{errors.email}</p>
             )}
 
             <label htmlFor="password" className="text-sm text-[#e8e8e6] mb-1">
@@ -116,13 +119,13 @@ const Login = () => {
               id="password"
               type="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
+              value={form.password}
+              onChange={handleChange}
+              onBlur={() => handleBlur("password")}
               className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
             />
-            {passwordError && (
-              <p className="text-red-500 text-sm mb-2">{passwordError}</p>
+            {errors.password && (
+              <p className="text-red-500 text-sm mb-2">{errors.password}</p>
             )}
 
             <button
