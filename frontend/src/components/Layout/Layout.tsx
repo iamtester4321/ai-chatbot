@@ -1,5 +1,6 @@
 import ChatInputField from "../ChatInputField/ChatInputField";
 import Sidebar from "../Sidebar/Sidebar";
+import Header from "../Header/Header";
 
 function Layout() {
   return (
@@ -8,6 +9,7 @@ function Layout() {
         <Sidebar />
       </div>
       <div className="ml-[72px] flex-1 flex flex-col">
+        <Header />
         <div className="flex-1 overflow-y-auto">
           <ChatInputField />
         </div>
