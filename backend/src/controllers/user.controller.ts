@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { getUserByIdService } from "../services/user.service";
 
 export const getMyProfile = async (req: any, res: any) => {

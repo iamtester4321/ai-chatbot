@@ -1,7 +1,6 @@
 import passport from "passport";
 import { env } from "../config/env";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { signToken } from "../utils/token.util"; // wherever your signToken lives
 import { findOrCreateUser } from "../services/user.service";
 
 passport.use(
@@ -13,7 +12,6 @@ passport.use(
     },
     async (_, __, profile, done) => {
       try {
-        // your logic to find or create a user in DB:
         const user = await findOrCreateUser({
           googleId: profile.id,
           email: profile.emails?.[0].value!,
