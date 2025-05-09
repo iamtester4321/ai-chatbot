@@ -1,9 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @theme {
   --breakpoint-lsm: 350px;
@@ -22,52 +20,110 @@
   --breakpoint-4xl: 1920px;
 }
 
-:root {
-  /* Theme Colors - Light Mode */
-  --primary-light: #3D365C;
-  --primary-dark: #221E36;
-  --secondary-light: #C68EFD;
-  --secondary-dark: #8E65C7;
-  --accent-light: #E9A5F1;
-  --accent-dark: #B674C7;
-  --highlight-light: #FED2E2;
-  --highlight-dark: #D395B4;
-  
-  /* Font Families */
-  --font-oswald: "Oswald", sans-serif;
-  --font-montserrat: "Montserrat", sans-serif;
+@theme {
+  --color-background: var(--background);
+  --color-blue-violet: var(--blue-violet);
 }
 
+@theme {
+  --font-oswald: var(--font-oswald);
+  --font-mont: var(--font-montserrat);
+}
+
+:root {
+  /* color  */
+  --background: #221E36;
+  --red: #e20e0e;
+  --blue-violet: #020023;
+
+
+
+  /* font-family  */
+  --font-oswald: "Oswald", sans-serif;
+  --font-montserrat : "Montserrat", sans-serif;
+}
+
+/* General-Sans-fonts  */
+
+/* @font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Extralight.otf") format("truetype");
+  font-weight: 200;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-ExtralightItalic.otf") format("truetype");
+  font-weight: 200;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Italic.otf") format("truetype");
+  font-weight: 200;
+  font-display: swap;
+  font-style: italic;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Light.otf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+  
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-LightItalic.otf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+  font-style: italic;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Regular.otf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Medium.otf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-MediumItalic.otf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+  font-style: italic;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-Semibold.otf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("../../public/fonts/GeneralSans-SemiboldItalic.otf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+  font-style: italic;
+} */
+
+
+/* General-Sans-fonts  */
+
+
 body {
-  background: var(--primary-light);
+  background: var(--background);
   font-family: var(--font-montserrat);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-.dark body {
-  background: var(--primary-dark);
-}
-
-@layer components {
-  .sidebar-bg {
-    @apply bg-secondary-light dark:bg-secondary-dark;
-  }
-  
-  .chat-input-bg {
-    @apply bg-secondary-light dark:bg-secondary-dark;
-  }
-  
-  .button-primary {
-    @apply bg-accent-light dark:bg-accent-dark hover:opacity-90 transition-opacity;
-  }
-  
-  .response-area {
-    @apply bg-highlight-light dark:bg-highlight-dark;
-  }
-}
-
 @layer utilities {
+
   .container {
     @apply max-w-[1920px] px-5 mx-auto w-full;
   }
@@ -79,7 +135,28 @@ body {
   .font-montserrat {
     font-family: 'Montserrat', sans-serif;
   }
+
+  /* h1 {
+    @apply text-[88px] font-semibold text-(--blue-violet);
+  }
+
+  h2 {
+    @apply text-[48px] font-semibold text-(--blue-violet) leading-[100%];
+  }
+
+  h3 {
+    @apply  text-[32px] font-medium leading-[100%] text-(--blue-violet);
+  }
+
+  h4 {
+    @apply text-[24px] font-semibold text-(--purple) leading-[115%];
+  }
+
+  .basic-transition {
+    @apply transition ease-linear duration-300;
+  } */
 }
+
 
 .arrow-top::after {
   content: "";

@@ -82,7 +82,7 @@ const ChatInputField = () => {
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
             {!isMessageSent && (
-              <h3 className="text-[48px] text-accent-light dark:text-accent-dark text-center hidden md:block">
+              <h3 className="font-montserrat text-[48px] text-accent-light dark:text-accent-dark text-center hidden md:block">
                 perplexity
               </h3>
             )}
