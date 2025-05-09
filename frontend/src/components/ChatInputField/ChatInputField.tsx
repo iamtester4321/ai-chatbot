@@ -176,7 +176,7 @@ const ChatInputField = () => {
 
               <div className="max-w-[640px] w-full flex flex-row gap-10 items-center justify-between pt-1">
                 <div className="bg-[#1e1c1c] rounded-lg max-w-[88px] w-full flex flex-row items-center">
-                  <button className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5">
+                  <button className="group bg-transparent hover:bg-[#20b8cd1a] hover:border hover:border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5 border-transparent border">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
