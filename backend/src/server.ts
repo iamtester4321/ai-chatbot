@@ -1,5 +1,4 @@
-import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -8,7 +7,6 @@ import "./config/passport";
 import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 

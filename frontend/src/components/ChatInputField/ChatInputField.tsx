@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "github-markdown-css/github-markdown-dark.css";
 import "highlight.js/styles/github-dark.css";
 import { useEffect, useState } from "react";
@@ -7,19 +6,49 @@ import { v4 as uuidv4 } from "uuid";
 import { useChatActions } from "../../actions/chat.actions";
 import MessageDisplay from "../MessageDisplay/MessageDisplay";
 import PromptInput from "../PromptInput/PromptInput";
+import { BASE_API } from "../../lib/apiUrl";
 
 const ChatInputField = () => {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const [chatResponse, setChatResponse] = useState<string>("");
+  const [chatName, setChatName] = useState<string>("");
+  const [messages, setMessages] = useState<any[]>([]);
+  const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
+    chatId,
+    onResponseUpdate: (text) => {
+      setChatResponse(text);
+    },
+  });
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChatActions({
-      chatId,
-      onResponseUpdate: (text) => {
-        setChatResponse(text);
-      },
-    });
+  useEffect(() => {
+    if (chatId) {
+      const fetchMessages = async () => {
+        try {
+      
+          const response = await fetch(`${BASE_API}/api/chat/${chatId}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+      
+          const text = await response.text();
+      
+          if (response.ok) {
+            const data = JSON.parse(text);
+            setMessages(data.messages);
+            setChatName(data.name);
+          } else {
+            console.error("Failed to fetch messages for chatId:", chatId);
+          }
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+        }
+      };
+      
+
+      fetchMessages();
+    }
+  }, [chatId]);
 
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
@@ -39,7 +68,7 @@ const ChatInputField = () => {
 
       sessionStorage.removeItem("initialPrompt");
     }
-  }, [chatId]);
+  }, [chatId, messages.length]);
 
   const generateChatId = () => {
     return uuidv4();
@@ -84,6 +113,7 @@ const ChatInputField = () => {
           messages={messages}
           chatResponse={chatResponse}
           isLoading={isLoading}
+          chatName={chatName}
         />
       )}
 
