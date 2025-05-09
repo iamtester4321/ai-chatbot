@@ -1,6 +1,8 @@
 import { useChat } from "@ai-sdk/react";
 import { GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
 import { fetcher } from "../utils/streamProcessor";
+import { useAppDispatch } from "../store/hooks";
+import { addMessage } from "../store/features/chat/chatSlice";
 
 interface ChatHookProps {
   chatId?: string;
@@ -8,14 +10,36 @@ interface ChatHookProps {
 }
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
+  const dispatch = useAppDispatch();
+
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
       const processStream = await fetcher(STREAM_CHAT_RESPONSE, input, chatId || '');
+
+      let fullResponse = '';
+
       processStream((text: string) => {
-        onResponseUpdate?.(text);
+        fullResponse += text;
+        onResponseUpdate?.(fullResponse);
       });
+
+      dispatch(addMessage({
+        role: 'user',
+        content: input,
+        createdAt: new Date().toISOString(),
+      }));
+
+      setTimeout(() => {
+        dispatch(addMessage({
+          role: 'assistant',
+          content: fullResponse,
+          createdAt: new Date().toISOString(),
+        }));
+
+        onResponseUpdate?.('');
+      }, 1000);
     },
   });
 
@@ -27,6 +51,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     isLoading: status === "submitted",
   };
 };
+
 
 export const fetchMessages = async (chatId: string) => {
   try {

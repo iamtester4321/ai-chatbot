@@ -1,23 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "github-markdown-css/github-markdown-dark.css";
 import "highlight.js/styles/github-dark.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { fetchMessages, useChatActions } from "../../actions/chat.actions";
+import { setChatName, setCurrentResponse, setIsLoading, setMessages } from "../../store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MessageDisplay from "../MessageDisplay/MessageDisplay";
 import PromptInput from "../PromptInput/PromptInput";
 
 const ChatInputField = () => {
   const navigate = useNavigate();
   const { chatId } = useParams();
-  const [chatResponse, setChatResponse] = useState<string>("");
-  const [chatName, setChatName] = useState<string>("");
-  const [messages, setMessages] = useState<any[]>([]);
-  const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
+  const dispatch = useAppDispatch();
+  const { messages, currentResponse, isLoading, chatName } = useAppSelector((state) => state.chat);
+  
+  const { input, handleInputChange, handleSubmit } = useChatActions({
     chatId,
     onResponseUpdate: (text) => {
-      setChatResponse(text);
+      dispatch(setCurrentResponse(text));
     },
   });
 
@@ -26,8 +28,8 @@ const ChatInputField = () => {
       const loadMessages = async () => {
         const { success, data, error } = await fetchMessages(chatId);
         if (success && data) {
-          setMessages(data.messages);
-          setChatName(data.name);
+          dispatch(setMessages(data.messages));
+          dispatch(setChatName(data.name));
         } else {
           console.error(error);
         }
@@ -35,7 +37,7 @@ const ChatInputField = () => {
 
       loadMessages();
     }
-  }, [chatId]);
+  }, [chatId, dispatch]);
 
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
@@ -69,7 +71,9 @@ const ChatInputField = () => {
       navigate(`/chat/${newChatId}`, { replace: true });
       return;
     }
-    handleSubmit(e);
+    dispatch(setIsLoading(true));
+    await handleSubmit(e);
+    dispatch(setIsLoading(false));
   };
 
   useEffect(() => {
@@ -98,7 +102,7 @@ const ChatInputField = () => {
       {messages.length > 0 && (
         <MessageDisplay
           messages={messages}
-          chatResponse={chatResponse}
+          chatResponse={currentResponse}
           isLoading={isLoading}
           chatName={chatName}
         />
