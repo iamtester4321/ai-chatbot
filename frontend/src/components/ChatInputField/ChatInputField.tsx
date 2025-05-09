@@ -81,7 +81,7 @@ const ChatInputField = () => {
     .slice(-1)[0];
 
   return (
-    <div className="bg-[#121212] min-h-screen text-white">
+    <div className="bg-primary min-h-screen text-white">
       {messages.length > 0 && (
         <div className="w-full pt-4 px-4 md:px-8">
           <div className="max-w-4xl mx-auto">
@@ -143,7 +143,7 @@ const ChatInputField = () => {
 
             <form
               onSubmit={handleFormSubmit}
-              className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"
+              className="bg-secondary border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"
             >
               <input
                 type="text"
@@ -154,13 +154,13 @@ const ChatInputField = () => {
               />
 
               <div className="max-w-[640px] w-full flex flex-row gap-10 items-center justify-between pt-1">
-                <div className="bg-[#1e1c1c] rounded-lg max-w-[88px] w-full flex flex-row items-center">
+                <div className="bg-highlight rounded-lg max-w-[88px] w-full flex flex-row items-center">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5"
+                    className="group bg-transparent hover:bg-highlight hover:border border-highlight rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5"
                   >
-                    <span className="text-[#e8e8e6b3] group-hover:text-[#20b8cd] transition-all duration-200 text-sm font-medium">
+                    <span className="text-text group-hover:text-highlight transition-all duration-200 text-sm font-medium">
                       Search
                     </span>
                   </button>
@@ -187,7 +187,7 @@ const ChatInputField = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-[#20b8cd] max-w-[36px] w-full h-[32px] cursor-pointer rounded-lg flex justify-center items-center ml-2 hover:bg-[#1a9eb2] transition-all duration-200"
+                    className="bg-highlight max-w-[36px] w-full h-[32px] cursor-pointer rounded-lg flex justify-center items-center ml-2 hover:bg-[#1a9eb2] transition-all duration-200"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

@@ -9,7 +9,7 @@ function ThemeToggle({ isDarkMode, toggleDarkMode }: ThemeToggleProps) {
   return (
     <button
       onClick={toggleDarkMode}
-      className="fixed top-4 right-6 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+      className="fixed top-4 right-6 px-3 py-2 bg-secondary border border-gray-300 dark:border-gray-600 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
       aria-label="Toggle color theme"
     >
       <svg 
@@ -24,6 +24,7 @@ function ThemeToggle({ isDarkMode, toggleDarkMode }: ThemeToggleProps) {
         strokeLinejoin="round"
       >
         {isDarkMode ? (
+
           <>
             <circle cx="12" cy="12" r="5" />
             <line x1="12" y1="1" x2="12" y2="3" />
