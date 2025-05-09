@@ -7,7 +7,7 @@ import http from "http";
 import "./config/passport";
 import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
-import { findChatById, streamChat } from "./controllers/chat.controller";
+import chatRoutes from "./routes/chat.routes";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -27,10 +27,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-//app.use("/api/chats", ensureAuthenticated, chatRoutes);
-
-app.post("/api/stream", ensureAuthenticated, streamChat);
-app.get("/api/chat/:chatId", findChatById);
+app.use("/api/chat", ensureAuthenticated, chatRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

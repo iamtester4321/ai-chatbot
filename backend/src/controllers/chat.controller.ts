@@ -3,10 +3,15 @@ import { streamText } from "ai";
 import {
   saveChat,
   findChatById as findChatByIdService,
+  findChatsByService,
 } from "../services/chat.service";
 
 export const streamChat = async (req: any, res: any) => {
-  const userId = req.user.id;
+  const userId = (req.user as { id: string }).id;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
   let assistantReply = "";
@@ -25,7 +30,7 @@ export const streamChat = async (req: any, res: any) => {
         }
       },
 
-      onFinish: async ({ text, response }) => {
+      onFinish: async () => {
         const allMessages = [
           ...messages,
           { role: "user", content: req.body.prompt },
@@ -61,6 +66,23 @@ export async function findChatById(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch chat";
+    res.status(404).json({ message: errorMessage });
+  }
+}
+
+export async function findChatsByUsrerId(
+  req: Request<ChatRequestParams>,
+  res: Response
+) {
+  try {
+    const userId = (req.user as { id: string }).id;
+
+    const chats = await findChatsByService(userId);
+
+    res.status(200).json(chats);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch chats";
     res.status(404).json({ message: errorMessage });
   }
 }

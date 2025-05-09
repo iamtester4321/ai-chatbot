@@ -5,7 +5,11 @@ export async function saveChat(
   messages: { role: string; content: string }[],
   chatId: string
 ) {
-  return chatRepo.createChatWithMessages(userId, messages, chatId);
+  return chatRepo.createChatWithMessagesOrApendMesages(
+    userId,
+    messages,
+    chatId
+  );
 }
 
 export async function listChats(userId: string) {
@@ -14,4 +18,8 @@ export async function listChats(userId: string) {
 
 export async function findChatById(chatId: string) {
   return chatRepo.findById(chatId);
+}
+
+export async function findChatsByService(userId: string) {
+  return chatRepo.getChatsByUser(userId);
 }
