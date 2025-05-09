@@ -147,7 +147,7 @@ const ChatInputField = () => {
             >
               <input
                 type="text"
-                className="outline-none w-full h-12 text-lg text-gray-200 pb-1.5 pl-1.5 text-start items-start bg-transparent"
+                className="outline-none w-full h-12 text-lg text-white pb-1.5 pl-1.5 text-start items-start bg-transparent"
                 placeholder="Ask anything..."
                 value={input}
                 onChange={handleInputChange}
@@ -167,6 +167,23 @@ const ChatInputField = () => {
                 </div>
 
                 <div className="max-w-[188px] w-full flex flex-row items-center justify-end">
+                  <div className="group bg-none hover:bg-secondary-light hover:dark:bg-secondary-dark transition-all duration-200 rounded-lg flex justify-center items-center max-w-[36px] w-full h-[32px] cursor-pointer">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-4 h-4 group-hover:stroke-white"
+                    >
+                      <path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5"></path>
+                    </svg>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isLoading}
