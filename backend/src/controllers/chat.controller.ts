@@ -4,7 +4,14 @@ import {
   saveChat,
   findChatById as findChatByIdService,
   findChatsByService,
+  addOrRemoveFavoriteService,
+  addOrRemoveArchiveService,
 } from "../services/chat.service";
+import { Request, Response } from "express";
+
+interface ChatRequestParams {
+  chatId: string;
+}
 
 export const streamChat = async (req: any, res: any) => {
   const userId = (req.user as { id: string }).id;
@@ -49,12 +56,6 @@ export const streamChat = async (req: any, res: any) => {
   }
 };
 
-import { Request, Response } from "express";
-
-interface ChatRequestParams {
-  chatId: string;
-}
-
 export async function findChatById(
   req: Request<ChatRequestParams>,
   res: Response
@@ -86,3 +87,37 @@ export async function findChatsByUsrerId(
     res.status(404).json({ message: errorMessage });
   }
 }
+
+export const addOrRemoveFavorite = async (req: any, res: any) => {
+  const { chatId } = req.params;
+
+  try {
+    const updatedChat = await addOrRemoveFavoriteService(chatId);
+    return res
+      .status(200)
+      .json({ message: "Favorite status updated", chat: updatedChat });
+  } catch (err: any) {
+    if (err.message === "Chat not found") {
+      return res.status(404).json({ error: err.message });
+    }
+    console.error("Error updating favorite:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const addOrRemoveArchive = async (req: any, res: any) => {
+  const { chatId } = req.params;
+
+  try {
+    const updatedChat = await addOrRemoveArchiveService(chatId);
+    return res
+      .status(200)
+      .json({ message: "Archive status updated", chat: updatedChat });
+  } catch (err: any) {
+    if (err.message === "Chat not found") {
+      return res.status(404).json({ error: err.message });
+    }
+    console.error("Error updating archive:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
