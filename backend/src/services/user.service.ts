@@ -1,4 +1,5 @@
 import { PrismaClient, User } from "@prisma/client";
+import { getUserById } from "../repositories/user.repository";
 
 const prisma = new PrismaClient();
 
@@ -38,3 +39,7 @@ export async function findOrCreateUser(payload: {
 
   return user;
 }
+
+export const getUserByIdService = async (id: string) => {
+  return getUserById(id);
+};
