@@ -8,6 +8,8 @@ import { useChatActions } from "../../actions/chat.actions";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
 
 const ChatInputField = () => {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  console.log(prefersDark);
   const navigate = useNavigate();
   const { chatId } = useParams();
   const [chatResponse, setChatResponse] = useState<string>("");

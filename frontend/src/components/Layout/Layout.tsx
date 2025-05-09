@@ -1,34 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useTheme } from "../../context/ThemeProvider"; 
 import ChatInputField from "../ChatInputField/ChatInputField";
 import Sidebar from "../Sidebar/Sidebar";
-import ThemeToggle from "../Theme/Theme";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
 function Layout() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(prevMode => {
-      const newMode = !prevMode;
-      if (newMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return newMode;
-    });
-  };
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode') === 'true';  
-    setIsDarkMode(savedMode);
-    if (savedMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('darkMode', isDarkMode.toString()); 
-  }, [isDarkMode]);
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   return (
     <div className="flex max-h-screen bg-primary-light dark:bg-primary-dark">
@@ -39,7 +15,7 @@ function Layout() {
         <div className="flex-1 overflow-y-auto">
           <ChatInputField />
         </div>
-        <div className="sticky bottom-0 w-full bg-primary z-[1000] px-4 pt-2"></div>
+        <div className="sticky bottom-0 w-full bg-primar z-[1000] px-4 pt-2"></div>
       </div>
 
       <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
