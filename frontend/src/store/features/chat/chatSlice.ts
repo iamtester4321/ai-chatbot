@@ -1,27 +1,15 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface Message {
-  role: string;
-  content: string;
-  createdAt: string;
-}
-
-interface ChatState {
-  messages: Message[];
-  currentResponse: string;
-  isLoading: boolean;
-  chatName: string;
-}
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ChatState, Message } from "../../../lib/types";
 
 const initialState: ChatState = {
   messages: [],
-  currentResponse: '',
+  currentResponse: "",
   isLoading: false,
-  chatName: '',
+  chatName: "",
 };
 
 const chatSlice = createSlice({
-  name: 'chat',
+  name: "chat",
   initialState,
   reducers: {
     setMessages: (state, action: PayloadAction<Message[]>) => {

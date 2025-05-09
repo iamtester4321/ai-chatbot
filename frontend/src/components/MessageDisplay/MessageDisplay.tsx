@@ -1,13 +1,8 @@
 import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MessageDisplayProps } from "../../lib/types";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
-
-interface MessageDisplayProps {
-  messages: Array<{ role: string; content: string; createdAt: string }>;
-  chatResponse: string;
-  isLoading: boolean;
-  chatName: string;
-}
+import StreamLoader from "../StreamLoader/StreamLoader";
 
 const MessageDisplay = ({
   messages,
@@ -16,11 +11,21 @@ const MessageDisplay = ({
   chatName,
 }: MessageDisplayProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showResponseActions, setShowResponseActions] = useState(false);
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, chatResponse]);
+
+  useEffect(() => {
+    if (!isLoading && chatResponse) {
+      setShowResponseActions(true);
+    } else {
+      setShowResponseActions(false);
+    }
+  }, [isLoading, chatResponse]);
 
   return (
     <div className="w-full min-h-screen bg-[#1a1a1a] text-white">
@@ -34,7 +39,6 @@ const MessageDisplay = ({
         {/* Display messages */}
         <div className="space-y-8">
           {messages.map((msg, index) => {
-            // const isAssistant = msg.role === "assistant";
             const isUser = msg.role === "user";
 
             if (isUser) {
@@ -55,8 +59,6 @@ const MessageDisplay = ({
                     __html: formatMarkdownResponse(msg.content),
                   }}
                 />
-
-                {/* Action buttons */}
                 <div className="flex items-center space-x-3 text-gray-400">
                   <button
                     className="p-1 hover:text-white"
@@ -67,7 +69,7 @@ const MessageDisplay = ({
                   <button className="p-1 hover:text-white" aria-label="Like">
                     <ThumbsUp />
                   </button>
-                  <button className="p-1 hover:text-white" aria-label="Like">
+                  <button className="p-1 hover:text-white" aria-label="Dislike">
                     <ThumbsDown />
                   </button>
                 </div>
@@ -85,33 +87,26 @@ const MessageDisplay = ({
                 }}
               />
 
-              {/* Action buttons */}
-              <div className="flex items-center space-x-3 text-gray-400">
-                <button
-                  className="p-1 hover:text-white"
-                  aria-label="Copy to clipboard"
-                >
-                  <Copy />
-                </button>
-                <button className="p-1 hover:text-white" aria-label="Like">
-                  <ThumbsUp />
-                </button>
-                <button className="p-1 hover:text-white" aria-label="Like">
-                  <ThumbsDown />
-                </button>
-              </div>
+              {/* Action buttons for AI response */}
+              {showResponseActions && (
+                <div className="flex items-center space-x-3 text-gray-400">
+                  <button
+                    className="p-1 hover:text-white"
+                    aria-label="Copy to clipboard"
+                  >
+                    <Copy />
+                  </button>
+                  <button className="p-1 hover:text-white" aria-label="Like">
+                    <ThumbsUp />
+                  </button>
+                  <button className="p-1 hover:text-white" aria-label="Dislike">
+                    <ThumbsDown />
+                  </button>
+                </div>
+              )}
             </div>
           )}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="flex items-center space-x-2 text-gray-400">
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
-            </div>
-          )}
-
+          {isLoading && <StreamLoader />}
           <div ref={messagesEndRef} />
         </div>
       </div>

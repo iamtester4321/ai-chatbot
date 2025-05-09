@@ -1,8 +1,10 @@
 import { useChat } from "@ai-sdk/react";
 import { GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
-import { fetcher } from "../utils/streamProcessor";
+import {
+  addMessage,
+  setCurrentResponse,
+} from "../store/features/chat/chatSlice";
 import { useAppDispatch } from "../store/hooks";
-import { addMessage } from "../store/features/chat/chatSlice";
 
 interface ChatHookProps {
   chatId?: string;
@@ -16,30 +18,60 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
-      const processStream = await fetcher(STREAM_CHAT_RESPONSE, input, chatId || '');
+      dispatch(
+        addMessage({
+          role: "user",
+          content: input,
+          createdAt: new Date().toISOString(),
+        })
+      );
 
-      let fullResponse = '';
-
-      processStream((text: string) => {
-        fullResponse += text;
-        onResponseUpdate?.(fullResponse);
+      const response = await fetch(STREAM_CHAT_RESPONSE, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: input,
+          messages: [],
+          chatId: chatId || "",
+        }),
       });
 
-      dispatch(addMessage({
-        role: 'user',
-        content: input,
-        createdAt: new Date().toISOString(),
-      }));
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
 
-      setTimeout(() => {
-        dispatch(addMessage({
-          role: 'assistant',
-          content: fullResponse,
-          createdAt: new Date().toISOString(),
-        }));
+      if (!response.body) {
+        throw new Error("Response body is empty");
+      }
 
-        onResponseUpdate?.('');
-      }, 1000);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        let accumulatedText = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedText += chunk;
+          dispatch(setCurrentResponse(accumulatedText));
+          onResponseUpdate?.(accumulatedText);
+        }
+        dispatch(
+          addMessage({
+            role: "assistant",
+            content: accumulatedText,
+            createdAt: new Date().toISOString(),
+          })
+        );
+        dispatch(setCurrentResponse(""));
+        onResponseUpdate?.("");
+      } finally {
+        reader.releaseLock();
+      }
     },
   });
 
@@ -52,12 +84,11 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   };
 };
 
-
 export const fetchMessages = async (chatId: string) => {
   try {
     const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
-      method: 'GET',
-      credentials: 'include',
+      method: "GET",
+      credentials: "include",
     });
 
     const text = await response.text();
