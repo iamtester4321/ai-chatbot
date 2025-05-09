@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../config/db";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
@@ -25,7 +24,6 @@ export async function createChatWithMessagesOrApendMesages(
       include: { messages: true },
     });
   } else {
-    // Generate a chat name from the first user message
     const userMessage = messages.find((m) => m.role === "user");
     const trimmedName = userMessage?.content.trim().slice(0, 50) || "New Chat";
 
@@ -62,3 +60,23 @@ export async function findById(chatId: string) {
     },
   });
 }
+
+export const toggleFavoriteStatus = async (
+  chatId: string,
+  currentStatus: boolean
+) => {
+  return prisma.chat.update({
+    where: { id: chatId },
+    data: { isFavorite: !currentStatus },
+  });
+};
+
+export const toggleArchiveStatus = async (
+  chatId: string,
+  currentStatus: boolean
+) => {
+  return prisma.chat.update({
+    where: { id: chatId },
+    data: { isArchived: !currentStatus },
+  });
+};
