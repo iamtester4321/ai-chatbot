@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
 import userRoutes from "./routes/user.route";
 import messageRoutes from "./routes/message.routes";
+import { redisClient } from "./config/redis";
 
 dotenv.config();
 
@@ -21,6 +22,14 @@ app.use(
     credentials: true,
   })
 );
+
+redisClient.on("connect", () => {
+  console.log("✅ Redis connected");
+});
+
+redisClient.on("error", (err: any) => {
+  console.error("❌ Redis error:", err);
+});
 
 app.use(cookieParser());
 
