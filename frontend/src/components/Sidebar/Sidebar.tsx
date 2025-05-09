@@ -4,6 +4,7 @@ import CustomLogo from "../../assets/icons/Logo";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
 import SunIcon from "../../assets/icons/SunIcon";
+import { SidebarItemProps } from "../../lib/types";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,11 +69,6 @@ const Sidebar = () => {
     </section>
   );
 };
-
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-}
 
 const SidebarItem = ({ icon, label }: SidebarItemProps) => {
   return (

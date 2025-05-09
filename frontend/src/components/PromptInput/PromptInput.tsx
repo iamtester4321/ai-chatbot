@@ -1,11 +1,11 @@
-interface PromptInputProps {
-  input: string;
-  isLoading: boolean;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFormSubmit: (e: React.FormEvent) => void;
-}
+import { PromptInputProps } from "../../lib/types";
 
-const PromptInput = ({ input, isLoading, handleInputChange, handleFormSubmit }: PromptInputProps) => {
+const PromptInput = ({
+  input,
+  isLoading,
+  handleInputChange,
+  handleFormSubmit,
+}: PromptInputProps) => {
   return (
     <form
       onSubmit={handleFormSubmit}

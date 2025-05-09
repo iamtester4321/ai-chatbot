@@ -1,6 +1,6 @@
+import DOMPurify from "dompurify";
+import hljs from "highlight.js";
 import { marked } from "marked";
-import hljs from 'highlight.js';
-import DOMPurify from 'dompurify';
 
 const renderer = new marked.Renderer();
 renderer.code = ({ text, lang }) => {
@@ -9,7 +9,7 @@ renderer.code = ({ text, lang }) => {
     ? hljs.highlight(text, { language: lang }).value
     : hljs.highlightAuto(text).value;
 
-  const languageClass = lang ? `language-${lang}` : '';
+  const languageClass = lang ? `language-${lang}` : "";
 
   return `
     <div class="code-block-wrapper relative group">
