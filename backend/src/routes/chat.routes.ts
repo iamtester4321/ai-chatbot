@@ -13,10 +13,8 @@ const router = Router();
 
 router.get("/", findChatsByUsrerId);
 router.get("/:chatId", findChatById);
-
-router.post("/:chatId", deleteChat);
-
-router.delete("/:chatId", streamChat);
+router.post("/stream", streamChat);
+router.delete("/:chatId", deleteChat);
 
 router.patch("/addOrRemoveFavrate/:chatId", addOrRemoveFavorite);
 router.patch("/addOrRemoveArchive/:chatId", addOrRemoveArchive);
