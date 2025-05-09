@@ -10,11 +10,16 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />} />
+          <Route element={<Layout />}>
+            <Route path="/" />
+            <Route path="/chat" />
+            <Route path="/chat/:chatId" />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
       </BrowserRouter>
+
       <ToastContainer
         position="top-right"
         autoClose={2000}

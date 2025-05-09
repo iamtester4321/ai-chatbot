@@ -1,11 +1,11 @@
-export const fetcher = async (url: string, prompt: string) => {
+export const fetcher = async (url: string, prompt: string, chatId: string) => {
   const response = await fetch(url, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prompt: prompt, messages: [], chatId: "50" }),
+    body: JSON.stringify({ prompt: prompt, messages: [], chatId: chatId }),
   });
 
   if (!response.ok) {

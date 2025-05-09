@@ -1,31 +1,59 @@
-import { useEffect, useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { formatMarkdownResponse } from "../../utils/responseRenderer";
-import "highlight.js/styles/github-dark.css";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "github-markdown-css/github-markdown-dark.css";
-import { STREAM_CHAT_RESPONSE } from "../../lib/apiUrl";
-import { fetcher } from "../../utils/streamProcessor";
+import "highlight.js/styles/github-dark.css";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import { useChatActions } from "../../actions/chat.actions";
+import { formatMarkdownResponse } from "../../utils/responseRenderer";
 
 const ChatInputField = () => {
+  const navigate = useNavigate();
+  const { chatId } = useParams();
   const [chatResponse, setChatResponse] = useState<string>("");
-  const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
-    useChat({
-      initialMessages: [],
-      api: STREAM_CHAT_RESPONSE,
-      onResponse: async () => {
-        const processStream = await fetcher(STREAM_CHAT_RESPONSE, input);
-        processStream((text: string) => {
-          setChatResponse(text);
-          console.log("Streaming Response text:", text);
-        });
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChatActions({
+      chatId,
+      onResponseUpdate: (text) => {
+        setChatResponse(text);
       },
     });
 
   useEffect(() => {
-    if (data) {
-      console.log("Data from Stream:", data);
+    const storedPrompt = sessionStorage.getItem("initialPrompt");
+
+    if (storedPrompt && chatId && messages.length === 0) {
+      const inputElement = document.createElement("input");
+      inputElement.value = storedPrompt;
+      const event = {
+        target: inputElement,
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      handleInputChange(event);
+
+      setTimeout(() => {
+        handleSubmit(new Event("submit") as any);
+      }, 0);
+
+      sessionStorage.removeItem("initialPrompt");
     }
-  }, [data]);
+  }, [chatId]);
+
+  const generateChatId = () => {
+    return uuidv4();
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatId) {
+      const newChatId = generateChatId();
+      sessionStorage.setItem("initialPrompt", input);
+      navigate(`/chat/${newChatId}`, { replace: true });
+      return;
+    }
+    handleSubmit(e);
+  };
 
   useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
@@ -114,7 +142,7 @@ const ChatInputField = () => {
             </h3>
 
             <form
-              onSubmit={handleSubmit}
+              onSubmit={handleFormSubmit}
               className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"
             >
               <input
