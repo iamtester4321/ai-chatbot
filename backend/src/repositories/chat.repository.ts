@@ -80,3 +80,9 @@ export const toggleArchiveStatus = async (
     data: { isArchived: !currentStatus },
   });
 };
+
+export const deleteChatById = async (chatId: string) => {
+  return prisma.chat.delete({
+    where: { id: chatId },
+  });
+};

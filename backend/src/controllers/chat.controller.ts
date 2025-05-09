@@ -6,6 +6,7 @@ import {
   findChatsByService,
   addOrRemoveFavoriteService,
   addOrRemoveArchiveService,
+  deleteChatService,
 } from "../services/chat.service";
 import { Request, Response } from "express";
 
@@ -118,6 +119,22 @@ export const addOrRemoveArchive = async (req: any, res: any) => {
       return res.status(404).json({ error: err.message });
     }
     console.error("Error updating archive:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const deleteChat = async (req: any, res: any) => {
+  const { chatId } = req.params;
+  const userId = (req.user as { id: string }).id;
+
+  try {
+    await deleteChatService(chatId, userId);
+    return res.status(200).json({ message: "Chat deleted successfully" });
+  } catch (err: any) {
+    console.error("Error deleting chat:", err);
+    if (err.message === "Chat not found") {
+      return res.status(404).json({ error: "Chat not found" });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 };
