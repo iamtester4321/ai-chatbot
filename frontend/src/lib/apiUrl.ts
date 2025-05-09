@@ -7,3 +7,4 @@ export const GOOGLE_AUTH_API = `${BASE_API}/api/auth/google`;
 
 // chat API
 export const STREAM_CHAT_RESPONSE = `${BASE_API}/api/chat/stream`;
+export const GET_CHAT_MESSAGES = `${BASE_API}/api/chat`;

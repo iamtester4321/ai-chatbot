@@ -25,7 +25,7 @@ const MessageDisplay = ({
   return (
     <div className="w-full min-h-screen bg-[#1a1a1a] text-white">
       {/* Messages Container */}
-      <div className="mx-auto max-w-3xl px-4 md:px-8 py-10">
+      <div className="mx-auto max-w-5xl px-4 md:px-8 py-10">
         {chatName && (
           <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-white text-center md:text-left">
             {chatName}
@@ -34,7 +34,7 @@ const MessageDisplay = ({
         {/* Display messages */}
         <div className="space-y-8">
           {messages.map((msg, index) => {
-            const isAssistant = msg.role === "assistant";
+            // const isAssistant = msg.role === "assistant";
             const isUser = msg.role === "user";
 
             if (isUser) {

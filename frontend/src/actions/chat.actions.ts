@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
+import { GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
 import { fetcher } from "../utils/streamProcessor";
 
 interface ChatHookProps {
@@ -26,4 +26,26 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     handleSubmit,
     isLoading: status === "submitted",
   };
+};
+
+export const fetchMessages = async (chatId: string) => {
+  try {
+    const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      const data = JSON.parse(text);
+      return { success: true, data };
+    } else {
+      console.error("Failed to fetch messages for chatId:", chatId);
+      return { success: false, error: "Failed to fetch messages" };
+    }
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return { success: false, error: "Error fetching messages" };
+  }
 };
