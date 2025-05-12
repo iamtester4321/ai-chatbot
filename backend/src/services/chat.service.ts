@@ -163,3 +163,16 @@ export const deleteChatService = async (chatId: string, userId: string) => {
     redisClient.del(`${USER_CHATS_PREFIX}${userId}:chats`),
   ]);
 };
+
+export const renameChatService = async (chatId: string, newName: string) => {
+  const chat = await chatRepo.findById(chatId);
+  if (!chat) throw new Error("Chat not found");
+
+  const updated = await chatRepo.renameChat(chatId, newName);
+  await Promise.all([
+    redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
+    redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chats`),
+    redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chat-names`),
+  ]);
+  return updated;
+};

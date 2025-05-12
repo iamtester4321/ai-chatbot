@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import useToast from "../../hooks/useToast";
+import { renameChat } from "../../actions/chat.actions";
 
 interface RenameModalProps {
   isOpen: boolean;
@@ -27,21 +28,10 @@ export default function RenameModal({
 
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/chats/${chatId}/rename`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: newName.trim() }),
-      });
-
-      const result = await response.json();
+      const result = await renameChat(chatId, newName.trim());
 
       if (result.success) {
-        showToast.success("Chat renamed successfully!");
-        // Dispatch event to trigger sidebar update
-        window.dispatchEvent(new Event('chat-renamed'));
+        showToast.success(result.message || "Chat renamed successfully!");
         onClose();
       } else {
         showToast.error(result.message || "Failed to rename chat");

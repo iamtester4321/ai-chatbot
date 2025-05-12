@@ -38,7 +38,7 @@ function Layout() {
       }
     };
     getChatNames();
-  }, [dispatch]);
+  }, []); // Remove dispatch from dependencies
 
   useEffect(() => {
     const checkMobile = () => {
@@ -85,7 +85,7 @@ function Layout() {
       window.removeEventListener('chat-renamed', handleChatUpdates);
       window.removeEventListener('chat-names-updated', handleChatUpdates);
     };
-  }, [dispatch]);
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

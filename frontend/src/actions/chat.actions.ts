@@ -122,8 +122,8 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
     if (response.ok) {
       const data = JSON.parse(text);
       dispatch(setChatList(data));
-      // Dispatch event for real-time updates
-      window.dispatchEvent(new CustomEvent('chat-names-updated', { detail: { data } }));
+      // Remove this line to prevent infinite loop
+      // window.dispatchEvent(new CustomEvent('chat-names-updated', { detail: { data } }));
       return { success: true, data };
     } else {
       console.error("Failed to fetch chat names");
@@ -195,6 +195,42 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
     };
   } catch (error) {
     console.error(error)
+    return {
+      success: false,
+      message: 'Network error. Please try again later.',
+    };
+  }
+};
+
+export const renameChat = async (chatId: string, newName: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await fetch(`/api/chats/${chatId}/rename`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ newName }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || 'Failed to rename chat',
+      };
+    }
+
+    // Dispatch event to trigger sidebar update
+    window.dispatchEvent(new Event('chat-renamed'));
+
+    return {
+      success: true,
+      message: result.message,
+    };
+  } catch (error) {
+    console.error(error);
     return {
       success: false,
       message: 'Network error. Please try again later.',
