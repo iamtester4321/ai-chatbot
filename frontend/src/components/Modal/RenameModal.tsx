@@ -1,7 +1,8 @@
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useToast from "../../hooks/useToast";
-import { renameChat } from "../../actions/chat.actions";
+import { fetchChatNames, renameChat } from "../../actions/chat.actions";
+import { useAppDispatch } from "../../store/hooks";
 
 interface RenameModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function RenameModal({
   currentName,
 }: RenameModalProps) {
   const showToast = useToast();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(currentName);
 
@@ -25,13 +27,14 @@ export default function RenameModal({
       showToast.error("Chat name cannot be empty");
       return;
     }
-
+  
     try {
       setIsLoading(true);
       const result = await renameChat(chatId, newName.trim());
-
+  
       if (result.success) {
         showToast.success(result.message || "Chat renamed successfully!");
+        await fetchChatNames(dispatch);
         onClose();
       } else {
         showToast.error(result.message || "Failed to rename chat");
@@ -43,6 +46,11 @@ export default function RenameModal({
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    if (isOpen) {
+      setNewName(currentName);
+    }
+  }, [isOpen, currentName]);
 
   if (!isOpen) return null;
 

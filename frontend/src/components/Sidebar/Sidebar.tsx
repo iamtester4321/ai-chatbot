@@ -8,9 +8,10 @@ import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 import LogoutModal from "../Modal/LogoutModal";
 import RenameModal from "../Modal/RenameModal";
-import UserDetail from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
+import { LogOut, Settings } from "lucide-react";
+import { UserDetail } from "../UserDetail/UserDetail";
 
 interface SidebarProps {
   isLogoutModalOpen: boolean;
@@ -48,6 +49,7 @@ const Sidebar = ({
     id: string;
     name: string;
   } | null>(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -141,11 +143,36 @@ const Sidebar = ({
         />
       </div>
 
-      <div className="border-t border-[#e8e8e61a] pt-2 text-sm sticky bottom-0 bg-[#121212]">
+      <div className="border-t border-[#e8e8e61a] pt-3 pb-2 text-sm sticky bottom-0 bg-[#121212]">
+        {isUserMenuOpen && (
+          <div className="mt-2 space-y-2">
+            <button
+              onClick={() => {
+                setIsSettingsOpen(true);
+                setIsUserMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#e8e8e6b3] hover:bg-[#202222] transition-colors"
+            >
+              <Settings size={16} />
+              Settings
+            </button>
+
+            <button
+              onClick={() => {
+                handleLogoutClick();
+                setIsUserMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-500 hover:bg-[#202222] transition-colors"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
+        )}
+
         <UserDetail
           user={user}
-          onLogoutClick={handleLogoutClick}
-          setIsSettingsOpen={setIsSettingsOpen}
+          onClick={() => setIsUserMenuOpen((prev) => !prev)}
         />
       </div>
 
