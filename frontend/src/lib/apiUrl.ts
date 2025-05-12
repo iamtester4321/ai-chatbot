@@ -15,4 +15,4 @@ export const GET_CHAT_MESSAGES = `${BASE_API}/api/chat`;
 export const DELETE_CHAT = (chatId: string) => `${BASE_API}/api/chat/${chatId}`;
 export const TOGGLE_FAVORITE_CHAT = (chatId: string) => `${BASE_API}/api/chat/addOrRemoveFavrate/${chatId}`;
 export const GET_CHAT_NAMES = `${BASE_API}/api/chat/names`;
-export const RENAME_CHAT = (chatId: string) => `${BASE_API}/api/chat/rename/${chatId}`;
+export const RENAME_CHAT= (chatId: string) => `${BASE_API}/api/chat/rename/${chatId}`;

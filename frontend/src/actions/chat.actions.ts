@@ -9,8 +9,8 @@ import {
 } from "../lib/apiUrl";
 import {
   addMessage,
-  setCurrentResponse,
   setChatList,
+  setCurrentResponse,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch } from "../store/hooks";
 import { AppDispatch } from "../store/store";
