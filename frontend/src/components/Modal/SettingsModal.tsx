@@ -23,6 +23,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
   ];
 
   const favoriteChats = chatList.filter((chat) => chat.isFavorite);
+  const archivedChats = chatList.filter((chat) => chat.isArchived);
 
   return (
     <>
@@ -73,7 +74,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
             {/* Content based on active tab */}
             <div className="text-[#e8e8e6b3]">
               {activeTab === "general" && <GeneralSettings />}
-              {activeTab === "archive" && <ArchivedChats />}
+              {activeTab === "archive" && <ArchivedChats archivedChats={archivedChats} />}
               {activeTab === "favorite" && <FavoriteChats favoriteChats={favoriteChats} />}
             </div>
           </div>

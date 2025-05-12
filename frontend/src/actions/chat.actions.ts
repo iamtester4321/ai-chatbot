@@ -6,6 +6,7 @@ import {
   TOGGLE_FAVORITE_CHAT,
   GET_CHAT_NAMES,
   RENAME_CHAT,
+  ARCHIVE_CHAT,
 } from "../lib/apiUrl";
 import {
   addMessage,
@@ -243,6 +244,39 @@ export const renameChat = async (
     };
   } catch (error) {
     console.error(error);
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
+};
+
+export const archiveChat = async (
+  chatId: string
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await fetch(ARCHIVE_CHAT(chatId), {
+      method: "PATCH",
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to archive chat",
+      };
+    }
+
+    window.dispatchEvent(new Event("chat-archived"));
+
+    return {
+      success: true,
+      message: result.message || "Chat archived successfully",
+    };
+  } catch (error) {
+    console.error("Error archiving chat:", error);
     return {
       success: false,
       message: "Network error. Please try again later.",

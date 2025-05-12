@@ -77,6 +77,7 @@ function Layout() {
     window.addEventListener('chat-favorite-toggled', handleChatUpdates);
     window.addEventListener('chat-renamed', handleChatUpdates);
     window.addEventListener('chat-names-updated', handleChatUpdates);
+    window.addEventListener('chat-archived', handleChatUpdates);
 
     return () => {
       // Clean up event listeners
@@ -84,6 +85,7 @@ function Layout() {
       window.removeEventListener('chat-favorite-toggled', handleChatUpdates);
       window.removeEventListener('chat-renamed', handleChatUpdates);
       window.removeEventListener('chat-names-updated', handleChatUpdates);
+      window.removeEventListener('chat-archived', handleChatUpdates);
     };
   }, []);
 

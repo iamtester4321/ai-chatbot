@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchMessages, toggleFavoriteChat } from "../../actions/chat.actions";
+import {
+  archiveChat,
+  fetchMessages,
+  toggleFavoriteChat,
+} from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import DeleteModal from "../Modal/DeleteModal";
 
@@ -28,6 +32,7 @@ export default function Header({
   const { chatId } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isArchive, setIsArchive] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartMode, setIsChartMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,6 +53,7 @@ export default function Header({
 
         if (result.success) {
           setIsFavorite(result.data.isFavorite || false);
+          setIsArchive(result.data.isArchived || false);
         }
       } catch (error) {
         console.error("Error fetching favorite status:", error);
@@ -80,6 +86,20 @@ export default function Header({
     } catch (error) {
       showToast.error("An error occurred while updating favorite status");
       console.error("Error toggling favorite:", error);
+    }
+  };
+
+  const archiveCurrentChat = async () => {
+    if (!chatId) return;
+
+    const result = await archiveChat(chatId);
+    if (result.success) {
+      setIsArchive(!isArchive);
+      showToast.success(result.message || "Chat archived");
+      setIsMenuOpen(false);
+      setIsMobileMenuOpen(false);
+    } else {
+      showToast.error(result.message || "Failed to archive chat");
     }
   };
 
@@ -223,9 +243,12 @@ export default function Header({
                       />
                       Favourite
                     </button>
-                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
+                    <button
+                      onClick={archiveCurrentChat}
+                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                    >
                       <Archive size={16} className="mr-2" />
-                      Archive
+                      {isArchive ? "Un-archive" : "Archive"}
                     </button>
                     <button
                       onClick={openDeleteModal}
@@ -252,9 +275,12 @@ export default function Header({
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center cursor-pointer">
+                    <button
+                      onClick={archiveCurrentChat}
+                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center cursor-pointer"
+                    >
                       <Archive size={16} className="mr-2" />
-                      Archive
+                      {isArchive ? "Un-archive" : "Archive"}
                     </button>
                     <button
                       onClick={openDeleteModal}

@@ -102,10 +102,10 @@ const Sidebar = ({
       <Link
         to={"/chat"}
         onClick={() => dispatch(resetChat())}
-        className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group"
+        className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full"
       >
         <PlusIcon />
-        <span className="text-sm whitespace-nowrap text-[#e8e8e6b3] group-hover:text-[#20b8cd]">
+        <span className="text-sm whitespace-nowrap text-white">
           New Chat
         </span>
       </Link>
