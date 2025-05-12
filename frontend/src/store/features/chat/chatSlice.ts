@@ -6,7 +6,7 @@ const initialState: ChatState = {
   currentResponse: "",
   isLoading: false,
   chatName: "",
-  chatList: [], // Add this new field
+  chatList: [],
 };
 
 const chatSlice = createSlice({

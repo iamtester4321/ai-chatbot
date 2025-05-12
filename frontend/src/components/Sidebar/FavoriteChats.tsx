@@ -16,10 +16,9 @@ interface FavoriteChatsProps {
   isFavoritesOpen: boolean;
   setIsFavoritesOpen: (value: boolean) => void;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: string | null;
+  activeDropdown: {id: string | null, section: 'favorite' | 'all' | null};
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const FavoriteChats = ({
@@ -31,7 +30,6 @@ const FavoriteChats = ({
   activeDropdown,
   handleRename,
   handleDelete,
-  dropdownRef,
 }: FavoriteChatsProps) => {
   if (chats.length === 0) return null;
 
@@ -77,9 +75,10 @@ const FavoriteChats = ({
               </div>
             </Link>
 
-            {activeDropdown === chat.id && (
+            {activeDropdown.id === chat.id && activeDropdown.section === 'favorite' && (
               <div
-                ref={dropdownRef}
+                // ref={dropdownRef}
+                data-dropdown-menu
                 className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
               >
                 <div className="py-1">
@@ -96,6 +95,15 @@ const FavoriteChats = ({
                   >
                     <Trash2 size={16} className="mr-2" />
                     Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      toggleDropdown(chat.id);
+                    }}
+                    className="px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700 w-full text-left flex items-center"
+                  >
+                    <Star size={16} className="mr-2" />
+                    Remove
                   </button>
                 </div>
               </div>

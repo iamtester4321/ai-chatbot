@@ -1,10 +1,14 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
-import { useEffect, useRef, useState } from "react";
 import { ChatState } from "../../lib/types";
-import FavoriteChats from "./FavoriteChats";
+import { resetChat } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
+import DeleteModal from "../Modal/DeleteModal";
 import AllChats from "./AllChats";
+import FavoriteChats from "./FavoriteChats";
+import RenameModal from "../Modal/RenameModal";
 
 interface SidebarProps {
   chatList: ChatState['chatList'];
@@ -12,32 +16,52 @@ interface SidebarProps {
 
 const Sidebar = ({ chatList }: SidebarProps) => {
   const { chatId } = useParams();
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const [activeDropdown, setActiveDropdown] = useState<{id: string | null, section: 'favorite' | 'all' | null}>({
+    id: null,
+    section: null
+  });
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+    const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<{id: string, name: string} | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setActiveDropdown(null);
+      const target = event.target as HTMLElement;
+      const isInsideDropdown = target.closest('[data-dropdown-menu]');
+      if (!isInsideDropdown) {
+        setActiveDropdown({ id: null, section: null });
       }
     };
-
+  
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = (chatId: string) => {
-    setActiveDropdown(activeDropdown === chatId ? null : chatId);
+  const toggleDropdown = (chatId: string, section: 'favorite' | 'all') => {
+    setActiveDropdown(current => 
+      current.id === chatId && current.section === section 
+        ? {id: null, section: null} 
+        : {id: chatId, section}
+    );
   };
 
   const handleRename = (chatId: string) => {
-    setActiveDropdown(null);
-  };
+    const chat = chatList.find(c => c.id === chatId);
+    if (chat) {
+      setSelectedChat({ id: chat.id, name: chat.name });
+      setIsRenameModalOpen(true);
+      setActiveDropdown({ id: null, section: null });
+    }
+  }
 
   const handleDelete = (chatId: string) => {
-    setActiveDropdown(null);
+    setSelectedChatId(chatId);
+    setIsDeleteModalOpen(true);
+    setActiveDropdown({ id: null, section: null });
   };
 
   const filteredChatList = chatList.filter(chat => 
@@ -48,7 +72,11 @@ const Sidebar = ({ chatList }: SidebarProps) => {
 
   return (
     <div className="flex flex-col h-[calc(100%-1rem)] md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden mt-16 md:mt-0">
-      <Link to={"/chat"} className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group">
+      <Link 
+        to={"/chat"} 
+        onClick={() => dispatch(resetChat())}
+        className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group"
+      >
         <PlusIcon />
         <span className="text-sm whitespace-nowrap text-[#e8e8e6b3] group-hover:text-[#20b8cd]">
           New Chat
@@ -72,21 +100,19 @@ const Sidebar = ({ chatList }: SidebarProps) => {
           chatId={chatId}
           isFavoritesOpen={isFavoritesOpen}
           setIsFavoritesOpen={setIsFavoritesOpen}
-          toggleDropdown={toggleDropdown}
+          toggleDropdown={(id) => toggleDropdown(id, 'favorite')}
           activeDropdown={activeDropdown}
           handleRename={handleRename}
           handleDelete={handleDelete}
-          dropdownRef={dropdownRef}
         />
 
         <AllChats
           chats={filteredChatList}
           chatId={chatId}
-          toggleDropdown={toggleDropdown}
+          toggleDropdown={(id) => toggleDropdown(id, 'all')}
           activeDropdown={activeDropdown}
           handleRename={handleRename}
           handleDelete={handleDelete}
-          dropdownRef={dropdownRef}
         />
       </div>
 
@@ -98,6 +124,25 @@ const Sidebar = ({ chatList }: SidebarProps) => {
           Log out
         </div>
       </div>
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedChatId(null);
+        }}
+        chatId={selectedChatId || ""}
+      />
+      
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => {
+          setIsRenameModalOpen(false);
+          setSelectedChat(null);
+        }}
+        chatId={selectedChat?.id || ""}
+        currentName={selectedChat?.name || ""}
+      />
     </div>
   );
 };

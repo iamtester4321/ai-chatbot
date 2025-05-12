@@ -6,10 +6,9 @@ interface AllChatsProps {
   chats: ChatState['chatList'];
   chatId: string | undefined;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: string | null;
+  activeDropdown: {id: string | null, section: 'favorite' | 'all' | null};
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const AllChats = ({
@@ -19,7 +18,6 @@ const AllChats = ({
   activeDropdown,
   handleRename,
   handleDelete,
-  dropdownRef
 }: AllChatsProps) => {
   if (chats.length === 0) return null;
 
@@ -58,8 +56,8 @@ const AllChats = ({
             </div>
           </Link>
           
-          {activeDropdown === chat.id && (
-            <div ref={dropdownRef} className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
+          {activeDropdown.id === chat.id && activeDropdown.section === 'all' && (
+            <div data-dropdown-menu className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
               <div className="py-1">
                 <button
                   onClick={() => handleRename(chat.id)}
