@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { DELETE_CHAT, GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE, TOGGLE_FAVORITE_CHAT } from "../lib/apiUrl";
+import { DELETE_CHAT, GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE, TOGGLE_FAVORITE_CHAT, GET_CHAT_NAMES } from "../lib/apiUrl";
 import {
   addMessage,
   setCurrentResponse,
@@ -106,7 +106,6 @@ export const fetchMessages = async (chatId: string) => {
   }
 };
 
-
 interface DeleteChatResponse {
   success: boolean;
   message?: string;
@@ -163,5 +162,27 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
       success: false,
       message: 'Network error. Please try again later.',
     };
+  }
+};
+
+export const fetchChatNames = async () => {
+  try {
+    const response = await fetch(GET_CHAT_NAMES, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      const data = JSON.parse(text);
+      return { success: true, data };
+    } else {
+      console.error("Failed to fetch chat names");
+      return { success: false, error: "Failed to fetch chat names" };
+    }
+  } catch (error) {
+    console.error("Error fetching chat names:", error);
+    return { success: false, error: "Error fetching chat names" };
   }
 };

@@ -7,6 +7,7 @@ import {
   addOrRemoveFavoriteService,
   addOrRemoveArchiveService,
   deleteChatService,
+  findChatNamesByService,
 } from "../services/chat.service";
 import { Request, Response } from "express";
 
@@ -85,6 +86,21 @@ export async function findChatsByUsrerId(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch chats";
+    res.status(404).json({ message: errorMessage });
+  }
+}
+
+export async function findChatNamesByUserId(
+  req: Request<ChatRequestParams>,
+  res: Response
+) {
+  try {
+    const userId = (req.user as { id: string }).id;
+    const chatNames = await findChatNamesByService(userId);
+    res.status(200).json(chatNames);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch chat names";
     res.status(404).json({ message: errorMessage });
   }
 }

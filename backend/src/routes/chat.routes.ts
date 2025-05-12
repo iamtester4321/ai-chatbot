@@ -4,6 +4,7 @@ import {
   addOrRemoveFavorite,
   findChatById,
   findChatsByUsrerId,
+  findChatNamesByUserId,
   streamChat,
   deleteChat,
 } from "../controllers/chat.controller";
@@ -12,6 +13,7 @@ import { generateShareId } from "../controllers/share.controller";
 const router = Router();
 
 router.get("/", findChatsByUsrerId);
+router.get("/names", findChatNamesByUserId);
 router.get("/:chatId", findChatById);
 router.post("/stream", streamChat);
 router.delete("/:chatId", deleteChat);

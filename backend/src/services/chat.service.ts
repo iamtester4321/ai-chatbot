@@ -47,6 +47,16 @@ export async function findChatsByService(userId: string) {
   return chats;
 }
 
+export async function findChatNamesByService(userId: string) {
+  const key = `${USER_CHATS_PREFIX}${userId}:chat-names`;
+  const cached = await redisClient.get(key);
+  if (cached) return JSON.parse(cached);
+
+  const chatNames = await chatRepo.getChatNamesByUser(userId);
+  await redisClient.set(key, JSON.stringify(chatNames));
+  return chatNames;
+}
+
 export const addOrRemoveFavoriteService = async (chatId: string) => {
   const chat = await chatRepo.findById(chatId);
   if (!chat) throw new Error("Chat not found");
