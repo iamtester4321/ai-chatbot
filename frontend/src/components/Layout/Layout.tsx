@@ -38,7 +38,7 @@ function Layout() {
       }
     };
     getChatNames();
-  }, []); // Remove dispatch from dependencies
+  }, []); 
 
   useEffect(() => {
     const checkMobile = () => {
