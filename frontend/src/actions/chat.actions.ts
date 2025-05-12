@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
+import { GET_CHAT_MESSAGES, GET_CHAT_NAMES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
 import {
   addMessage,
   setCurrentResponse,
@@ -103,5 +103,27 @@ export const fetchMessages = async (chatId: string) => {
   } catch (error) {
     console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
+  }
+};
+
+export const fetchChatNames = async () => {
+  try {
+    const response = await fetch(GET_CHAT_NAMES, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      const data = JSON.parse(text);
+      return { success: true, data };
+    } else {
+      console.error("Failed to fetch chat names");
+      return { success: false, error: "Failed to fetch chat names" };
+    }
+  } catch (error) {
+    console.error("Error fetching chat names:", error);
+    return { success: false, error: "Error fetching chat names" };
   }
 };

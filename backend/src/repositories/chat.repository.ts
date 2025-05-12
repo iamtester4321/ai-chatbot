@@ -52,6 +52,17 @@ export function getChatsByUser(userId: string) {
   });
 }
 
+export function getChatNamesByUser(userId: string) {
+  return prisma.chat.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      name: true
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function findById(chatId: string) {
   return await prisma.chat.findUnique({
     where: { id: chatId },
