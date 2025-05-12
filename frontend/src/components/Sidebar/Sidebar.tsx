@@ -37,48 +37,61 @@ const Sidebar = () => {
   return (
     <section className="relative">
       {/* Toggle Button (visible on small screens) */}
+      <button
+        className="md:hidden absolute top-6 left-6 z-50"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <CustomLogo />
+      </button>
 
       {/* Sidebar */}
       <div
         ref={sidebarRef}
         className={`
           fixed top-0 left-0 z-40 h-full w-[72px] bg-[#202222] 
-          flex-col items-center py-4 transition-transform duration-300
-          md:flex ${isOpen ? "flex" : "hidden"}
+          flex-col items-center py-4 transition-all duration-300 ease-in-out
+          md:w-20 ${isOpen ? "w-72" : "w-20"} 
         `}
       >
         <div className="w-8 h-9 cursor-pointer mt-1">
           <CustomLogo />
         </div>
 
-        <div className="pt-2 flex flex-col items-center justify-center mt-6">
-          <div className="my-8 flex items-center justify-center w-10 h-10 bg-[#2D2F2F] rounded-full cursor-pointer group transform transition duration-300 hover:scale-110">
+        {/* Sidebar items */}
+        <div className="pt-6 flex flex-col items-center justify-center space-y-4">
+          <div
+            className="my-6 flex items-center justify-center w-12 h-12 bg-[#2D2F2F] rounded-full cursor-pointer group transform transition duration-300 hover:scale-110"
+          >
             <PlusIcon />
           </div>
 
-          <SidebarItem icon={<SearchIcon />} label="Home" />
-          <SidebarItem icon={<GlobeIcon />} label="Discover" />
-          <SidebarItem icon={<SunIcon />} label="Explore" />
+          <SidebarItem icon={<SearchIcon />} label="Home" isOpen={isOpen} />
+          <SidebarItem icon={<GlobeIcon />} label="Discover" isOpen={isOpen} />
+          <SidebarItem icon={<SunIcon />} label="Explore" isOpen={isOpen} />
         </div>
       </div>
 
       {/* Content area beside sidebar */}
-      <div className="ml-0 w-full h-screen bg-[#1a1a1a]">
+      <div className={`ml-0 md:ml-20 w-full h-screen bg-[#1a1a1a]`}>
         {/* Main content would go here */}
       </div>
     </section>
   );
 };
 
-const SidebarItem = ({ icon, label }: SidebarItemProps) => {
+const SidebarItem = ({ icon, label, isOpen }: SidebarItemProps & { isOpen: boolean }) => {
   return (
-    <div className="flex items-center gap-0.5 flex-col p-2 cursor-pointer">
-      <div className="flex items-center justify-center w-10 h-10 bg-transparent hover:bg-[#2D2F2F] group transform transition duration-300 hover:scale-110 rounded-[6px]">
+    <div
+      className="flex items-center gap-2 flex-col md:flex-row p-2 cursor-pointer transition-all duration-200 group hover:bg-[#3B3B3B] rounded-md"
+    >
+      <div className="flex items-center justify-center w-10 h-10 bg-transparent group-hover:bg-[#2D2F2F] rounded-[6px]">
         {icon}
       </div>
-      <span className="font-sans text-xs font-normal text-[#898D8D]">
-        {label}
-      </span>
+      {isOpen && (
+        <span className="font-sans text-sm font-normal text-[#898D8D] group-hover:text-white transition-colors">
+          {label}
+        </span>
+      )}
     </div>
   );
 };
