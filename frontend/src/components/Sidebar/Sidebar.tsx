@@ -1,12 +1,32 @@
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchChatNames } from "../../actions/chat.actions";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
-import { useEffect, useState } from "react";
-import { fetchChatNames } from "../../actions/chat.actions";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import LogoutModal from "../Modal/LogoutModal";
+import UserDetail from "../UserDetail/UserDetail";
 
-const Sidebar = () => {
-  const [chatNames, setChatNames] = useState<Array<{ id: string; name: string }> | null>(null);
+interface SidebarProps {
+  isLogoutModalOpen: boolean;
+  setIsLogoutModalOpen: (isOpen: boolean) => void;
+  user: {
+    id: string;
+    email: string;
+  } | null;
+  setIsSettingsOpen: (open: boolean) => void;
+}
+
+const Sidebar = ({
+  isLogoutModalOpen,
+  setIsLogoutModalOpen,
+  user,
+  setIsSettingsOpen,
+}: SidebarProps) => {
+  const [chatNames, setChatNames] = useState<Array<{
+    id: string;
+    name: string;
+  }> | null>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,9 +55,16 @@ const Sidebar = () => {
     setActiveDropdown(null);
   };
 
+  const handleLogoutClick = () => {
+    setIsLogoutModalOpen(true);
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100%-1rem)] md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden mt-16 md:mt-0">
-      <Link to={"/chat"} className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group">
+    <div className="flex flex-col h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
+      <Link
+        to={"/chat"}
+        className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group"
+      >
         <PlusIcon />
         <span className="text-sm whitespace-nowrap text-[#e8e8e6b3] group-hover:text-[#20b8cd]">
           New Chat
@@ -70,7 +97,7 @@ const Sidebar = () => {
                 <MoreHorizontal size={16} />
               </button>
             </div>
-            
+
             {activeDropdown === chat.id && (
               <div className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
                 <div className="py-1">
@@ -95,14 +122,17 @@ const Sidebar = () => {
         ))}
       </div>
 
-      <div className="border-t border-[#e8e8e61a] pt-2 text-sm">
-        <div className="p-2.5 hover:bg-[#202222] hover:text-[#20b8cd] cursor-pointer rounded-lg text-[#e8e8e6b3] transition-all duration-200">
-          Settings
-        </div>
-        <div className="p-2.5 hover:bg-[#202222] hover:text-[#20b8cd] cursor-pointer rounded-lg mb-2 text-[#e8e8e6b3] transition-all duration-200">
-          Log out
-        </div>
+      <div className="border-t border-[#e8e8e61a] pt-2 text-sm mt-auto">
+        <UserDetail
+          user={user}
+          onLogoutClick={handleLogoutClick}
+          setIsSettingsOpen={setIsSettingsOpen}
+        />
       </div>
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+      />
     </div>
   );
 };

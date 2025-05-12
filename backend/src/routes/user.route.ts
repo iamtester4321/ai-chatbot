@@ -4,6 +4,6 @@ import { ensureAuthenticated } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/", ensureAuthenticated, getMyProfile);
+router.get("/myprofile", ensureAuthenticated, getMyProfile);
 
 export default router;

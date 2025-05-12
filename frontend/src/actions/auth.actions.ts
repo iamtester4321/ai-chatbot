@@ -1,4 +1,9 @@
-import { GOOGLE_AUTH_API, LOGIN_API, REGISTER_API } from "../lib/apiUrl";
+import {
+  GOOGLE_AUTH_API,
+  LOGIN_API,
+  LOGOUT_API,
+  REGISTER_API,
+} from "../lib/apiUrl";
 
 export const registerUser = async (email: string, password: string) => {
   try {
@@ -71,6 +76,34 @@ export const googleAuth = () => {
     return {
       success: false,
       message: "Failed to initiate Google authentication",
+    };
+  }
+};
+
+export const logoutUser = async () => {
+  try {
+    const response = await fetch(LOGOUT_API, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Logout failed",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Logged out successfully",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
     };
   }
 };

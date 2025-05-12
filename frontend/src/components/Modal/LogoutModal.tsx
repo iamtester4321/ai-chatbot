@@ -1,39 +1,34 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { deleteChat } from "../../actions/chat.actions";
+import { logoutUser } from "../../actions/auth.actions";
 import useToast from "../../hooks/useToast";
-import { resetChat } from "../../store/features/chat/chatSlice";
 
-interface DeleteModalProps {
+interface LogoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  chatId: string;
 }
 
-export default function DeleteModal({ isOpen, onClose, chatId }: DeleteModalProps) {
+export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const showToast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDelete = async () => {
+  const handleLogout = async () => {
     try {
       setIsLoading(true);
-      const result = await deleteChat(chatId);
+      const result = await logoutUser();
 
       if (result.success) {
-        dispatch(resetChat());
-        showToast.success("Chat deleted successfully!");
-        navigate("/");
+        showToast.success(result.message);
+        navigate("/login");
         onClose();
       } else {
-        showToast.error(result.message || "Failed to delete chat");
+        showToast.error(result.message);
       }
     } catch (error) {
-      showToast.error("An error occurred while deleting the chat");
-      console.error("Error deleting chat:", error);
+      showToast.error("An error occurred while logging out");
+      console.error("Error logging out:", error);
     } finally {
       setIsLoading(false);
     }
@@ -46,11 +41,8 @@ export default function DeleteModal({ isOpen, onClose, chatId }: DeleteModalProp
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
         <div className="bg-[#121212] border border-[#e8e8e61a] rounded-lg p-6 max-w-sm w-full mx-4">
-          <h2 className="text-xl font-semibold text-[#e8e8e6] mb-4">Delete Chat</h2>
-          <p className="text-[#e8e8e6b3] mb-6">
-            Are you sure you want to delete this chat? This action cannot be
-            undone.
-          </p>
+          <h2 className="text-xl font-semibold text-[#e8e8e6] mb-4">Logout</h2>
+          <p className="text-[#e8e8e6b3] mb-6">Are you sure you want to logout?</p>
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
@@ -60,17 +52,17 @@ export default function DeleteModal({ isOpen, onClose, chatId }: DeleteModalProp
               Cancel
             </button>
             <button
-              onClick={handleDelete}
+              onClick={handleLogout}
               disabled={isLoading}
               className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors disabled:opacity-50 flex items-center"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  Logging out...
                 </>
               ) : (
-                "Delete"
+                "Logout"
               )}
             </button>
           </div>

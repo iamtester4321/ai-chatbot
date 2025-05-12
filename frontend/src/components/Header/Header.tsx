@@ -1,14 +1,14 @@
 import {
-  Share2,
+  Archive,
   BarChart2,
   MessageSquare,
-  Star,
   Moon,
-  Sun,
   MoreHorizontal,
-  Archive,
-  Trash2,
+  Share2,
   Sidebar,
+  Star,
+  Sun,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -16,7 +16,15 @@ import { fetchMessages, toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import DeleteModal from "../Modal/DeleteModal";
 
-export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
+interface HeaderProps {
+  toggleSidebar: () => void;
+  isLogoutModalOpen: boolean;
+}
+
+export default function Header({
+  toggleSidebar,
+  isLogoutModalOpen,
+}: HeaderProps) {
   const { chatId } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -110,6 +118,8 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  if (isLogoutModalOpen) return null;
+
   return (
     <header className="sticky top-0 w-full bg-[#121212] text-white z-[1000] py-3 px-4 border-b border-gray-800 flex items-center justify-between">
       <div className="flex items-center">
@@ -184,14 +194,14 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               </button>
 
               {isMobileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
+                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
                       <Share2 size={18} className="mr-2" />
                       Share
                     </button>
                     <button
-                      className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
                       onClick={toggleChartMode}
                     >
                       {isChartMode ? (
@@ -203,7 +213,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                     </button>
                     <button
                       onClick={toggleFavorite}
-                      className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
                     >
                       <Star
                         className="mr-2"
@@ -213,7 +223,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                       />
                       Favourite
                     </button>
-                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
                       <Star
                         size={16}
                         fill={isFavorite ? "gold" : "none"}
@@ -222,13 +232,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                       />
                       Favourite
                     </button>
-                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>
                     <button
                       onClick={openDeleteModal}
-                      className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-red-500 hover:bg-[#202222] w-full text-left flex items-center"
                     >
                       <Trash2 size={16} className="mr-2" />
                       Delete
@@ -249,15 +259,15 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
+                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center cursor-pointer">
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>
                     <button
                       onClick={openDeleteModal}
-                      className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-red-500 hover:bg-[#202222] w-full text-left flex items-center cursor-pointer"
                     >
                       <Trash2 size={16} className="mr-2" />
                       Delete

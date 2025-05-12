@@ -4,6 +4,10 @@ export const BASE_API = import.meta.env.VITE_BACKEND_API_URL;
 export const REGISTER_API = `${BASE_API}/api/auth/register`;
 export const LOGIN_API = `${BASE_API}/api/auth/login`;
 export const GOOGLE_AUTH_API = `${BASE_API}/api/auth/google`;
+export const LOGOUT_API = `${BASE_API}/api/auth/logout`;
+
+// user API
+export const GET_USER_PROFILE = `${BASE_API}/api/user/myprofile`;
 
 // chat API
 export const STREAM_CHAT_RESPONSE = `${BASE_API}/api/chat/stream`;

@@ -38,7 +38,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", ensureAuthenticated, chatRoutes);
 app.use("/api/message", ensureAuthenticated, messageRoutes);
-app.use("/api/myprofile", ensureAuthenticated, userRoutes);
+app.use("/api/user", ensureAuthenticated, userRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
