@@ -1,8 +1,9 @@
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useToast from "../../hooks/useToast";
 import { fetchChatNames, renameChat } from "../../actions/chat.actions";
 import { useAppDispatch } from "../../store/hooks";
+import { setChatName } from "../../store/features/chat/chatSlice";
 
 interface RenameModalProps {
   isOpen: boolean;
@@ -21,9 +22,12 @@ export default function RenameModal({
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(currentName);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (isOpen) {
       setNewName(currentName);
+      setTimeout(() => inputRef.current?.focus(), 0); // Wait for DOM to render
     }
   }, [isOpen, currentName]);
 
@@ -32,13 +36,14 @@ export default function RenameModal({
       showToast.error("Chat name cannot be empty");
       return;
     }
-  
+
     try {
       setIsLoading(true);
       const result = await renameChat(chatId, newName.trim());
-  
+
       if (result.success) {
         showToast.success(result.message || "Chat renamed successfully!");
+        dispatch(setChatName(newName.trim()));
         await fetchChatNames(dispatch);
         onClose();
       } else {
@@ -51,11 +56,12 @@ export default function RenameModal({
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    if (isOpen) {
-      setNewName(currentName);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleRename();
     }
-  }, [isOpen, currentName]);
+  };
 
   if (!isOpen) return null;
 
@@ -68,9 +74,11 @@ export default function RenameModal({
             Rename Chat
           </h2>
           <input
+            ref={inputRef}
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full px-4 py-2 mb-6 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-[#e8e8e6] placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
             placeholder="Enter new name"
           />
