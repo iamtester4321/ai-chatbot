@@ -94,6 +94,13 @@ export const toggleArchiveStatus = async (
   });
 };
 
+export const renameChat = async (chatId: string, newName: string) => {
+  return prisma.chat.update({
+    where: { id: chatId },
+    data: { name: newName },
+  });
+};
+
 export const deleteChatById = async (chatId: string) => {
   await prisma.message.deleteMany({
     where: {

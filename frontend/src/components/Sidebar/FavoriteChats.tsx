@@ -9,6 +9,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ChatState } from "../../lib/types";
+import { toggleFavoriteChat } from "../../actions/chat.actions";
+import useToast from "../../hooks/useToast";
 
 interface FavoriteChatsProps {
   chats: ChatState["chatList"];
@@ -31,6 +33,24 @@ const FavoriteChats = ({
   handleRename,
   handleDelete,
 }: FavoriteChatsProps) => {
+  const showToast = useToast();
+
+  const handleRemoveFromFavorites = async (chatId: string) => {
+    try {
+      const result = await toggleFavoriteChat(chatId);
+      
+      if (result.success) {
+        showToast.success(result.message || "Removed from favorites");
+        toggleDropdown(chatId); // Close the dropdown
+      } else {
+        showToast.error(result.message || "Failed to remove from favorites");
+      }
+    } catch (error) {
+      showToast.error("An error occurred while removing from favorites");
+      console.error("Error removing from favorites:", error);
+    }
+  };
+
   if (chats.length === 0) return null;
 
   return (
@@ -77,7 +97,6 @@ const FavoriteChats = ({
 
             {activeDropdown.id === chat.id && activeDropdown.section === 'favorite' && (
               <div
-                // ref={dropdownRef}
                 data-dropdown-menu
                 className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
               >
@@ -97,9 +116,7 @@ const FavoriteChats = ({
                     Delete
                   </button>
                   <button
-                    onClick={() => {
-                      toggleDropdown(chat.id);
-                    }}
+                    onClick={() => handleRemoveFromFavorites(chat.id)}
                     className="px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700 w-full text-left flex items-center"
                   >
                     <Star size={16} className="mr-2" />

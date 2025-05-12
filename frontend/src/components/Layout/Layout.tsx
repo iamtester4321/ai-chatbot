@@ -38,7 +38,7 @@ function Layout() {
       }
     };
     getChatNames();
-  }, [dispatch]);
+  }, []); // Remove dispatch from dependencies
 
   useEffect(() => {
     const checkMobile = () => {
@@ -66,6 +66,27 @@ function Layout() {
     getUserProfile();
   }, []);
 
+  useEffect(() => {
+    const handleChatUpdates = () => {
+      // Refresh chat list
+      fetchChatNames(dispatch);
+    };
+
+    // Add event listeners for all chat-related events
+    window.addEventListener('chat-deleted', handleChatUpdates);
+    window.addEventListener('chat-favorite-toggled', handleChatUpdates);
+    window.addEventListener('chat-renamed', handleChatUpdates);
+    window.addEventListener('chat-names-updated', handleChatUpdates);
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener('chat-deleted', handleChatUpdates);
+      window.removeEventListener('chat-favorite-toggled', handleChatUpdates);
+      window.removeEventListener('chat-renamed', handleChatUpdates);
+      window.removeEventListener('chat-names-updated', handleChatUpdates);
+    };
+  }, []);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -76,7 +97,7 @@ function Layout() {
       <div
         className={`${
           isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-[calc(100vh-4rem)] md:h-screen bg-[#2c3e50] z-20 top-16 md:top-0`}
+        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[#121212] z-20 top-0`}
       >
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}

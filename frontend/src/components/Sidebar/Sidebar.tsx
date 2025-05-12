@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
@@ -6,11 +6,11 @@ import { ChatState } from "../../lib/types";
 import { resetChat } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
+import LogoutModal from "../Modal/LogoutModal";
+import RenameModal from "../Modal/RenameModal";
+import UserDetail from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
-import RenameModal from "../Modal/RenameModal";
-import LogoutModal from "../Modal/LogoutModal";
-import UserDetail from "../UserDetail/UserDetail";
 
 interface SidebarProps {
   isLogoutModalOpen: boolean;
@@ -96,7 +96,7 @@ const Sidebar = ({
   const favoriteChats = filteredChatList.filter((chat) => chat.isFavorite);
 
   return (
-    <div className="flex flex-col h-[calc(100%-1rem)] md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden mt-16 md:mt-0">
+    <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
       <Link
         to={"/chat"}
         onClick={() => dispatch(resetChat())}
@@ -141,7 +141,7 @@ const Sidebar = ({
         />
       </div>
 
-      <div className="border-t border-[#e8e8e61a] pt-2 text-sm mt-auto">
+      <div className="border-t border-[#e8e8e61a] pt-2 text-sm sticky bottom-0 bg-[#121212]">
         <UserDetail
           user={user}
           onLogoutClick={handleLogoutClick}

@@ -8,6 +8,7 @@ import {
   addOrRemoveArchiveService,
   deleteChatService,
   findChatNamesByService,
+  renameChatService,
 } from "../services/chat.service";
 import { Request, Response } from "express";
 
@@ -151,6 +152,28 @@ export const deleteChat = async (req: any, res: any) => {
     if (err.message === "Chat not found") {
       return res.status(404).json({ error: "Chat not found" });
     }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const renameChat = async (req: any, res: any) => {
+  const { chatId } = req.params;
+  const { newName } = req.body;
+
+  if (!newName || typeof newName !== 'string') {
+    return res.status(400).json({ error: "New name is required" });
+  }
+
+  try {
+    const updatedChat = await renameChatService(chatId, newName.trim());
+    return res
+      .status(200)
+      .json({ message: "Chat renamed successfully", chat: updatedChat });
+  } catch (err: any) {
+    if (err.message === "Chat not found") {
+      return res.status(404).json({ error: err.message });
+    }
+    console.error("Error renaming chat:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 };

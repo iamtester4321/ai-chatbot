@@ -97,6 +97,8 @@ export const fetchMessages = async (chatId: string) => {
 
     if (response.ok) {
       const data = JSON.parse(text);
+      // Dispatch updated data to Redux store
+      window.dispatchEvent(new CustomEvent('chat-data-updated', { detail: { chatId, data } }));
       return { success: true, data };
     } else {
       console.error("Failed to fetch messages for chatId:", chatId);
@@ -105,6 +107,31 @@ export const fetchMessages = async (chatId: string) => {
   } catch (error) {
     console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
+  }
+};
+
+export const fetchChatNames = async (dispatch: AppDispatch) => {
+  try {
+    const response = await fetch(GET_CHAT_NAMES, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      const data = JSON.parse(text);
+      dispatch(setChatList(data));
+      // Remove this line to prevent infinite loop
+      // window.dispatchEvent(new CustomEvent('chat-names-updated', { detail: { data } }));
+      return { success: true, data };
+    } else {
+      console.error("Failed to fetch chat names");
+      return { success: false, error: "Failed to fetch chat names" };
+    }
+  } catch (error) {
+    console.error("Error fetching chat names:", error);
+    return { success: false, error: "Error fetching chat names" };
   }
 };
 
@@ -175,26 +202,39 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
   }
 };
 
-export const fetchChatNames = async (dispatch: AppDispatch) => {
+export const renameChat = async (chatId: string, newName: string): Promise<{ success: boolean; message?: string }> => {
   try {
-    const response = await fetch(GET_CHAT_NAMES, {
-      method: "GET",
-      credentials: "include",
+    const response = await fetch(`/api/chats/${chatId}/rename`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ newName }),
     });
 
-    const text = await response.text();
+    const result = await response.json();
 
-    if (response.ok) {
-      const data = JSON.parse(text);
-      dispatch(setChatList(data));
-      return { success: true, data };
-    } else {
-      console.error("Failed to fetch chat names");
-      return { success: false, error: "Failed to fetch chat names" };
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || 'Failed to rename chat',
+      };
     }
+
+    // Dispatch event to trigger sidebar update
+    window.dispatchEvent(new Event('chat-renamed'));
+
+    return {
+      success: true,
+      message: result.message,
+    };
   } catch (error) {
-    console.error("Error fetching chat names:", error);
-    return { success: false, error: "Error fetching chat names" };
+    console.error(error);
+    return {
+      success: false,
+      message: 'Network error. Please try again later.',
+    };
   }
 };
 
