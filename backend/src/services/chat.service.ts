@@ -83,8 +83,9 @@ export const deleteChatService = async (chatId: string, userId: string) => {
   }
 
   await chatRepo.deleteChatById(chatId);
-
-  // Invalidate cache
-  await redisClient.del(`chat:${chatId}`);
-  await redisClient.del(`chats:user:${userId}`);
+  
+  await Promise.all([
+    redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
+    redisClient.del(`${USER_CHATS_PREFIX}${userId}:chats`),
+  ]);
 };

@@ -82,7 +82,15 @@ export const toggleArchiveStatus = async (
 };
 
 export const deleteChatById = async (chatId: string) => {
+  await prisma.message.deleteMany({
+    where: {
+      chatId: chatId,
+    },
+  });
+
   return prisma.chat.delete({
-    where: { id: chatId },
+    where: {
+      id: chatId,
+    },
   });
 };

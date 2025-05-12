@@ -27,6 +27,12 @@ const chatSlice = createSlice({
     setChatName: (state, action: PayloadAction<string>) => {
       state.chatName = action.payload;
     },
+    resetChat: (state) => {
+      state.messages = initialState.messages;
+      state.currentResponse = initialState.currentResponse;
+      state.isLoading = initialState.isLoading;
+      state.chatName = initialState.chatName;
+    },
   },
 });
 
@@ -36,6 +42,7 @@ export const {
   setCurrentResponse,
   setIsLoading,
   setChatName,
+  resetChat,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

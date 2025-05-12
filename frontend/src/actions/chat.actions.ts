@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE } from "../lib/apiUrl";
+import { DELETE_CHAT, GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE, TOGGLE_FAVORITE_CHAT } from "../lib/apiUrl";
 import {
   addMessage,
   setCurrentResponse,
@@ -105,5 +105,65 @@ export const fetchMessages = async (chatId: string) => {
   } catch (error) {
     console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
+  }
+};
+
+
+interface DeleteChatResponse {
+  success: boolean;
+  message?: string;
+}
+
+export const deleteChat = async (chatId: string): Promise<DeleteChatResponse> => {
+  try {
+    const response = await fetch(DELETE_CHAT(chatId), {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      return {
+        success: false,
+        message: result.message || "Failed to delete chat",
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
+};
+
+export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await fetch(TOGGLE_FAVORITE_CHAT(chatId), {
+      method: 'PATCH',
+      credentials: 'include',
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || 'Failed to toggle favorite status',
+      };
+    }
+
+    return {
+      success: true,
+      message: result.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Network error. Please try again later.',
+    };
   }
 };

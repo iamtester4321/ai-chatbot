@@ -1,23 +1,78 @@
-import { useState } from 'react';
-import { Share2, BarChart2, MessageSquare, Star, Moon, Sun, MoreHorizontal, Archive, Trash2, Menu } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import {
+  Archive,
+  BarChart2,
+  Menu,
+  MessageSquare,
+  Moon,
+  MoreHorizontal,
+  Share2,
+  Star,
+  Sun,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchMessages, toggleFavoriteChat } from "../../actions/chat.actions";
+import useToast from "../../hooks/useToast";
+import DeleteModal from "../Modal/DeleteModal";
 
 export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
+  const { chatId } = useParams();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartMode, setIsChartMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { chatId } = useParams();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  console.log(chatId)
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+    setIsMenuOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        if (!chatId) return;
+
+        const result = await fetchMessages(chatId);
+
+        if (result.success) {
+          setIsFavorite(result.data.isFavorite || false);
+        }
+      } catch (error) {
+        console.error("Error fetching favorite status:", error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [chatId]);
+
+  const closeDeleteModal = () => setIsDeleteModalOpen(false);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const showToast = useToast();
+
+  const toggleFavorite = async () => {
+    try {
+      if (!chatId) return;
+
+      const result = await toggleFavoriteChat(chatId);
+
+      if (result.success) {
+        setIsFavorite(!isFavorite);
+        showToast.success(result.message || "Favorite status updated");
+      } else {
+        showToast.error(result.message || "Failed to update favorite status");
+      }
+    } catch (error) {
+      showToast.error("An error occurred while updating favorite status");
+      console.error("Error toggling favorite:", error);
+    }
   };
 
   const toggleChartMode = () => {
@@ -29,8 +84,31 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen); // Toggle mobile-specific menu
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+      if (
+        desktopMenuRef.current &&
+        !desktopMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 w-full bg-[#121212] text-white z-[1000] py-3 px-4 border-b border-gray-800 flex items-center justify-between">
@@ -42,9 +120,11 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
         >
           <Menu size={20} />
         </button>
-        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">AI Assistant</h1>
+        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
+          AI Assistant
+        </h1>
       </div>
-  
+
       <div className="flex items-center space-x-1 sm:space-x-3">
         {/* Always visible: Theme toggle */}
         <button
@@ -54,18 +134,23 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
         >
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-  
+
         {/* Only show the rest if chatId is present */}
         {chatId && (
           <>
             <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
-              <button className="p-2 rounded-full hover:bg-gray-700 transition duration-200" title="Share">
+              <button
+                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                title="Share"
+              >
                 <Share2 size={20} />
               </button>
-  
+
               <button
                 className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200"
-                title={isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"}
+                title={
+                  isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"
+                }
                 onClick={toggleChartMode}
               >
                 {isChartMode ? (
@@ -74,7 +159,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                   <BarChart2 size={18} className="sm:w-5 sm:h-5" />
                 )}
               </button>
-  
+
               <button
                 className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
                 title="Favorite"
@@ -87,9 +172,9 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                 />
               </button>
             </div>
-  
-            {/* Mobile More Options */}
-            <div className="relative sm:hidden">
+
+            {/* Update Mobile More Options */}
+            <div className="relative sm:hidden" ref={mobileMenuRef}>
               <button
                 className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
                 title="More Options"
@@ -97,7 +182,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               >
                 <MoreHorizontal size={20} />
               </button>
-  
+
               {isMobileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
                   <div className="py-1">
@@ -116,11 +201,26 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                       )}
                       {isChartMode ? "Chat Mode" : "Chart Mode"}
                     </button>
+                    <button
+                      onClick={toggleFavorite}
+                      className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center"
+                    >
+                      <Star
+                        className="mr-2"
+                        size={18}
+                        fill={isFavorite ? "gold" : "none"}
+                        color={isFavorite ? "gold" : "currentColor"}
+                      />
+                      Favourite
+                    </button>
                     <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>
-                    <button className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button
+                      onClick={openDeleteModal}
+                      className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
+                    >
                       <Trash2 size={16} className="mr-2" />
                       Delete
                     </button>
@@ -128,9 +228,9 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                 </div>
               )}
             </div>
-  
-            {/* Desktop More Options */}
-            <div className="relative hidden sm:block">
+
+            {/* Update Desktop More Options */}
+            <div className="relative hidden sm:block" ref={desktopMenuRef}>
               <button
                 className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
                 title="More Options"
@@ -138,7 +238,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               >
                 <MoreHorizontal size={20} />
               </button>
-  
+
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
                   <div className="py-1">
@@ -146,7 +246,10 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>
-                    <button className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center">
+                    <button
+                      onClick={openDeleteModal}
+                      className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
+                    >
                       <Trash2 size={16} className="mr-2" />
                       Delete
                     </button>
@@ -157,7 +260,11 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
           </>
         )}
       </div>
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        chatId={chatId || ""}
+      />
     </header>
   );
-  
 }
