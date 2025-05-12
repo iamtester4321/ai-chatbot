@@ -2,10 +2,38 @@ import { useState, useEffect } from "react";
 import ChatInputField from "../ChatInputField/ChatInputField";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { fetchChatNames } from "../../actions/chat.actions";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const dispatch = useAppDispatch();
+  const chatList = useAppSelector((state) => state.chat.chatList);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const getChatNames = async () => {
+      try {
+        const { success } = await fetchChatNames(dispatch);
+        if (!success) {
+          console.error("Failed to fetch chat names");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getChatNames();
+  }, [dispatch]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -30,9 +58,9 @@ function Layout() {
       <div
         className={`${
           isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-screen bg-[#2c3e50] z-20`}
+        } fixed md:relative transition-all duration-300 overflow-hidden h-screen bg-[#121212] z-20`}
       >
-        <Sidebar />
+        <Sidebar chatList={chatList} />
       </div>
 
       {/* Overlay for mobile */}

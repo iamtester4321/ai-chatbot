@@ -28,4 +28,10 @@ export type ChatState = {
   currentResponse: string;
   isLoading: boolean;
   chatName: string;
+  chatList: Array<{ 
+    id: string; 
+    name: string;
+    isFavorite: boolean;
+    isArchived: boolean;
+  }>;
 };
