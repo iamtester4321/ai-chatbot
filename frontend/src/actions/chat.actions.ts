@@ -3,8 +3,10 @@ import { DELETE_CHAT, GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE, TOGGLE_FAVORITE_C
 import {
   addMessage,
   setCurrentResponse,
+  setChatList
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch } from "../store/hooks";
+import { AppDispatch } from "../store/store";
 
 interface ChatHookProps {
   chatId?: string;
@@ -126,10 +128,14 @@ export const deleteChat = async (chatId: string): Promise<DeleteChatResponse> =>
       };
     }
 
+    // Dispatch event to trigger sidebar update
+    window.dispatchEvent(new Event('chat-deleted'));
+
     return {
       success: true,
     };
   } catch (error) {
+    console.error(error)
     return {
       success: false,
       message: "Network error. Please try again later.",
@@ -153,11 +159,15 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
       };
     }
 
+    // Dispatch event to trigger sidebar update
+    window.dispatchEvent(new Event('chat-favorite-toggled'));
+
     return {
       success: true,
       message: result.message,
     };
   } catch (error) {
+    console.error(error)
     return {
       success: false,
       message: 'Network error. Please try again later.',
@@ -165,7 +175,7 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
   }
 };
 
-export const fetchChatNames = async () => {
+export const fetchChatNames = async (dispatch: AppDispatch) => {
   try {
     const response = await fetch(GET_CHAT_NAMES, {
       method: "GET",
@@ -176,6 +186,7 @@ export const fetchChatNames = async () => {
 
     if (response.ok) {
       const data = JSON.parse(text);
+      dispatch(setChatList(data));
       return { success: true, data };
     } else {
       console.error("Failed to fetch chat names");
@@ -186,3 +197,4 @@ export const fetchChatNames = async () => {
     return { success: false, error: "Error fetching chat names" };
   }
 };
+

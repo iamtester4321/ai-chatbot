@@ -1,11 +1,12 @@
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { fetchChatNames } from "../../actions/chat.actions";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
+import { ChatState } from "../../lib/types";
 import LogoutModal from "../Modal/LogoutModal";
 import UserDetail from "../UserDetail/UserDetail";
+import AllChats from "./AllChats";
+import FavoriteChats from "./FavoriteChats";
 
 interface SidebarProps {
   isLogoutModalOpen: boolean;
@@ -15,6 +16,7 @@ interface SidebarProps {
     email: string;
   } | null;
   setIsSettingsOpen: (open: boolean) => void;
+  chatList: ChatState["chatList"];
 }
 
 const Sidebar = ({
@@ -22,25 +24,26 @@ const Sidebar = ({
   setIsLogoutModalOpen,
   user,
   setIsSettingsOpen,
+  chatList,
 }: SidebarProps) => {
-  const [chatNames, setChatNames] = useState<Array<{
-    id: string;
-    name: string;
-  }> | null>(null);
+  const { chatId } = useParams();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const getChatNames = async () => {
-      try {
-        const { success, data } = await fetchChatNames();
-        if (success && data) {
-          setChatNames(data);
-        }
-      } catch (error) {
-        console.log(error);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setActiveDropdown(null);
       }
     };
-    getChatNames();
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const toggleDropdown = (chatId: string) => {
@@ -59,6 +62,12 @@ const Sidebar = ({
     setIsLogoutModalOpen(true);
   };
 
+  const filteredChatList = chatList.filter((chat) =>
+    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const favoriteChats = filteredChatList.filter((chat) => chat.isFavorite);
+
   return (
     <div className="flex flex-col h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
       <Link
@@ -74,6 +83,8 @@ const Sidebar = ({
       <div className="relative mb-4">
         <input
           type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search chats"
           className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
         />
@@ -81,45 +92,27 @@ const Sidebar = ({
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#20b8cd] scrollbar-track-transparent pb-4">
-        {chatNames?.map((chat) => (
-          <div key={chat.id} className="relative group">
-            <div className="flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200">
-              <span className="truncate flex-1" title={chat.name}>
-                {chat.name}
-              </span>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleDropdown(chat.id);
-                }}
-                className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200"
-              >
-                <MoreHorizontal size={16} />
-              </button>
-            </div>
+        <FavoriteChats
+          chats={favoriteChats}
+          chatId={chatId}
+          isFavoritesOpen={isFavoritesOpen}
+          setIsFavoritesOpen={setIsFavoritesOpen}
+          toggleDropdown={toggleDropdown}
+          activeDropdown={activeDropdown}
+          handleRename={handleRename}
+          handleDelete={handleDelete}
+          dropdownRef={dropdownRef}
+        />
 
-            {activeDropdown === chat.id && (
-              <div className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
-                <div className="py-1">
-                  <button
-                    onClick={() => handleRename(chat.id)}
-                    className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center"
-                  >
-                    <Pencil size={16} className="mr-2" />
-                    Rename
-                  </button>
-                  <button
-                    onClick={() => handleDelete(chat.id)}
-                    className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
-                  >
-                    <Trash2 size={16} className="mr-2" />
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+        <AllChats
+          chats={filteredChatList}
+          chatId={chatId}
+          toggleDropdown={toggleDropdown}
+          activeDropdown={activeDropdown}
+          handleRename={handleRename}
+          handleDelete={handleDelete}
+          dropdownRef={dropdownRef}
+        />
       </div>
 
       <div className="border-t border-[#e8e8e61a] pt-2 text-sm mt-auto">

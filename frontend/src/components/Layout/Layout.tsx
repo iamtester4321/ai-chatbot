@@ -4,13 +4,41 @@ import ChatInputField from "../ChatInputField/ChatInputField";
 import Header from "../Header/Header";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { fetchChatNames } from "../../actions/chat.actions";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const dispatch = useAppDispatch();
+  const chatList = useAppSelector((state) => state.chat.chatList);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const getChatNames = async () => {
+      try {
+        const { success } = await fetchChatNames(dispatch);
+        if (!success) {
+          console.error("Failed to fetch chat names");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getChatNames();
+  }, [dispatch]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -55,6 +83,7 @@ function Layout() {
           setIsLogoutModalOpen={setIsLogoutModalOpen}
           user={user}
           setIsSettingsOpen={setIsSettingsOpen}
+          chatList={chatList}
         />
       </div>
 

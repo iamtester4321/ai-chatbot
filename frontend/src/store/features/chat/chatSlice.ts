@@ -6,6 +6,7 @@ const initialState: ChatState = {
   currentResponse: "",
   isLoading: false,
   chatName: "",
+  chatList: [], // Add this new field
 };
 
 const chatSlice = createSlice({
@@ -33,6 +34,14 @@ const chatSlice = createSlice({
       state.isLoading = initialState.isLoading;
       state.chatName = initialState.chatName;
     },
+    setChatList: (state, action: PayloadAction<Array<{ 
+      id: string; 
+      name: string;
+      isFavorite: boolean;
+      isArchived: boolean;
+    }>>) => {
+      state.chatList = action.payload;
+    },
   },
 });
 
@@ -43,6 +52,7 @@ export const {
   setIsLoading,
   setChatName,
   resetChat,
+  setChatList,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

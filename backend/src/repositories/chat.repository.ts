@@ -57,7 +57,9 @@ export function getChatNamesByUser(userId: string) {
     where: { userId },
     select: {
       id: true,
-      name: true
+      name: true,
+      isFavorite: true,
+      isArchived: true
     },
     orderBy: { createdAt: "desc" },
   });
