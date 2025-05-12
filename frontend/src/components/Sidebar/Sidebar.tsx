@@ -1,97 +1,53 @@
-import { useEffect, useRef, useState } from "react";
-import GlobeIcon from "../../assets/icons/GlobeIcon";
-import CustomLogo from "../../assets/icons/Logo";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
-import SunIcon from "../../assets/icons/SunIcon";
-import { SidebarItemProps } from "../../lib/types";
+
+const dummyChats = [
+  "What is AI?",
+  "Explain Quantum Physics",
+  "React vs Vue",
+  "Best travel destinations",
+  "How to learn TypeScript?",
+];
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-
-      if (
-        sidebarRef.current &&
-        !(
-          sidebarRef.current.contains(target) ||
-          (target instanceof Element && target.closest("button"))
-        )
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
-
   return (
-    <section className="relative">
-      {/* Toggle Button (visible on small screens) */}
-      <button
-        className="md:hidden absolute top-6 left-6 z-50"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <CustomLogo />
+    <div className="flex flex-col h-[calc(100%-1rem)] md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden mt-16 md:mt-0">
+      <button className="flex items-center gap-2 p-2 mb-4 bg-[#202222] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a1a1a] transition-all duration-200 w-full group">
+        <PlusIcon />
+        <span className="text-sm whitespace-nowrap text-[#e8e8e6b3] group-hover:text-[#20b8cd]">
+          New Chat
+        </span>
       </button>
 
-      {/* Sidebar */}
-      <div
-        ref={sidebarRef}
-        className={`
-          fixed top-0 left-0 z-40 h-full w-[72px] bg-[#202222] 
-          flex-col items-center py-4 transition-all duration-300 ease-in-out
-          md:w-20 ${isOpen ? "w-72" : "w-20"} 
-        `}
-      >
-        <div className="w-8 h-9 cursor-pointer mt-1">
-          <CustomLogo />
-        </div>
+      <div className="relative mb-4">
+        <input
+          type="text"
+          placeholder="Search chats"
+          className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
+        />
+        <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3]" />
+      </div>
 
-        {/* Sidebar items */}
-        <div className="pt-6 flex flex-col items-center justify-center space-y-4">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#20b8cd] scrollbar-track-transparent pb-4">
+        {dummyChats.map((chat, index) => (
           <div
-            className="my-6 flex items-center justify-center w-12 h-12 bg-[#2D2F2F] rounded-full cursor-pointer group transform transition duration-300 hover:scale-110"
+            key={index}
+            className="p-2.5 text-sm rounded-lg hover:bg-[#202222] hover:text-[#20b8cd] cursor-pointer truncate mb-1.5 text-[#e8e8e6b3] transition-all duration-200"
+            title={chat}
           >
-            <PlusIcon />
+            {chat}
           </div>
+        ))}
+      </div>
 
-          <SidebarItem icon={<SearchIcon />} label="Home" isOpen={isOpen} />
-          <SidebarItem icon={<GlobeIcon />} label="Discover" isOpen={isOpen} />
-          <SidebarItem icon={<SunIcon />} label="Explore" isOpen={isOpen} />
+      <div className="border-t border-[#e8e8e61a] pt-2 text-sm">
+        <div className="p-2.5 hover:bg-[#202222] hover:text-[#20b8cd] cursor-pointer rounded-lg text-[#e8e8e6b3] transition-all duration-200">
+          Settings
+        </div>
+        <div className="p-2.5 hover:bg-[#202222] hover:text-[#20b8cd] cursor-pointer rounded-lg mb-2 text-[#e8e8e6b3] transition-all duration-200">
+          Log out
         </div>
       </div>
-
-      {/* Content area beside sidebar */}
-      <div className={`ml-0 md:ml-20 w-full h-screen bg-[#1a1a1a]`}>
-        {/* Main content would go here */}
-      </div>
-    </section>
-  );
-};
-
-const SidebarItem = ({ icon, label, isOpen }: SidebarItemProps & { isOpen: boolean }) => {
-  return (
-    <div
-      className="flex items-center gap-2 flex-col md:flex-row p-2 cursor-pointer transition-all duration-200 group hover:bg-[#3B3B3B] rounded-md"
-    >
-      <div className="flex items-center justify-center w-10 h-10 bg-transparent group-hover:bg-[#2D2F2F] rounded-[6px]">
-        {icon}
-      </div>
-      {isOpen && (
-        <span className="font-sans text-sm font-normal text-[#898D8D] group-hover:text-white transition-colors">
-          {label}
-        </span>
-      )}
     </div>
   );
 };

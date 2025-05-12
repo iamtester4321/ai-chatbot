@@ -1,6 +1,18 @@
-import { useState } from 'react';
-import { Share2, BarChart2, MessageSquare, Star, Moon, Sun, MoreHorizontal, Archive, Trash2, Menu } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import {
+  Share2,
+  BarChart2,
+  MessageSquare,
+  Star,
+  Moon,
+  Sun,
+  MoreHorizontal,
+  Archive,
+  Trash2,
+  Sidebar,
+} from "lucide-react";
+import { useParams } from "react-router-dom";
 
 export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -9,8 +21,6 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
   const [isChartMode, setIsChartMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { chatId } = useParams();
-
-  console.log(chatId)
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -29,7 +39,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen); // Toggle mobile-specific menu
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -40,11 +50,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
           onClick={toggleSidebar}
           title="Toggle Sidebar"
         >
-          <Menu size={20} />
+          <Sidebar size={20} />
         </button>
-        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">AI Assistant</h1>
+        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
+          AI Assistant
+        </h1>
       </div>
-  
+
       <div className="flex items-center space-x-1 sm:space-x-3">
         {/* Always visible: Theme toggle */}
         <button
@@ -54,18 +66,23 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
         >
           {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-  
+
         {/* Only show the rest if chatId is present */}
         {chatId && (
           <>
             <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
-              <button className="p-2 rounded-full hover:bg-gray-700 transition duration-200" title="Share">
+              <button
+                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                title="Share"
+              >
                 <Share2 size={20} />
               </button>
-  
+
               <button
                 className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200"
-                title={isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"}
+                title={
+                  isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"
+                }
                 onClick={toggleChartMode}
               >
                 {isChartMode ? (
@@ -74,7 +91,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                   <BarChart2 size={18} className="sm:w-5 sm:h-5" />
                 )}
               </button>
-  
+
               <button
                 className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
                 title="Favorite"
@@ -87,7 +104,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                 />
               </button>
             </div>
-  
+
             {/* Mobile More Options */}
             <div className="relative sm:hidden">
               <button
@@ -97,7 +114,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               >
                 <MoreHorizontal size={20} />
               </button>
-  
+
               {isMobileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
                   <div className="py-1">
@@ -117,6 +134,15 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                       {isChartMode ? "Chat Mode" : "Chart Mode"}
                     </button>
                     <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                      <Star
+                        size={16}
+                        fill={isFavorite ? "gold" : "none"}
+                        color={isFavorite ? "gold" : "currentColor"}
+                        className="mr-2"
+                      />
+                      Favourite
+                    </button>
+                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>
@@ -128,7 +154,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                 </div>
               )}
             </div>
-  
+
             {/* Desktop More Options */}
             <div className="relative hidden sm:block">
               <button
@@ -138,7 +164,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
               >
                 <MoreHorizontal size={20} />
               </button>
-  
+
               {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
                   <div className="py-1">
@@ -159,5 +185,4 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
       </div>
     </header>
   );
-  
 }
