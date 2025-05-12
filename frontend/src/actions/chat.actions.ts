@@ -97,6 +97,8 @@ export const fetchMessages = async (chatId: string) => {
 
     if (response.ok) {
       const data = JSON.parse(text);
+      // Dispatch updated data to Redux store
+      window.dispatchEvent(new CustomEvent('chat-data-updated', { detail: { chatId, data } }));
       return { success: true, data };
     } else {
       console.error("Failed to fetch messages for chatId:", chatId);
@@ -105,6 +107,31 @@ export const fetchMessages = async (chatId: string) => {
   } catch (error) {
     console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
+  }
+};
+
+export const fetchChatNames = async (dispatch: AppDispatch) => {
+  try {
+    const response = await fetch(GET_CHAT_NAMES, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      const data = JSON.parse(text);
+      dispatch(setChatList(data));
+      // Dispatch event for real-time updates
+      window.dispatchEvent(new CustomEvent('chat-names-updated', { detail: { data } }));
+      return { success: true, data };
+    } else {
+      console.error("Failed to fetch chat names");
+      return { success: false, error: "Failed to fetch chat names" };
+    }
+  } catch (error) {
+    console.error("Error fetching chat names:", error);
+    return { success: false, error: "Error fetching chat names" };
   }
 };
 
@@ -172,29 +199,6 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
       success: false,
       message: 'Network error. Please try again later.',
     };
-  }
-};
-
-export const fetchChatNames = async (dispatch: AppDispatch) => {
-  try {
-    const response = await fetch(GET_CHAT_NAMES, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    const text = await response.text();
-
-    if (response.ok) {
-      const data = JSON.parse(text);
-      dispatch(setChatList(data));
-      return { success: true, data };
-    } else {
-      console.error("Failed to fetch chat names");
-      return { success: false, error: "Failed to fetch chat names" };
-    }
-  } catch (error) {
-    console.error("Error fetching chat names:", error);
-    return { success: false, error: "Error fetching chat names" };
   }
 };
 
