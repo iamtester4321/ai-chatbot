@@ -1,9 +1,16 @@
 import { useChat } from "@ai-sdk/react";
-import { DELETE_CHAT, GET_CHAT_MESSAGES, STREAM_CHAT_RESPONSE, TOGGLE_FAVORITE_CHAT, GET_CHAT_NAMES } from "../lib/apiUrl";
+import {
+  DELETE_CHAT,
+  GET_CHAT_MESSAGES,
+  GET_CHAT_NAMES,
+  RENAME_CHAT,
+  STREAM_CHAT_RESPONSE,
+  TOGGLE_FAVORITE_CHAT,
+} from "../lib/apiUrl";
 import {
   addMessage,
+  setChatList,
   setCurrentResponse,
-  setChatList
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch } from "../store/hooks";
 import { AppDispatch } from "../store/store";
@@ -98,7 +105,9 @@ export const fetchMessages = async (chatId: string) => {
     if (response.ok) {
       const data = JSON.parse(text);
       // Dispatch updated data to Redux store
-      window.dispatchEvent(new CustomEvent('chat-data-updated', { detail: { chatId, data } }));
+      window.dispatchEvent(
+        new CustomEvent("chat-data-updated", { detail: { chatId, data } })
+      );
       return { success: true, data };
     } else {
       console.error("Failed to fetch messages for chatId:", chatId);
@@ -140,7 +149,9 @@ interface DeleteChatResponse {
   message?: string;
 }
 
-export const deleteChat = async (chatId: string): Promise<DeleteChatResponse> => {
+export const deleteChat = async (
+  chatId: string
+): Promise<DeleteChatResponse> => {
   try {
     const response = await fetch(DELETE_CHAT(chatId), {
       method: "DELETE",
@@ -155,14 +166,13 @@ export const deleteChat = async (chatId: string): Promise<DeleteChatResponse> =>
       };
     }
 
-    // Dispatch event to trigger sidebar update
-    window.dispatchEvent(new Event('chat-deleted'));
+    window.dispatchEvent(new Event("chat-deleted"));
 
     return {
       success: true,
     };
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return {
       success: false,
       message: "Network error. Please try again later.",
@@ -170,11 +180,13 @@ export const deleteChat = async (chatId: string): Promise<DeleteChatResponse> =>
   }
 };
 
-export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boolean; message?: string }> => {
+export const toggleFavoriteChat = async (
+  chatId: string
+): Promise<{ success: boolean; message?: string }> => {
   try {
     const response = await fetch(TOGGLE_FAVORITE_CHAT(chatId), {
-      method: 'PATCH',
-      credentials: 'include',
+      method: "PATCH",
+      credentials: "include",
     });
 
     const result = await response.json();
@@ -182,48 +194,11 @@ export const toggleFavoriteChat = async (chatId: string): Promise<{ success: boo
     if (!response.ok) {
       return {
         success: false,
-        message: result.message || 'Failed to toggle favorite status',
+        message: result.message || "Failed to toggle favorite status",
       };
     }
 
-    // Dispatch event to trigger sidebar update
-    window.dispatchEvent(new Event('chat-favorite-toggled'));
-
-    return {
-      success: true,
-      message: result.message,
-    };
-  } catch (error) {
-    console.error(error)
-    return {
-      success: false,
-      message: 'Network error. Please try again later.',
-    };
-  }
-};
-
-export const renameChat = async (chatId: string, newName: string): Promise<{ success: boolean; message?: string }> => {
-  try {
-    const response = await fetch(`/api/chats/${chatId}/rename`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ newName }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        message: result.message || 'Failed to rename chat',
-      };
-    }
-
-    // Dispatch event to trigger sidebar update
-    window.dispatchEvent(new Event('chat-renamed'));
+    window.dispatchEvent(new Event("chat-favorite-toggled"));
 
     return {
       success: true,
@@ -233,8 +208,45 @@ export const renameChat = async (chatId: string, newName: string): Promise<{ suc
     console.error(error);
     return {
       success: false,
-      message: 'Network error. Please try again later.',
+      message: "Network error. Please try again later.",
     };
   }
 };
 
+export const renameChat = async (
+  chatId: string,
+  newName: string
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await fetch(RENAME_CHAT(chatId), {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ newName }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result.message || "Failed to rename chat",
+      };
+    }
+
+    window.dispatchEvent(new Event("chat-renamed"));
+
+    return {
+      success: true,
+      message: result.message,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
+};
