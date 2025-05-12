@@ -1,14 +1,14 @@
 import {
-  Archive,
-  BarChart2,
-  Menu,
-  MessageSquare,
-  Moon,
-  MoreHorizontal,
   Share2,
+  BarChart2,
+  MessageSquare,
   Star,
+  Moon,
   Sun,
+  MoreHorizontal,
+  Archive,
   Trash2,
+  Sidebar,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -118,7 +118,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
           onClick={toggleSidebar}
           title="Toggle Sidebar"
         >
-          <Menu size={20} />
+          <Sidebar size={20} />
         </button>
         <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
           AI Assistant
@@ -210,6 +210,15 @@ export default function Header({ toggleSidebar }: { toggleSidebar: any }) {
                         size={18}
                         fill={isFavorite ? "gold" : "none"}
                         color={isFavorite ? "gold" : "currentColor"}
+                      />
+                      Favourite
+                    </button>
+                    <button className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center">
+                      <Star
+                        size={16}
+                        fill={isFavorite ? "gold" : "none"}
+                        color={isFavorite ? "gold" : "currentColor"}
+                        className="mr-2"
                       />
                       Favourite
                     </button>

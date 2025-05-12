@@ -86,8 +86,6 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
 
 export const fetchMessages = async (chatId: string) => {
   try {
-    console.log("url::", `${GET_CHAT_MESSAGES}/${chatId}`);
-
     const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
       method: "GET",
       credentials: "include",
