@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { fetchUserProfile } from "../../actions/user.actions";
 import ChatInputField from "../ChatInputField/ChatInputField";
-import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
+import SettingsModal from "../Modal/SettingsModal";
+import Sidebar from "../Sidebar/Sidebar";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchChatNames } from "../../actions/chat.actions";
 
@@ -10,6 +12,9 @@ function Layout() {
   const dispatch = useAppDispatch();
   const chatList = useAppSelector((state) => state.chat.chatList);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
 
   useEffect(() => {
@@ -42,10 +47,23 @@ function Layout() {
         setIsSidebarOpen(false);
       }
     };
-
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const { success, data } = await fetchUserProfile();
+        if (success && data) {
+          setUser(data);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    getUserProfile();
   }, []);
 
   const toggleSidebar = () => {
@@ -58,9 +76,15 @@ function Layout() {
       <div
         className={`${
           isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-screen bg-[#121212] z-20`}
+        } fixed md:relative transition-all duration-300 overflow-hidden h-[calc(100vh-4rem)] md:h-screen bg-[#2c3e50] z-20 top-16 md:top-0`}
       >
-        <Sidebar chatList={chatList} />
+        <Sidebar
+          isLogoutModalOpen={isLogoutModalOpen}
+          setIsLogoutModalOpen={setIsLogoutModalOpen}
+          user={user}
+          setIsSettingsOpen={setIsSettingsOpen}
+          chatList={chatList}
+        />
       </div>
 
       {/* Overlay for mobile */}
@@ -73,11 +97,21 @@ function Layout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col transition-all duration-300 w-full">
-        <Header toggleSidebar={toggleSidebar} />
+        {!isSettingsOpen && (
+          <Header
+            toggleSidebar={toggleSidebar}
+            isLogoutModalOpen={isLogoutModalOpen}
+          />
+        )}
+
         <div className="flex-1 overflow-y-auto">
           <ChatInputField />
         </div>
       </div>
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }
