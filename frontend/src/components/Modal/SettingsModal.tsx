@@ -1,12 +1,17 @@
 import { Archive, Settings, Star } from "lucide-react";
 import { useState } from "react";
+import ArchivedChats from "../Settings/ArchivedChats";
+import FavoriteChats from "../Settings/FavoriteChats";
+import GeneralSettings from "../Settings/GeneralSettings";
+import { ChatState } from "../../lib/types";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  chatList: ChatState["chatList"];
 }
 
-const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
+const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState("general");
 
   if (!isOpen) return null;
@@ -16,6 +21,8 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     { id: "archive", label: "Archive", icon: Archive },
     { id: "favorite", label: "Favorite", icon: Star },
   ];
+
+  const favoriteChats = chatList.filter((chat) => chat.isFavorite);
 
   return (
     <>
@@ -65,9 +72,9 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
             {/* Content based on active tab */}
             <div className="text-[#e8e8e6b3]">
-              {activeTab === "general" && <div>General Settings Content</div>}
-              {activeTab === "archive" && <div>Archived Chats Content</div>}
-              {activeTab === "favorite" && <div>Favorite Chats Content</div>}
+              {activeTab === "general" && <GeneralSettings />}
+              {activeTab === "archive" && <ArchivedChats />}
+              {activeTab === "favorite" && <FavoriteChats favoriteChats={favoriteChats} />}
             </div>
           </div>
         </div>

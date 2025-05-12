@@ -224,15 +224,6 @@ export default function Header({
                       Favourite
                     </button>
                     <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
-                      <Star
-                        size={16}
-                        fill={isFavorite ? "gold" : "none"}
-                        color={isFavorite ? "gold" : "currentColor"}
-                        className="mr-2"
-                      />
-                      Favourite
-                    </button>
-                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
                       <Archive size={16} className="mr-2" />
                       Archive
                     </button>

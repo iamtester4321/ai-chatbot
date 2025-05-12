@@ -85,7 +85,7 @@ function Layout() {
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
         />
-      </div>
+      </div>  
 
       {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && (
@@ -111,6 +111,7 @@ function Layout() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        chatList={chatList}
       />
     </div>
   );
