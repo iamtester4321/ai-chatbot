@@ -1,16 +1,16 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
-import {
-  saveChat,
-  findChatById as findChatByIdService,
-  findChatsByService,
-  addOrRemoveFavoriteService,
-  addOrRemoveArchiveService,
-  deleteChatService,
-  findChatNamesByService,
-  renameChatService,
-} from "../services/chat.service";
 import { Request, Response } from "express";
+import {
+  addOrRemoveArchiveService,
+  addOrRemoveFavoriteService,
+  deleteChatService,
+  findChatById as findChatByIdService,
+  findChatNamesByService,
+  findChatsByService,
+  renameChatService,
+  saveChat,
+} from "../services/chat.service";
 
 interface ChatRequestParams {
   chatId: string;
@@ -41,13 +41,14 @@ export const streamChat = async (req: any, res: any) => {
       },
 
       onFinish: async () => {
-        const allMessages = [
-          ...messages,
-          { role: "user", content: req.body.prompt },
-          { role: "assistant", content: assistantReply },
-        ];
-
-        await saveChat(userId, allMessages, chatId);
+        await saveChat(
+          userId,
+          [
+            { role: "user", content: req.body.prompt },
+            { role: "assistant", content: assistantReply },
+          ],
+          chatId
+        );
       },
 
       onError: (err) => console.error("Stream error:", err),
@@ -160,7 +161,7 @@ export const renameChat = async (req: any, res: any) => {
   const { chatId } = req.params;
   const { newName } = req.body;
 
-  if (!newName || typeof newName !== 'string') {
+  if (!newName || typeof newName !== "string") {
     return res.status(400).json({ error: "New name is required" });
   }
 

@@ -37,7 +37,7 @@ const ChatResponse = ({
       .writeText(text)
       .then(() => {
         setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000); // reset after 2s
+        setTimeout(() => setCopiedIndex(null), 2000);
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);

@@ -29,29 +29,21 @@ const ChatSection = () => {
     },
   });
 
-  // In ChatSection.tsx
-useEffect(() => {
-  if (chatId) {
-    const loadMessages = async () => {
-      dispatch(setIsLoading(true));
-      const { success, data, error } = await fetchMessages(chatId);
-      if (success && data) {
-        dispatch(setMessages(data.messages));
-        dispatch(setChatName(data.name));
-      } else {
-        console.error(error);
-        // Handle error - maybe redirect to new chat
-      }
-      dispatch(setIsLoading(false));
-    };
+  useEffect(() => {
+    if (chatId) {
+      const loadMessages = async () => {
+        const { success, data, error } = await fetchMessages(chatId);
+        if (success && data) {
+          dispatch(setMessages(data.messages));
+          dispatch(setChatName(data.name));
+        } else {
+          console.error(error);
+        }
+      };
 
-    loadMessages();
-  } else {
-    // If no chatId, start fresh
-    dispatch(setMessages([]));
-    dispatch(setChatName(""));
-  }
-}, [chatId, dispatch]);
+      loadMessages();
+    }
+  }, [chatId, dispatch]);
 
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");

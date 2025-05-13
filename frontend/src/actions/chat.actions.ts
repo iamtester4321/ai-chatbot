@@ -24,7 +24,7 @@ interface ChatHookProps {
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
-  const { messages } = useAppSelector((state) => state.chat); // Get current messages from store
+  const { messages } = useAppSelector((state) => state.chat);
 
   const { input, handleInputChange, handleSubmit, status } = useChat({
     api: STREAM_CHAT_RESPONSE,
@@ -46,7 +46,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         },
         body: JSON.stringify({
           prompt: input,
-          messages: messages, // Send entire message history
+          messages: messages,
           chatId: chatId || "",
         }),
       });
@@ -82,6 +82,11 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         onResponseUpdate?.("");
 
         await fetchChatNames(dispatch);
+        if (!chatId) return;
+        const updatedChat = await fetchMessages(chatId);
+        if (updatedChat.success && updatedChat.data) {
+          dispatch(setChatName(updatedChat.data.name));
+        }
       } finally {
         reader.releaseLock();
       }
@@ -97,7 +102,6 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   };
 };
 
-// In chat.actions.ts
 export const fetchMessages = async (chatId: string) => {
   try {
     const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
