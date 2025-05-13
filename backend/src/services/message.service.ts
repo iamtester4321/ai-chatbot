@@ -1,14 +1,15 @@
-import { updateMessageReactionRepository } from "../repositories/message.repository";
-import { redisClient } from "../config/redis";
+import { updateMessageReactionLikeRepository, updateMessageReactionDislikeRepository } from "../repositories/message.repository";
 
-const CHAT_CACHE_PREFIX = "chat:";
-
-export const updateMessageReactionService = async (
+export const updateMessageReactionLikeService = async (
   messageId: string,
   liked: boolean
 ) => {
-  const updated = await updateMessageReactionRepository(messageId, liked);
-  // invalidate the chat detail cache
-  await redisClient.del(`${CHAT_CACHE_PREFIX}${updated.chatId}`);
-  return updated;
+  return updateMessageReactionLikeRepository(messageId, liked);
+};
+
+export const updateMessageReactionDislikeService = async (
+  messageId: string,
+  disliked: boolean
+) => {
+  return updateMessageReactionDislikeRepository(messageId, disliked);
 };
