@@ -1,12 +1,14 @@
 import { useChat } from "@ai-sdk/react";
+import { v4 as uuidv4 } from "uuid";
 import {
   ARCHIVE_CHAT,
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
   RENAME_CHAT,
+  SHARE_CHAT,
   STREAM_CHAT_RESPONSE,
-  TOGGLE_FAVORITE_CHAT,
+  TOGGLE_FAVORITE_CHAT
 } from "../lib/apiUrl";
 import {
   addMessage,
@@ -283,3 +285,29 @@ export const archiveChat = async (
     };
   }
 };
+
+
+export async function generateShareId(chatId: string) {
+  try {
+    const response = await fetch(SHARE_CHAT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        chatId,
+        id: uuidv4(),
+      }),
+    });
+
+    const data = await response.json();
+    return {
+      success: response.ok,
+      shareId: data.shareId,
+      message: data.message,
+    };
+  } catch (error) {
+    return { success: false, message: "Network error" };
+  }
+}

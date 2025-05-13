@@ -17,3 +17,4 @@ export const TOGGLE_FAVORITE_CHAT = (chatId: string) => `${BASE_API}/api/chat/ad
 export const GET_CHAT_NAMES = `${BASE_API}/api/chat/names`;
 export const RENAME_CHAT= (chatId: string) => `${BASE_API}/api/chat/rename/${chatId}`;
 export const ARCHIVE_CHAT = (chatId: string) => `${BASE_API}/api/chat/addOrRemoveArchive/${chatId}`;
+export const SHARE_CHAT = `${BASE_API}/api/chat/generate-share-id`;

@@ -18,9 +18,10 @@ import {
   toggleFavoriteChat,
 } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import DeleteModal from "../Modal/DeleteModal";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import DeleteModal from "../Modal/DeleteModal";
+import ShareModal from "../Modal/ShareModal";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -36,13 +37,14 @@ export default function Header({
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const isArchive = useAppSelector((state) => state.chat.isArchived);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isChartMode, setIsChartMode] = useState(searchParams.get('mode') === 'chart');
+  const [isChartMode, setIsChartMode] = useState(
+    searchParams.get("mode") === "chart"
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isShareOpen, setShareOpen] = useState(false);
   const dispatch = useAppDispatch();
-
 
   const openDeleteModal = () => {
     setIsDeleteModalOpen(true);
@@ -116,11 +118,11 @@ export default function Header({
   const toggleChartMode = () => {
     const newIsChartMode = !isChartMode;
     setIsChartMode(newIsChartMode);
-    
+
     if (newIsChartMode) {
-      setSearchParams({ mode: 'chart' });
+      setSearchParams({ mode: "chart" });
     } else {
-      searchParams.delete('mode');
+      searchParams.delete("mode");
       setSearchParams(searchParams);
     }
   };
@@ -190,35 +192,40 @@ export default function Header({
               <button
                 className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
                 title="Share"
+                onClick={() => setShareOpen(true)}
               >
                 <Share2 size={20} />
               </button>
-
-              <button
-                className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200"
-                title={
-                  isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"
-                }
-                onClick={toggleChartMode}
-              >
-                {isChartMode ? (
-                  <MessageSquare size={18} className="sm:w-5 sm:h-5" />
-                ) : (
-                  <BarChart2 size={18} className="sm:w-5 sm:h-5" />
-                )}
-              </button>
-
-              <button
-                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
-                title="Favorite"
-                onClick={toggleFavorite}
-              >
-                <Star
-                  size={20}
-                  fill={isFavorite ? "gold" : "none"}
-                  color={isFavorite ? "gold" : "currentColor"}
-                />
-              </button>
+              {!isArchive && (
+                <>
+                  <button
+                    className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                    title={
+                      isChartMode
+                        ? "Switch to Chat Mode"
+                        : "Switch to Chart Mode"
+                    }
+                    onClick={toggleChartMode}
+                  >
+                    {isChartMode ? (
+                      <MessageSquare size={18} className="sm:w-5 sm:h-5" />
+                    ) : (
+                      <BarChart2 size={18} className="sm:w-5 sm:h-5" />
+                    )}
+                  </button>
+                  <button
+                    className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                    title="Favorite"
+                    onClick={toggleFavorite}
+                  >
+                    <Star
+                      size={20}
+                      fill={isFavorite ? "gold" : "none"}
+                      color={isFavorite ? "gold" : "currentColor"}
+                    />
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Update Mobile More Options */}
@@ -234,33 +241,40 @@ export default function Header({
               {isMobileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
+                    <button
+                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                      onClick={() => setShareOpen(true)}
+                    >
                       <Share2 size={18} className="mr-2" />
                       Share
                     </button>
-                    <button
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
-                      onClick={toggleChartMode}
-                    >
-                      {isChartMode ? (
-                        <MessageSquare size={18} className="mr-2" />
-                      ) : (
-                        <BarChart2 size={18} className="mr-2" />
-                      )}
-                      {isChartMode ? "Chat Mode" : "Chart Mode"}
-                    </button>
-                    <button
-                      onClick={toggleFavorite}
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
-                    >
-                      <Star
-                        className="mr-2"
-                        size={18}
-                        fill={isFavorite ? "gold" : "none"}
-                        color={isFavorite ? "gold" : "currentColor"}
-                      />
-                      Favourite
-                    </button>
+                    {!isArchive && (
+                      <>
+                        <button
+                          className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                          onClick={toggleChartMode}
+                        >
+                          {isChartMode ? (
+                            <MessageSquare size={18} className="mr-2" />
+                          ) : (
+                            <BarChart2 size={18} className="mr-2" />
+                          )}
+                          {isChartMode ? "Chat Mode" : "Chart Mode"}
+                        </button>
+                        <button
+                          onClick={toggleFavorite}
+                          className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                        >
+                          <Star
+                            className="mr-2"
+                            size={18}
+                            fill={isFavorite ? "gold" : "none"}
+                            color={isFavorite ? "gold" : "currentColor"}
+                          />
+                          Favourite
+                        </button>
+                      </>
+                    )}
                     <button
                       onClick={archiveCurrentChat}
                       className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
@@ -317,6 +331,11 @@ export default function Header({
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
+        chatId={chatId || ""}
+      />
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setShareOpen(false)}
         chatId={chatId || ""}
       />
     </header>

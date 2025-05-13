@@ -95,7 +95,9 @@ const Sidebar = ({
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const favoriteChats = filteredChatList.filter((chat) => chat.isFavorite);
+  const favoriteChats = filteredChatList.filter(
+    (chat) => chat.isFavorite && !chat.isArchived
+  );
 
   return (
     <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
@@ -105,13 +107,11 @@ const Sidebar = ({
         className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full"
       >
         <PlusIcon />
-        <span className="text-sm whitespace-nowrap text-white">
-          New Chat
-        </span>
+        <span className="text-sm whitespace-nowrap text-white">New Chat</span>
       </Link>
 
       {/* Conditionally render the search input */}
-      {chatList.length > 0 && (
+      {chatList.filter((chat) => !chat.isArchived).length > 0 && (
         <div className="relative mb-4">
           <input
             type="text"

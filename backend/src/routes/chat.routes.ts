@@ -23,6 +23,6 @@ router.patch("/addOrRemoveFavrate/:chatId", addOrRemoveFavorite);
 router.patch("/addOrRemoveArchive/:chatId", addOrRemoveArchive);
 router.patch("/rename/:chatId", renameChat);
 
-router.post("/generate-share-id", generateShareId);
+router.post("/generate-share-id/", generateShareId);
 
 export default router;
