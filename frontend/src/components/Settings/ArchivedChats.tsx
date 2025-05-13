@@ -35,6 +35,7 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
 
       if (result.success) {
         dispatch(setIsArchived(false));
+        onClose();
         showToast.success("Chat restored");
       } else {
         showToast.error(result.message || "Failed to restore chat");

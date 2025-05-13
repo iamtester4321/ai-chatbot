@@ -4,7 +4,7 @@ export type ChatResponseProps = {
   isLoading: boolean;
   chatName: string;
   input:string;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
   chatId:string;
 };
