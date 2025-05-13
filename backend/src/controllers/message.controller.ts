@@ -3,12 +3,11 @@ import { updateMessageReactionLikeService, updateMessageReactionDislikeService }
 
 export const updateMessageReactionLike = async (req: any, res: any) => {
   const { messageId } = req.params;
-  const { liked } = req.query;
+  const { liked } = req.body;
 
   try {
     const updatedMessage = await updateMessageReactionLikeService(
       messageId,
-      liked === "true"
     );
     return res.status(200).json({
       message: "Message reaction updated successfully",
@@ -22,12 +21,11 @@ export const updateMessageReactionLike = async (req: any, res: any) => {
 
 export const updateMessageReactionDislike = async (req: any, res: any) => {
   const { messageId } = req.params;
-  const { disliked } = req.query;
+  const { disliked } = req.body;
 
   try {
     const updatedMessage = await updateMessageReactionDislikeService(
       messageId,
-      disliked === "true"
     );
     return res.status(200).json({
       message: "Message reaction updated successfully",

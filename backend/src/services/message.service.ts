@@ -2,14 +2,12 @@ import { updateMessageReactionLikeRepository, updateMessageReactionDislikeReposi
 
 export const updateMessageReactionLikeService = async (
   messageId: string,
-  liked: boolean
 ) => {
-  return updateMessageReactionLikeRepository(messageId, liked);
+  return updateMessageReactionLikeRepository(messageId);
 };
 
 export const updateMessageReactionDislikeService = async (
   messageId: string,
-  disliked: boolean
 ) => {
-  return updateMessageReactionDislikeRepository(messageId, disliked);
+  return updateMessageReactionDislikeRepository(messageId);
 };

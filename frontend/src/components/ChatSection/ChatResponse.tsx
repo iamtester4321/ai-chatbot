@@ -1,6 +1,10 @@
 import { Archive, Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { archiveChat } from "../../actions/chat.actions";
+import {
+  updateDislikeStatus,
+  updateLikeStatus,
+} from "../../actions/message.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
@@ -68,6 +72,70 @@ const ChatResponse = ({
     }
   };
 
+  const [likedMessages, setLikedMessages] = useState<{ [key: string]: boolean }>({});
+  const [dislikedMessages, setDislikedMessages] = useState<{ [key: string]: boolean }>({});
+
+  const handleLike = async (messageId: string | undefined) => {
+    if (!messageId) return;
+    try {
+      const currentLiked = !likedMessages[messageId];
+      const result = await updateLikeStatus(messageId, currentLiked);
+
+      if (result) {
+        setLikedMessages((prev) => ({
+          ...prev,
+          [messageId]: currentLiked,
+        }));
+        if (currentLiked && dislikedMessages[messageId]) {
+          setDislikedMessages((prev) => ({
+            ...prev,
+            [messageId]: false,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error updating like status:", error);
+    }
+  };
+
+  const handleDislike = async (messageId: string | undefined) => {
+    if (!messageId) return;
+    try {
+      const currentDisliked = !dislikedMessages[messageId];
+      const result = await updateDislikeStatus(messageId, currentDisliked);
+
+      if (result) {
+        setDislikedMessages((prev) => ({
+          ...prev,
+          [messageId]: currentDisliked,
+        }));
+        if (currentDisliked && likedMessages[messageId]) {
+          setLikedMessages((prev) => ({
+            ...prev,
+            [messageId]: false,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error updating dislike status:", error);
+    }
+  };
+
+  useEffect(() => {
+    const newLikedMessages: { [key: string]: boolean } = {};
+    const newDislikedMessages: { [key: string]: boolean } = {};
+
+    messages.forEach((msg) => {
+      if (msg.id) {
+        newLikedMessages[msg.id] = msg.isLiked || false;
+        newDislikedMessages[msg.id] = msg.isDisliked || false;
+      }
+    });
+
+    setLikedMessages(newLikedMessages);
+    setDislikedMessages(newDislikedMessages);
+  }, [messages]);
+
   return (
     <div className="w-full min-h-screen bg-[#1a1a1a] text-white flex flex-col">
       {/* Scrollable content area */}
@@ -111,15 +179,33 @@ const ChatResponse = ({
                       {copiedIndex === index ? <Check /> : <Copy />}
                     </button>
 
-                    <button className="p-1 hover:text-white" aria-label="Like">
-                      <ThumbsUp />
-                    </button>
-                    <button
-                      className="p-1 hover:text-white"
-                      aria-label="Dislike"
-                    >
-                      <ThumbsDown />
-                    </button>
+                    {msg?.id && (
+                      <button
+                        className="p-1 hover:text-white transition-colors"
+                        aria-label="Like"
+                        onClick={() => handleLike(msg.id)}
+                      >
+                        <ThumbsUp
+                          size={20}
+                          fill={likedMessages[msg.id] ? "currentColor" : "none"}
+                          color={likedMessages[msg.id] ? "currentColor" : "currentColor"}
+                        />
+                      </button>
+                    )}
+
+                    {msg?.id && (
+                      <button
+                        className="p-1 hover:text-white transition-colors"
+                        aria-label="Dislike"
+                        onClick={() => handleDislike(msg.id)}
+                      >
+                        <ThumbsDown
+                          size={20}
+                          fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
+                          color={dislikedMessages[msg.id] ? "currentColor" : "currentColor"}
+                        />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -146,14 +232,26 @@ const ChatResponse = ({
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
 
-                    <button className="p-1 hover:text-white" aria-label="Like">
-                      <ThumbsUp />
-                    </button>
                     <button
-                      className="p-1 hover:text-white"
+                      className="p-1 hover:text-white transition-colors"
+                      aria-label="Like"
+                    >
+                      <ThumbsUp
+                        size={20}
+                        fill={likedMessages[chatResponse] ? "currentColor" : "none"}
+                        color={likedMessages[chatResponse] ? "currentColor" : "currentColor"}
+                      />
+                    </button>
+
+                    <button
+                      className="p-1 hover:text-white transition-colors"
                       aria-label="Dislike"
                     >
-                      <ThumbsDown />
+                      <ThumbsDown
+                        size={20}
+                        fill={dislikedMessages[chatResponse] ? "currentColor" : "none"}
+                        color={dislikedMessages[chatResponse] ? "currentColor" : "currentColor"}
+                      />
                     </button>
                   </div>
                 )}

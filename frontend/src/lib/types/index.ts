@@ -1,5 +1,5 @@
 export type ChatResponseProps = {
-  messages: Array<{ role: string; content: string; createdAt: string }>;
+  messages: Message[];
   chatResponse: string;
   isLoading: boolean;
   chatName: string;
@@ -22,9 +22,12 @@ export type SidebarItemProps = {
 };
 
 export type Message = {
+  id?:string
   role: string;
   content: string;
   createdAt: string;
+  isLiked?: boolean;
+  isDisliked?: boolean; 
 };
 
 export type ChatState = {

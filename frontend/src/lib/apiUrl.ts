@@ -19,5 +19,5 @@ export const RENAME_CHAT= (chatId: string) => `${BASE_API}/api/chat/rename/${cha
 export const ARCHIVE_CHAT = (chatId: string) => `${BASE_API}/api/chat/addOrRemoveArchive/${chatId}`;
 
 // message API
-export const LIKE_MESSAGE = (messageId: string) => `${BASE_API}/api/messages/${messageId}/reaction/like`;
-export const DISLIKE_MESSAGE = (messageId: string) => `${BASE_API}/api/messages/${messageId}/reaction/dislike`;
+export const LIKE_MESSAGE = (messageId: string) => `${BASE_API}/api/message/${messageId}/reaction/like`;
+export const DISLIKE_MESSAGE = (messageId: string) => `${BASE_API}/api/message/${messageId}/reaction/dislike`;
