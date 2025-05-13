@@ -8,9 +8,10 @@ import DeleteModal from "../Modal/DeleteModal";
 
 interface FavoriteChatsProps {
   favoriteChats: ChatState["chatList"];
+  onClose: () => void;
 }
 
-const FavoriteChats = ({ favoriteChats }: FavoriteChatsProps) => {
+const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
@@ -57,6 +58,7 @@ const FavoriteChats = ({ favoriteChats }: FavoriteChatsProps) => {
             <Link
               to={`/chat/${chat.id}`}
               className="text-white font-medium hover:text-[#20b8cd] transition-colors"
+              onClick={onClose}
             >
               {chat.name}
             </Link>

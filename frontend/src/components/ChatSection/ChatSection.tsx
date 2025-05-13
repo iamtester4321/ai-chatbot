@@ -7,6 +7,7 @@ import { fetchMessages, useChatActions } from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
+  setIsArchived,
   setIsLoading,
   setMessages,
 } from "../../store/features/chat/chatSlice";
@@ -34,8 +35,10 @@ const ChatSection = () => {
       const loadMessages = async () => {
         const { success, data, error } = await fetchMessages(chatId);
         if (success && data) {
+          console.log(data);
           dispatch(setMessages(data.messages));
           dispatch(setChatName(data.name));
+          dispatch(setIsArchived(data.isArchived));
         } else {
           console.error(error);
         }
@@ -114,6 +117,7 @@ const ChatSection = () => {
           input={input}
           handleInputChange={handleInputChange}
           handleFormSubmit={handleFormSubmit}
+          chatId={chatId || ""}
         />
       )}
 

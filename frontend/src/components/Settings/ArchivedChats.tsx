@@ -4,16 +4,20 @@ import { Link } from "react-router-dom";
 import { archiveChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatState } from "../../lib/types";
+import { setIsArchived } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 
 interface ArchivedChatsProps {
   archivedChats: ChatState["chatList"];
+  onClose: () => void;
 }
 
-const ArchivedChats = ({ archivedChats }: ArchivedChatsProps) => {
+const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
+  const dispatch = useAppDispatch();
 
   const openDeleteModal = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -30,6 +34,8 @@ const ArchivedChats = ({ archivedChats }: ArchivedChatsProps) => {
       const result = await archiveChat(chatId);
 
       if (result.success) {
+        dispatch(setIsArchived(false));
+        onClose();
         showToast.success("Chat restored");
       } else {
         showToast.error(result.message || "Failed to restore chat");
@@ -57,6 +63,7 @@ const ArchivedChats = ({ archivedChats }: ArchivedChatsProps) => {
             <Link
               to={`/chat/${chat.id}`}
               className="text-white font-medium hover:text-[#20b8cd] transition-colors"
+              onClick={onClose}
             >
               {chat.name}
             </Link>

@@ -74,8 +74,8 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
             {/* Content based on active tab */}
             <div className="text-[#e8e8e6b3]">
               {activeTab === "general" && <GeneralSettings />}
-              {activeTab === "archive" && <ArchivedChats archivedChats={archivedChats} />}
-              {activeTab === "favorite" && <FavoriteChats favoriteChats={favoriteChats} />}
+              {activeTab === "archive" && <ArchivedChats onClose={onClose} archivedChats={archivedChats} />}
+              {activeTab === "favorite" && <FavoriteChats onClose={onClose} favoriteChats={favoriteChats} />}
             </div>
           </div>
         </div>

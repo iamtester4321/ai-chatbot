@@ -1,6 +1,10 @@
-import { Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Archive, Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { archiveChat } from "../../actions/chat.actions";
+import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
+import { setIsArchived } from "../../store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
 import StreamLoader from "../StreamLoader/StreamLoader";
 import PromptInput from "./PromptInput";
@@ -13,10 +17,14 @@ const ChatResponse = ({
   input,
   handleInputChange,
   handleFormSubmit,
+  chatId,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const isArchived = useAppSelector((state) => state.chat.isArchived);
+  const showToast = useToast();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -42,6 +50,22 @@ const ChatResponse = ({
       .catch((err) => {
         console.error("Failed to copy: ", err);
       });
+  };
+
+  const handleRestoreChat = async (chatId: string) => {
+    try {
+      const result = await archiveChat(chatId);
+
+      if (result.success) {
+        dispatch(setIsArchived(false));
+        showToast.success("Chat restored");
+      } else {
+        showToast.error(result.message || "Failed to restore chat");
+      }
+    } catch (error) {
+      showToast.error("An error occurred while restoring chat");
+      console.error("Error restoring chat:", error);
+    }
   };
 
   return (
@@ -144,12 +168,32 @@ const ChatResponse = ({
 
       {/* Sticky input bar */}
       <div className="sticky bottom-0 bg-[#1a1a1a] px-4 py-4 border-t border-[#2a2a2a] z-10">
-        <PromptInput
-          input={input}
-          isLoading={isLoading}
-          handleInputChange={handleInputChange}
-          handleFormSubmit={handleFormSubmit}
-        />
+        {isArchived ? (
+          <div className="text-center text-white">
+            <p className="mb-4">
+              This conversation is archived. To continue, please unarchive it
+              first.
+            </p>
+            <button
+              onClick={() => {
+                handleRestoreChat(chatId);
+              }}
+              className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition cursor-pointer"
+            >
+              <span className="flex items-center">
+                <Archive size={16} className="mr-2" />
+                Unarchive
+              </span>
+            </button>
+          </div>
+        ) : (
+          <PromptInput
+            input={input}
+            isLoading={isLoading}
+            handleInputChange={handleInputChange}
+            handleFormSubmit={handleFormSubmit}
+          />
+        )}
       </div>
     </div>
   );

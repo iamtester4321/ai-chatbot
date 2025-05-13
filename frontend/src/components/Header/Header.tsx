@@ -19,6 +19,8 @@ import {
 } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import DeleteModal from "../Modal/DeleteModal";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setIsArchived } from "../../store/features/chat/chatSlice";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -33,11 +35,14 @@ export default function Header({
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isArchive, setIsArchive] = useState(false);
+  const isArchive = useAppSelector((state) => state.chat.isArchived);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartMode, setIsChartMode] = useState(searchParams.get('mode') === 'chart');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
 
   const openDeleteModal = () => {
     setIsDeleteModalOpen(true);
@@ -50,7 +55,7 @@ export default function Header({
       try {
         if (!chatId) {
           setIsFavorite(false);
-          setIsArchive(false);
+          dispatch(setIsArchived(false));
           return;
         }
 
@@ -58,7 +63,7 @@ export default function Header({
 
         if (result.success) {
           setIsFavorite(result.data.isFavorite || false);
-          setIsArchive(result.data.isArchived || false);
+          dispatch(setIsArchived(result.data.isArchived || false));
         }
       } catch (error) {
         console.error("Error fetching favorite status:", error);
@@ -99,7 +104,7 @@ export default function Header({
 
     const result = await archiveChat(chatId);
     if (result.success) {
-      setIsArchive(!isArchive);
+      dispatch(setIsArchived(!isArchive));
       showToast.success(result.message || "Chat archived");
       setIsMenuOpen(false);
       setIsMobileMenuOpen(false);
