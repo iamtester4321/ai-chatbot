@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import { fetchChatNames } from "../../actions/chat.actions";
 import { fetchUserProfile } from "../../actions/user.actions";
-import ChatInputField from "../ChatInputField/ChatInputField";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchChatNames } from "../../actions/chat.actions";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -16,14 +16,13 @@ function Layout() {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -38,7 +37,7 @@ function Layout() {
       }
     };
     getChatNames();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -73,19 +72,19 @@ function Layout() {
     };
 
     // Add event listeners for all chat-related events
-    window.addEventListener('chat-deleted', handleChatUpdates);
-    window.addEventListener('chat-favorite-toggled', handleChatUpdates);
-    window.addEventListener('chat-renamed', handleChatUpdates);
-    window.addEventListener('chat-names-updated', handleChatUpdates);
-    window.addEventListener('chat-archived', handleChatUpdates);
+    window.addEventListener("chat-deleted", handleChatUpdates);
+    window.addEventListener("chat-favorite-toggled", handleChatUpdates);
+    window.addEventListener("chat-renamed", handleChatUpdates);
+    window.addEventListener("chat-names-updated", handleChatUpdates);
+    window.addEventListener("chat-archived", handleChatUpdates);
 
     return () => {
       // Clean up event listeners
-      window.removeEventListener('chat-deleted', handleChatUpdates);
-      window.removeEventListener('chat-favorite-toggled', handleChatUpdates);
-      window.removeEventListener('chat-renamed', handleChatUpdates);
-      window.removeEventListener('chat-names-updated', handleChatUpdates);
-      window.removeEventListener('chat-archived', handleChatUpdates);
+      window.removeEventListener("chat-deleted", handleChatUpdates);
+      window.removeEventListener("chat-favorite-toggled", handleChatUpdates);
+      window.removeEventListener("chat-renamed", handleChatUpdates);
+      window.removeEventListener("chat-names-updated", handleChatUpdates);
+      window.removeEventListener("chat-archived", handleChatUpdates);
     };
   }, []);
 
@@ -108,7 +107,7 @@ function Layout() {
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
         />
-      </div>  
+      </div>
 
       {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && (
@@ -128,7 +127,7 @@ function Layout() {
         )}
 
         <div className="flex-1 overflow-y-auto">
-          <ChatInputField />
+          <ChatSection />
         </div>
       </div>
       <SettingsModal

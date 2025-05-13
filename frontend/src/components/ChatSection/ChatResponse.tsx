@@ -1,15 +1,15 @@
 import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { MessageDisplayProps } from "../../lib/types";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
 import StreamLoader from "../StreamLoader/StreamLoader";
+import { ChatResponseProps } from "../../lib/types";
 
-const MessageDisplay = ({
+const ChatResponse = ({
   messages,
   chatResponse,
   isLoading,
   chatName,
-}: MessageDisplayProps) => {
+}: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
 
@@ -114,4 +114,4 @@ const MessageDisplay = ({
   );
 };
 
-export default MessageDisplay;
+export default ChatResponse;

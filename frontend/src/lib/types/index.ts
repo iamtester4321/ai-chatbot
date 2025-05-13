@@ -1,4 +1,4 @@
-export type MessageDisplayProps = {
+export type ChatResponseProps = {
   messages: Array<{ role: string; content: string; createdAt: string }>;
   chatResponse: string;
   isLoading: boolean;

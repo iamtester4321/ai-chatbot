@@ -11,10 +11,10 @@ import {
   setMessages,
 } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import MessageDisplay from "../MessageDisplay/MessageDisplay";
-import PromptInput from "../PromptInput/PromptInput";
+import ChatResponse from "./ChatResponse";
+import PromptInput from "./PromptInput";
 
-const ChatInputField = () => {
+const ChatSection = () => {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -106,7 +106,7 @@ const ChatInputField = () => {
   return (
     <div className="bg-[#121212] min-h-screen text-white">
       {messages.length > 0 && (
-        <MessageDisplay
+        <ChatResponse
           messages={messages}
           chatResponse={currentResponse}
           isLoading={isLoading}
@@ -147,4 +147,4 @@ const ChatInputField = () => {
   );
 };
 
-export default ChatInputField;
+export default ChatSection;
