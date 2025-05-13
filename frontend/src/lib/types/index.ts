@@ -3,9 +3,10 @@ export type ChatResponseProps = {
   chatResponse: string;
   isLoading: boolean;
   chatName: string;
-  input:any;
-  handleInputChange:any;
-  handleFormSubmit:any;
+  input:string;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFormSubmit: (e: React.FormEvent) => void;
+  chatId:string;
 };
 
 export type PromptInputProps = {
@@ -37,4 +38,5 @@ export type ChatState = {
     isFavorite: boolean;
     isArchived: boolean;
   }>;
+  isArchived: boolean;
 };
