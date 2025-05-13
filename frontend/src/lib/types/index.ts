@@ -3,6 +3,9 @@ export type ChatResponseProps = {
   chatResponse: string;
   isLoading: boolean;
   chatName: string;
+  input:any;
+  handleInputChange:any;
+  handleFormSubmit:any;
 };
 
 export type PromptInputProps = {

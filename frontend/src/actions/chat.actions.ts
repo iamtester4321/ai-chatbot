@@ -1,12 +1,12 @@
 import { useChat } from "@ai-sdk/react";
 import {
+  ARCHIVE_CHAT,
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
-  STREAM_CHAT_RESPONSE,
-  TOGGLE_FAVORITE_CHAT,
   GET_CHAT_NAMES,
   RENAME_CHAT,
-  ARCHIVE_CHAT,
+  STREAM_CHAT_RESPONSE,
+  TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
 import {
   addMessage,
@@ -29,14 +29,30 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
-      dispatch(setChatName(input))
-      dispatch(
-        addMessage({
-          role: "user",
-          content: input,
-          createdAt: new Date().toISOString(),
-        })
-      );
+      dispatch(setChatName(input));
+      
+      // Create user message with proper ID
+      const userMessage = {
+        id: Date.now().toString(),
+        role: "user" as const, // Fix the type by using a const assertion
+        content: input,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Add user message to the store
+      dispatch(addMessage(userMessage));
+
+      // Prepare messages array with previous context
+      const messageHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Add current message to history
+      messageHistory.push({
+        role: userMessage.role,
+        content: userMessage.content
+      });
 
       const response = await fetch(STREAM_CHAT_RESPONSE, {
         method: "POST",
@@ -46,7 +62,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         },
         body: JSON.stringify({
           prompt: input,
-          messages: [],
+          messages: messageHistory, // Send full message history for context
           chatId: chatId || "",
         }),
       });
@@ -72,18 +88,22 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           dispatch(setCurrentResponse(accumulatedText));
           onResponseUpdate?.(accumulatedText);
         }
-        dispatch(
-          addMessage({
-            role: "assistant",
-            content: accumulatedText,
-            createdAt: new Date().toISOString(),
-          })
-        );
+
+        // Create assistant message with proper ID
+        const assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant" as const, // Fix the type by using a const assertion
+          content: accumulatedText,
+          createdAt: new Date().toISOString(),
+        };
+
+        // Update Redux store with the new message
+        dispatch(addMessage(assistantMessage));
+        
         dispatch(setCurrentResponse(""));
         onResponseUpdate?.("");
 
         await fetchChatNames(dispatch);
-        
       } finally {
         reader.releaseLock();
       }

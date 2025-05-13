@@ -104,19 +104,22 @@ const ChatSection = () => {
   }, [messages]);
 
   return (
-    <div className="bg-[#121212] min-h-screen text-white">
+    <div className="bg-[#121212] min-h-dvh sm:min-h-0 text-white">
       {messages.length > 0 && (
         <ChatResponse
           messages={messages}
           chatResponse={currentResponse}
           isLoading={isLoading}
           chatName={chatName}
+          input={input}
+          handleInputChange={handleInputChange}
+          handleFormSubmit={handleFormSubmit}
         />
       )}
 
       <section
         className={`${
-          messages.length > 0 ? "pt-8" : "pt-[200px]"
+          messages.length > 0 ? "" : "pt-[200px]"
         } h-100vh transition-all duration-300`}
       >
         <div className="container">
@@ -134,12 +137,14 @@ const ChatSection = () => {
               What do you want to know?
             </h3>
 
-            <PromptInput
-              input={input}
-              isLoading={isLoading}
-              handleInputChange={handleInputChange}
-              handleFormSubmit={handleFormSubmit}
-            />
+            {!chatId && (
+              <PromptInput
+                input={input}
+                isLoading={isLoading}
+                handleInputChange={handleInputChange}
+                handleFormSubmit={handleFormSubmit}
+              />
+            )}
           </div>
         </div>
       </section>

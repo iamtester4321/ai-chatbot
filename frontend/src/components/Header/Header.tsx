@@ -48,7 +48,11 @@ export default function Header({
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
       try {
-        if (!chatId) return;
+        if (!chatId) {
+          setIsFavorite(false);
+          setIsArchive(false);
+          return;
+        }
 
         const result = await fetchMessages(chatId);
 

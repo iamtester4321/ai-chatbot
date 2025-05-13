@@ -1,4 +1,8 @@
+import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
+
 
 const PromptInput = ({
   input,
@@ -6,56 +10,81 @@ const PromptInput = ({
   handleInputChange,
   handleFormSubmit,
 }: PromptInputProps) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [mode, setMode] = useState<"chat" | "chart">(
+    searchParams.get("mode") === "chart" ? "chart" : "chat"
+  );
+
+  useEffect(() => {
+    if (mode === "chart") {
+      setSearchParams({ mode: "chart" });
+    } else {
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete("mode");
+      setSearchParams(newParams);
+    }
+  }, [mode, setSearchParams]);
+
+  const handleModeChange = (newMode: "chat" | "chart") => {
+    setMode(newMode);
+  };
+
   return (
     <form
       onSubmit={handleFormSubmit}
-      className="bg-[#202222] border border-[#e8e8e61a] flex flex-col rounded-2xl py-3 px-4 w-full"
+      className="bg-[#1e1f1f] border border-[#2f2f2f] flex flex-col rounded-2xl px-4 py-4 w-full max-w-3xl mx-auto shadow-md gap-4"
     >
+      {/* Input Field */}
       <input
         type="text"
-        className="outline-none w-full h-12 text-lg text-gray-200 pb-1.5 pl-1.5 text-start items-start bg-transparent"
-        placeholder="Ask anything..."
+        className="bg-transparent text-gray-200 text-base placeholder:text-gray-500 outline-none h-12 px-1"
+        placeholder={`Ask anything in ${
+          mode === "chat" ? "chat" : "chart"
+        } mode...`}
         value={input}
         onChange={handleInputChange}
       />
 
-      <div className="max-w-[640px] w-full flex flex-row gap-10 items-center justify-between pt-1">
-        <div className="bg-[#1e1c1c] rounded-lg max-w-[88px] w-full flex flex-row items-center">
+      {/* Bottom Buttons */}
+      <div className="flex items-center justify-between">
+        {/* Mode Toggle */}
+        <div className="flex items-center gap-2">
           <button
-            type="submit"
-            disabled={isLoading}
-            className="group bg-transparent hover:bg-[#20b8cd1a] hover:border border-[#20b8cd1a] rounded-lg transition-all duration-200 flex flex-row gap-1 items-center cursor-pointer py-1.5 px-2.5"
+            type="button"
+            onClick={() => handleModeChange("chat")}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 
+              ${
+                mode === "chat"
+                  ? "bg-[#20b8cd] text-white shadow-sm"
+                  : "bg-[#2a2a2a] text-gray-400 hover:bg-[#333] hover:text-gray-200"
+              }`}
           >
-            <span className="text-[#e8e8e6b3] group-hover:text-[#20b8cd] transition-all duration-200 text-sm font-medium">
-              Search
-            </span>
+            <MessageSquare size={16} />
+            Chat
+          </button>
+          <button
+            type="button"
+            onClick={() => handleModeChange("chart")}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 
+              ${
+                mode === "chart"
+                  ? "bg-[#20b8cd] text-white shadow-sm"
+                  : "bg-[#2a2a2a] text-gray-400 hover:bg-[#333] hover:text-gray-200"
+              }`}
+          >
+            <BarChart2 size={16} />
+            Chart
           </button>
         </div>
 
-        <div className="max-w-[188px] w-full flex flex-row items-center justify-end">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-[#20b8cd] max-w-[36px] w-full h-[32px] cursor-pointer rounded-lg flex justify-center items-center ml-2 hover:bg-[#1a9eb2] transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4"
-            >
-              <path d="M5 12l14 0"></path>
-              <path d="M13 18l6 -6"></path>
-              <path d="M13 6l6 6"></path>
-            </svg>
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-[#20b8cd] hover:bg-[#1a9eb2] rounded-md w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ArrowUpRight size={18} />
+        </button>
       </div>
     </form>
   );
