@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
 
-
 const PromptInput = ({
   input,
   isLoading,
@@ -48,16 +47,17 @@ const PromptInput = ({
       {/* Bottom Buttons */}
       <div className="flex items-center justify-between">
         {/* Mode Toggle */}
-        <div className="flex items-center gap-2">
+        {/* Tab-style Mode Toggle with Icons and Original Colors */}
+        <div className="flex items-center bg-[#2f2f2f] rounded-2xl p-1 w-fit">
           <button
             type="button"
             onClick={() => handleModeChange("chat")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 
-              ${
-                mode === "chat"
-                  ? "bg-[#20b8cd] text-white shadow-sm"
-                  : "bg-[#2a2a2a] text-gray-400 hover:bg-[#333] hover:text-gray-200"
-              }`}
+            className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
+      ${
+        mode === "chat"
+          ? "bg-[#20b8cd] text-white shadow-sm"
+          : "text-gray-400 hover:text-gray-200"
+      }`}
           >
             <MessageSquare size={16} />
             Chat
@@ -65,12 +65,12 @@ const PromptInput = ({
           <button
             type="button"
             onClick={() => handleModeChange("chart")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 
-              ${
-                mode === "chart"
-                  ? "bg-[#20b8cd] text-white shadow-sm"
-                  : "bg-[#2a2a2a] text-gray-400 hover:bg-[#333] hover:text-gray-200"
-              }`}
+            className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
+      ${
+        mode === "chart"
+          ? "bg-[#20b8cd] text-white shadow-sm"
+          : "text-gray-400 hover:text-gray-200"
+      }`}
           >
             <BarChart2 size={16} />
             Chart
@@ -81,7 +81,7 @@ const PromptInput = ({
         <button
           type="submit"
           disabled={isLoading}
-          className="bg-[#20b8cd] hover:bg-[#1a9eb2] rounded-md w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#20b8cd] hover:bg-[#1a9eb2] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowUpRight size={18} />
         </button>

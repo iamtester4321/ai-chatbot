@@ -1,8 +1,8 @@
-import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ChatResponseProps } from "../../lib/types";
 import { formatMarkdownResponse } from "../../utils/responseRenderer";
 import StreamLoader from "../StreamLoader/StreamLoader";
-import { ChatResponseProps } from "../../lib/types";
 import PromptInput from "./PromptInput";
 
 const ChatResponse = ({
@@ -10,12 +10,13 @@ const ChatResponse = ({
   chatResponse,
   isLoading,
   chatName,
-    input,
+  input,
   handleInputChange,
   handleFormSubmit,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -30,6 +31,18 @@ const ChatResponse = ({
       setShowResponseActions(false);
     }
   }, [isLoading, chatResponse]);
+
+  const copyToClipboard = (text: string, index: number) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000); // reset after 2s
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
 
   return (
     <div className="w-full min-h-screen bg-[#1a1a1a] text-white flex flex-col">
@@ -67,11 +80,13 @@ const ChatResponse = ({
                   />
                   <div className="flex items-center space-x-3 text-gray-400">
                     <button
-                      className="p-1 hover:text-white"
+                      className="p-1 hover:text-white cursor-pointer"
                       aria-label="Copy to clipboard"
+                      onClick={() => copyToClipboard(msg.content, index)}
                     >
-                      <Copy />
+                      {copiedIndex === index ? <Check /> : <Copy />}
                     </button>
+
                     <button className="p-1 hover:text-white" aria-label="Like">
                       <ThumbsUp />
                     </button>
@@ -102,9 +117,11 @@ const ChatResponse = ({
                     <button
                       className="p-1 hover:text-white"
                       aria-label="Copy to clipboard"
+                      onClick={() => copyToClipboard(chatResponse, -1)}
                     >
-                      <Copy />
+                      {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
+
                     <button className="p-1 hover:text-white" aria-label="Like">
                       <ThumbsUp />
                     </button>

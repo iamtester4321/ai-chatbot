@@ -14,7 +14,7 @@ import {
   setChatName,
   setCurrentResponse,
 } from "../store/features/chat/chatSlice";
-import { useAppDispatch } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch } from "../store/store";
 
 interface ChatHookProps {
@@ -24,35 +24,19 @@ interface ChatHookProps {
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
+  const { messages } = useAppSelector((state) => state.chat); // Get current messages from store
 
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+  const { input, handleInputChange, handleSubmit, status } = useChat({
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
-      dispatch(setChatName(input));
-      
-      // Create user message with proper ID
-      const userMessage = {
-        id: Date.now().toString(),
-        role: "user" as const, // Fix the type by using a const assertion
-        content: input,
-        createdAt: new Date().toISOString(),
-      };
-      
-      // Add user message to the store
-      dispatch(addMessage(userMessage));
-
-      // Prepare messages array with previous context
-      const messageHistory = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-
-      // Add current message to history
-      messageHistory.push({
-        role: userMessage.role,
-        content: userMessage.content
-      });
+      dispatch(
+        addMessage({
+          role: "user",
+          content: input,
+          createdAt: new Date().toISOString(),
+        })
+      );
 
       const response = await fetch(STREAM_CHAT_RESPONSE, {
         method: "POST",
@@ -62,11 +46,10 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         },
         body: JSON.stringify({
           prompt: input,
-          messages: messageHistory, // Send full message history for context
+          messages: messages, // Send entire message history
           chatId: chatId || "",
         }),
       });
-
       if (!response.ok) {
         throw new Error("API request failed");
       }
@@ -88,18 +71,13 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           dispatch(setCurrentResponse(accumulatedText));
           onResponseUpdate?.(accumulatedText);
         }
-
-        // Create assistant message with proper ID
-        const assistantMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant" as const, // Fix the type by using a const assertion
-          content: accumulatedText,
-          createdAt: new Date().toISOString(),
-        };
-
-        // Update Redux store with the new message
-        dispatch(addMessage(assistantMessage));
-        
+        dispatch(
+          addMessage({
+            role: "assistant",
+            content: accumulatedText,
+            createdAt: new Date().toISOString(),
+          })
+        );
         dispatch(setCurrentResponse(""));
         onResponseUpdate?.("");
 
@@ -119,6 +97,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   };
 };
 
+// In chat.actions.ts
 export const fetchMessages = async (chatId: string) => {
   try {
     const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
@@ -126,18 +105,12 @@ export const fetchMessages = async (chatId: string) => {
       credentials: "include",
     });
 
-    const text = await response.text();
-
-    if (response.ok) {
-      const data = JSON.parse(text);
-      window.dispatchEvent(
-        new CustomEvent("chat-data-updated", { detail: { chatId, data } })
-      );
-      return { success: true, data };
-    } else {
-      console.error("Failed to fetch messages for chatId:", chatId);
-      return { success: false, error: "Failed to fetch messages" };
+    if (!response.ok) {
+      throw new Error("Failed to fetch messages");
     }
+
+    const data = await response.json();
+    return { success: true, data };
   } catch (error) {
     console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
