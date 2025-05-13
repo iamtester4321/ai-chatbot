@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   archiveChat,
   fetchMessages,
@@ -30,11 +30,12 @@ export default function Header({
   isLogoutModalOpen,
 }: HeaderProps) {
   const { chatId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isArchive, setIsArchive] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isChartMode, setIsChartMode] = useState(false);
+  const [isChartMode, setIsChartMode] = useState(searchParams.get('mode') === 'chart');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -104,7 +105,15 @@ export default function Header({
   };
 
   const toggleChartMode = () => {
-    setIsChartMode(!isChartMode);
+    const newIsChartMode = !isChartMode;
+    setIsChartMode(newIsChartMode);
+    
+    if (newIsChartMode) {
+      setSearchParams({ mode: 'chart' });
+    } else {
+      searchParams.delete('mode');
+      setSearchParams(searchParams);
+    }
   };
 
   const toggleMenu = () => {

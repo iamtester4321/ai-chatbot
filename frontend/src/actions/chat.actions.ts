@@ -11,6 +11,7 @@ import {
 import {
   addMessage,
   setChatList,
+  setChatName,
   setCurrentResponse,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch } from "../store/hooks";
@@ -28,6 +29,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
+      dispatch(setChatName(input))
       dispatch(
         addMessage({
           role: "user",
@@ -81,6 +83,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         onResponseUpdate?.("");
 
         await fetchChatNames(dispatch);
+        
       } finally {
         reader.releaseLock();
       }
