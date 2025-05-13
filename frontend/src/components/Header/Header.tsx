@@ -2,6 +2,7 @@ import {
   Archive,
   BarChart2,
   MessageSquare,
+  Monitor,
   Moon,
   MoreHorizontal,
   Share2,
@@ -19,6 +20,9 @@ import {
 } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import DeleteModal from "../Modal/DeleteModal";
+import { toggleTheme } from "../../store/features/themeSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -30,13 +34,14 @@ export default function Header({
   isLogoutModalOpen,
 }: HeaderProps) {
   const { chatId } = useParams();
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isArchive, setIsArchive] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartMode, setIsChartMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
 
   const openDeleteModal = () => {
     setIsDeleteModalOpen(true);
@@ -65,8 +70,13 @@ export default function Header({
 
   const closeDeleteModal = () => setIsDeleteModalOpen(false);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+  const handleToggleTheme = () => {
+    dispatch(toggleTheme());
+  };
+
+  const renderThemeIcon = () => {
+    if (mode === "system") return <Monitor size={20} />;
+    return isDarkMode ? <Sun size={20} /> : <Moon size={20} />;
   };
 
   const showToast = useToast();
@@ -141,10 +151,24 @@ export default function Header({
   if (isLogoutModalOpen) return null;
 
   return (
-    <header className="sticky top-0 w-full bg-[#121212] text-white z-[1000] py-3 px-4 border-b border-gray-800 flex items-center justify-between">
+    <header
+      className="sticky top-0 w-full z-[1000] py-3 px-4 border-b flex items-center justify-between"
+      style={{
+        backgroundColor: "var(--color-bg)",
+        color: "var(--color-text)",
+        borderColor: "var(--color-border)",
+      }}
+    >
       <div className="flex items-center">
         <button
-          className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+          className="p-2 rounded-full transition duration-200"
+          style={{ backgroundColor: "transparent" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
           onClick={toggleSidebar}
           title="Toggle Sidebar"
         >
@@ -156,28 +180,55 @@ export default function Header({
       </div>
 
       <div className="flex items-center space-x-1 sm:space-x-3">
-        {/* Always visible: Theme toggle */}
         <button
-          className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
-          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          onClick={toggleDarkMode}
+          className="p-2 rounded-full transition duration-200"
+          style={{ backgroundColor: "transparent" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          title={
+            mode === "system"
+              ? "Switch to Light Mode"
+              : mode === "light"
+              ? "Switch to Dark Mode"
+              : "Switch to System Theme"
+          }
+          onClick={handleToggleTheme}
         >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          {renderThemeIcon()}
         </button>
 
-        {/* Only show the rest if chatId is present */}
         {chatId && (
           <>
             <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
               <button
-                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                className="p-2 rounded-full transition duration-200"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-hover-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="Share"
               >
                 <Share2 size={20} />
               </button>
 
               <button
-                className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                className="p-1 sm:p-2 rounded-full transition duration-200"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-hover-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title={
                   isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"
                 }
@@ -191,7 +242,15 @@ export default function Header({
               </button>
 
               <button
-                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                className="p-2 rounded-full transition duration-200"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-hover-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="Favorite"
                 onClick={toggleFavorite}
               >
@@ -203,10 +262,17 @@ export default function Header({
               </button>
             </div>
 
-            {/* Update Mobile More Options */}
             <div className="relative sm:hidden" ref={mobileMenuRef}>
               <button
-                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                className="p-2 rounded-full transition duration-200"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-hover-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="More Options"
                 onClick={toggleMobileMenu}
               >
@@ -214,14 +280,23 @@ export default function Header({
               </button>
 
               {isMobileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
+                <div
+                  className="absolute right-0 mt-2 w-36 rounded-md shadow-lg border z-50"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
+                >
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center">
+                    <button className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-text)" }}>
                       <Share2 size={18} className="mr-2" />
                       Share
                     </button>
                     <button
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-text)" }}
                       onClick={toggleChartMode}
                     >
                       {isChartMode ? (
@@ -233,7 +308,8 @@ export default function Header({
                     </button>
                     <button
                       onClick={toggleFavorite}
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-text)" }}
                     >
                       <Star
                         className="mr-2"
@@ -245,14 +321,16 @@ export default function Header({
                     </button>
                     <button
                       onClick={archiveCurrentChat}
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-text)" }}
                     >
                       <Archive size={16} className="mr-2" />
                       {isArchive ? "Un-archive" : "Archive"}
                     </button>
                     <button
                       onClick={openDeleteModal}
-                      className="px-4 py-2 text-sm text-red-500 hover:bg-[#202222] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-error)" }}
                     >
                       <Trash2 size={16} className="mr-2" />
                       Delete
@@ -262,10 +340,17 @@ export default function Header({
               )}
             </div>
 
-            {/* Update Desktop More Options */}
             <div className="relative hidden sm:block" ref={desktopMenuRef}>
               <button
-                className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
+                className="p-2 rounded-full transition duration-200"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-hover-bg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="More Options"
                 onClick={toggleMenu}
               >
@@ -273,18 +358,26 @@ export default function Header({
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a]">
+                <div
+                  className="absolute right-0 mt-2 w-36 rounded-md shadow-lg border z-50"
+                  style={{
+                    backgroundColor: "var(--color-bg)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
+                >
                   <div className="py-1">
                     <button
                       onClick={archiveCurrentChat}
-                      className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center cursor-pointer"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                     >
                       <Archive size={16} className="mr-2" />
                       {isArchive ? "Un-archive" : "Archive"}
                     </button>
                     <button
                       onClick={openDeleteModal}
-                      className="px-4 py-2 text-sm text-red-500 hover:bg-[#202222] w-full text-left flex items-center cursor-pointer"
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-error)" }}
                     >
                       <Trash2 size={16} className="mr-2" />
                       Delete

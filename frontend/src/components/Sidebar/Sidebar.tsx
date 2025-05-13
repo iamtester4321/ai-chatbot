@@ -98,16 +98,25 @@ const Sidebar = ({
   const favoriteChats = filteredChatList.filter((chat) => chat.isFavorite);
 
   return (
-    <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
+    <div
+      className="flex flex-col h-screen md:h-full w-full p-3 overflow-hidden"
+      style={{
+        backgroundColor: "var(--color-bg)",
+        color: "var(--color-text)",
+      }}
+    >
       <Link
         to={"/chat"}
         onClick={() => dispatch(resetChat())}
-        className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full"
+        className="flex items-center gap-2 p-2 mb-4 rounded-lg border transition-all duration-200 w-full"
+        style={{
+          backgroundColor: "var(--color-primary)",
+          borderColor: "var(--color-border)",
+          color: "white",
+        }}
       >
         <PlusIcon />
-        <span className="text-sm whitespace-nowrap text-white">
-          New Chat
-        </span>
+        <span className="text-sm whitespace-nowrap">New Chat</span>
       </Link>
 
       <div className="relative mb-4">
@@ -116,12 +125,17 @@ const Sidebar = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search chats"
-          className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
+          className="w-full px-8 py-2 text-sm rounded-lg"
+          style={{
+            backgroundColor: "var(--color-muted)",
+            borderColor: "var(--color-border)",
+            color: "var(--color-text)",
+          }}
         />
-        <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3]" />
+        <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4" style={{ color: "var(--color-disabled-text)" }} />
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#20b8cd] scrollbar-track-transparent pb-4">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-primary)] scrollbar-track-transparent pb-4">
         <FavoriteChats
           chats={favoriteChats}
           chatId={chatId}
@@ -132,7 +146,6 @@ const Sidebar = ({
           handleRename={handleRename}
           handleDelete={handleDelete}
         />
-
         <AllChats
           chats={filteredChatList}
           chatId={chatId}
@@ -143,7 +156,10 @@ const Sidebar = ({
         />
       </div>
 
-      <div className="border-t border-[#e8e8e61a] pt-3 pb-2 text-sm sticky bottom-0 bg-[#121212]">
+      <div
+        className="border-t pt-3 pb-2 text-sm sticky bottom-0"
+        style={{ borderColor: "var(--color-border)" }}
+      >
         {isUserMenuOpen && (
           <div className="mt-2 space-y-2">
             <button
@@ -151,7 +167,8 @@ const Sidebar = ({
                 setIsSettingsOpen(true);
                 setIsUserMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#e8e8e6b3] hover:bg-[#202222] transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+              style={{ color: "var(--color-text)" }}
             >
               <Settings size={16} />
               Settings
@@ -162,7 +179,8 @@ const Sidebar = ({
                 handleLogoutClick();
                 setIsUserMenuOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-500 hover:bg-[#202222] transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+              style={{ color: "var(--color-error)" }}
             >
               <LogOut size={16} />
               Logout
@@ -194,6 +212,7 @@ const Sidebar = ({
         chatId={selectedChat?.id || ""}
         currentName={selectedChat?.name || ""}
       />
+
       <LogoutModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
