@@ -110,37 +110,46 @@ const Sidebar = ({
         </span>
       </Link>
 
-      <div className="relative mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search chats"
-          className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
-        />
-        <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3]" />
-      </div>
+      {/* Conditionally render the search input */}
+      {chatList.length > 0 && (
+        <div className="relative mb-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search chats"
+            className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
+          />
+          <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3]" />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#20b8cd] scrollbar-track-transparent pb-4">
-        <FavoriteChats
-          chats={favoriteChats}
-          chatId={chatId}
-          isFavoritesOpen={isFavoritesOpen}
-          setIsFavoritesOpen={setIsFavoritesOpen}
-          toggleDropdown={(id) => toggleDropdown(id, "favorite")}
-          activeDropdown={activeDropdown}
-          handleRename={handleRename}
-          handleDelete={handleDelete}
-        />
+        {chatList.length === 0 ? (
+          <div className="text-center text-gray-400">No Chats Available</div>
+        ) : (
+          <>
+            <FavoriteChats
+              chats={favoriteChats}
+              chatId={chatId}
+              isFavoritesOpen={isFavoritesOpen}
+              setIsFavoritesOpen={setIsFavoritesOpen}
+              toggleDropdown={(id) => toggleDropdown(id, "favorite")}
+              activeDropdown={activeDropdown}
+              handleRename={handleRename}
+              handleDelete={handleDelete}
+            />
 
-        <AllChats
-          chats={filteredChatList}
-          chatId={chatId}
-          toggleDropdown={(id) => toggleDropdown(id, "all")}
-          activeDropdown={activeDropdown}
-          handleRename={handleRename}
-          handleDelete={handleDelete}
-        />
+            <AllChats
+              chats={filteredChatList}
+              chatId={chatId}
+              toggleDropdown={(id) => toggleDropdown(id, "all")}
+              activeDropdown={activeDropdown}
+              handleRename={handleRename}
+              handleDelete={handleDelete}
+            />
+          </>
+        )}
       </div>
 
       <div className="border-t border-[#e8e8e61a] pt-3 pb-2 text-sm sticky bottom-0 bg-[#121212]">
