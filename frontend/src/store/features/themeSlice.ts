@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -14,6 +14,9 @@ const getInitialTheme = (): ThemeState => {
   const mode: ThemeMode = stored || "system";
   const isDarkMode = mode === "dark" || (mode === "system" && systemPrefersDark);
 
+  // Apply class on load
+  document.documentElement.classList.toggle("dark", isDarkMode);
+
   return { mode, isDarkMode };
 };
 
@@ -24,33 +27,34 @@ const themeSlice = createSlice({
   initialState,
   reducers: {
     toggleTheme(state) {
-      // Toggle between system → light → dark → system
+      // cycle system → light → dark → system
       const nextMode: ThemeMode =
         state.mode === "system" ? "light" : state.mode === "light" ? "dark" : "system";
-
+      state.mode = nextMode;
       localStorage.setItem("theme", nextMode);
 
-      const isDark =
-        nextMode === "dark" ||
-        (nextMode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      state.isDarkMode = nextMode === "dark" || (nextMode === "system" && systemPrefersDark);
+      document.documentElement.classList.toggle("dark", state.isDarkMode);
+    },
+    setTheme(state, action: PayloadAction<ThemeMode>) {
+      const mode = action.payload;
+      state.mode = mode;
+      localStorage.setItem("theme", mode);
 
-      state.mode = nextMode;
-      state.isDarkMode = isDark;
-
-      document.documentElement.classList.toggle("dark", isDark);
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      state.isDarkMode = mode === "dark" || (mode === "system" && systemPrefersDark);
+      document.documentElement.classList.toggle("dark", state.isDarkMode);
     },
     applyStoredTheme(state) {
+      const mode = (localStorage.getItem("theme") as ThemeMode) || "system";
       const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const mode = localStorage.getItem("theme") as ThemeMode | null || "system";
-      const isDark = mode === "dark" || (mode === "system" && systemPrefersDark);
-
       state.mode = mode;
-      state.isDarkMode = isDark;
-
-      document.documentElement.classList.toggle("dark", isDark);
+      state.isDarkMode = mode === "dark" || (mode === "system" && systemPrefersDark);
+      document.documentElement.classList.toggle("dark", state.isDarkMode);
     },
   },
 });
 
-export const { toggleTheme, applyStoredTheme } = themeSlice.actions;
+export const { toggleTheme, setTheme, applyStoredTheme } = themeSlice.actions;
 export default themeSlice.reducer;

@@ -29,50 +29,80 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
     <>
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
-        <div className="bg-[#121212] border border-[#e8e8e61a] rounded-lg w-full max-w-4xl mx-4 h-[80vh] flex flex-col md:flex-row">
-          {/* Tabs section with close button for mobile */}
-          <div className="md:w-64 md:border-r border-b md:border-b-0 border-[#e8e8e61a] p-4 flex flex-col">
+        <div
+          className="rounded-lg w-full max-w-4xl mx-4 h-[80vh] flex flex-col md:flex-row overflow-hidden"
+          style={{
+            backgroundColor: "var(--color-bg)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text)",
+          }}
+        >
+          {/* Tabs section */}
+          <div
+            className="md:w-64 md:border-r border-b md:border-b-0 p-4 flex flex-col"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            {/* Mobile header */}
             <div className="flex items-center justify-between md:hidden mb-2">
-              <h2 className="text-xl font-semibold text-white">Settings</h2>
+              <h2 style={{ color: "var(--color-text)" }} className="text-xl font-semibold">
+                Settings
+              </h2>
               <button
                 onClick={onClose}
-                className="text-[#e8e8e6b3] hover:text-white transition-colors p-2"
+                style={{ color: "var(--color-disabled-text)" }}
+                className="p-2 hover:text-white transition-colors"
               >
                 ✕
               </button>
             </div>
+
+            {/* Tab buttons */}
             <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 p-3 rounded-lg text-left whitespace-nowrap transition-colors md:w-full ${
-                    activeTab === tab.id
-                      ? "bg-[#202222] text-[#20b8cd]"
-                      : "text-[#e8e8e6b3] hover:bg-[#202222]"
-                  }`}
+                  className="flex items-center gap-2 p-3 rounded-lg transition-colors whitespace-nowrap"
+                  style={{
+                    backgroundColor:
+                      activeTab === tab.id ? "var(--color-muted)" : "transparent",
+                    color:
+                      activeTab === tab.id ? "var(--color-primary)" : "var(--color-disabled-text)",
+                    border: activeTab === tab.id ? "1px solid var(--color-primary)" : "none",
+                  }}
                 >
-                  <tab.icon size={18} />
+                  <tab.icon
+                    size={18}
+                    style={{
+                      color: activeTab === tab.id
+                        ? "var(--color-primary)"
+                        : "var(--color-disabled-text)",
+                    }}
+                  />
                   <span>{tab.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Right content area */}
+          {/* Content area */}
           <div className="flex-1 p-6 overflow-y-auto">
+            {/* Desktop header */}
             <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">Settings</h2>
+              <h2 style={{ color: "var(--color-text)" }} className="text-xl font-semibold">
+                Settings
+              </h2>
               <button
                 onClick={onClose}
-                className="text-[#e8e8e6b3] hover:text-white transition-colors"
+                style={{ color: "var(--color-disabled-text)" }}
+                className="hover:text-text transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* Content based on active tab */}
-            <div className="text-[#e8e8e6b3]">
+            {/* Tab content */}
+            <div style={{ color: "var(--color-text)" }}>
               {activeTab === "general" && <GeneralSettings />}
               {activeTab === "archive" && <ArchivedChats archivedChats={archivedChats} />}
               {activeTab === "favorite" && <FavoriteChats favoriteChats={favoriteChats} />}
