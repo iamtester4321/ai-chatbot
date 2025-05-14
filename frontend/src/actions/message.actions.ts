@@ -16,7 +16,6 @@ export const updateLikeStatus = async (messageId: string, liked: boolean) => {
       const result = await response.json();
     
       if (response.ok) {
-        console.log("Message reaction updated successfully:", result);
         return result;
       } else {
         console.error("Failed to update message reaction:", result);
@@ -45,7 +44,6 @@ export const updateDislikeStatus = async (messageId: string, disliked: boolean) 
     const result = await response.json();
 
     if (response.ok) {
-      console.log("Message reaction updated successfully:", result);
       return result;
     } else {
       console.error("Failed to update message reaction:", result);

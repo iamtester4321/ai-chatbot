@@ -28,7 +28,7 @@ async function getUserVersion(userId: string) {
 
 export async function saveChat(
   userId: string,
-  messages: { role: string; content: string }[],
+  messages: { id: string; role: string; content: string }[],
   chatId: string
 ) {
   const result = await chatRepo.createChatWithMessagesOrApendMesages(

@@ -35,7 +35,6 @@ const ChatSection = () => {
       const loadMessages = async () => {
         const { success, data, error } = await fetchMessages(chatId);
         if (success && data) {
-          console.log(data);
           dispatch(setMessages(data.messages));
           dispatch(setChatName(data.name));
           dispatch(setIsArchived(data.isArchived));

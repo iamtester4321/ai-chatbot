@@ -2,7 +2,7 @@ import { prisma } from "../config/db";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
-  messages: { role: string; content: string }[],
+  messages: { id: string; role: string; content: string }[],
   chatId: string
 ) {
   const existingChat = await prisma.chat.findUnique({
@@ -12,6 +12,7 @@ export async function createChatWithMessagesOrApendMesages(
   if (existingChat) {
     await prisma.message.createMany({
       data: messages.map((m) => ({
+        id: m.id,
         role: m.role,
         content: m.content,
         chatId: chatId,
@@ -34,6 +35,7 @@ export async function createChatWithMessagesOrApendMesages(
         name: trimmedName,
         messages: {
           create: messages.map((m) => ({
+            id: m.id,
             role: m.role,
             content: m.content,
           })),
