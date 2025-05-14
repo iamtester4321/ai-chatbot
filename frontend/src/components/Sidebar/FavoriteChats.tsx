@@ -18,7 +18,7 @@ interface FavoriteChatsProps {
   isFavoritesOpen: boolean;
   setIsFavoritesOpen: (value: boolean) => void;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: {id: string | null, section: 'favorite' | 'all' | null};
+  activeDropdown: { id: string | null; section: "favorite" | "all" | null };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }
@@ -38,10 +38,10 @@ const FavoriteChats = ({
   const handleRemoveFromFavorites = async (chatId: string) => {
     try {
       const result = await toggleFavoriteChat(chatId);
-      
+
       if (result.success) {
         showToast.success(result.message || "Removed from favorites");
-        toggleDropdown(chatId); 
+        toggleDropdown(chatId);
       } else {
         showToast.error(result.message || "Failed to remove from favorites");
       }
@@ -57,14 +57,14 @@ const FavoriteChats = ({
     <div className="mb-4">
       <button
         onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
-        className="flex items-center gap-2 px-2.5 py-2 text-sm text-[#e8e8e6b3] w-full hover:bg-[#202222] rounded-lg transition-all duration-200"
+        className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
       >
         {isFavoritesOpen ? (
-          <ChevronDown size={16} className="text-[#e8e8e6b3]" />
+          <ChevronDown size={16} className="text-[color:var(--color-text)]" />
         ) : (
-          <ChevronRight size={16} className="text-[#e8e8e6b3]" />
+          <ChevronRight size={16} className="text-[color:var(--color-text)]" />
         )}
-        <Star size={16} fill={"gold"} color={"gold"} />
+        <Star size={16} fill="gold" color="gold" />
         <span>Favorites</span>
       </button>
       {isFavoritesOpen &&
@@ -72,8 +72,8 @@ const FavoriteChats = ({
           <div key={chat.id} className="relative group">
             <Link
               to={`/chat/${chat.id}`}
-              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200 hover:text-yellow-500 ${
-                chatId === chat.id ? "bg-[#202222] text-[#20b8cd]" : ""
+              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
+                chatId === chat.id ? "bg-[var(--color-muted)] text-yellow-500" : ""
               }`}
             >
               <span className="truncate flex-1" title={chat.name}>
@@ -81,50 +81,51 @@ const FavoriteChats = ({
               </span>
               <div className="flex items-center gap-2">
                 {chat.isArchived && (
-                  <Archive size={16} className="text-gray-500" />
+                  <Archive size={16} className="text-[color:var(--color-disabled-text)]" />
                 )}
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     toggleDropdown(chat.id);
                   }}
-                  className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200"
+                  className="p-1 hover:bg-[var(--color-border)] rounded-lg transition-all duration-200"
                 >
                   <MoreHorizontal size={16} />
                 </button>
               </div>
             </Link>
 
-            {activeDropdown.id === chat.id && activeDropdown.section === 'favorite' && (
-              <div
-                data-dropdown-menu
-                className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-[#121212] border border-[#e8e8e61a] z-50"
-              >
-                <div className="py-1">
-                  <button
-                    onClick={() => handleRename(chat.id)}
-                    className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] w-full text-left flex items-center"
-                  >
-                    <Pencil size={16} className="mr-2" />
-                    Rename
-                  </button>
-                  <button
-                    onClick={() => handleDelete(chat.id)}
-                    className="px-4 py-2 text-sm text-red-500 hover:bg-[#202222] w-full text-left flex items-center"
-                  >
-                    <Trash2 size={16} className="mr-2" />
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => handleRemoveFromFavorites(chat.id)}
-                    className="px-4 py-2 text-sm text-yellow-500 hover:bg-[#202222] w-full text-left flex items-center"
-                  >
-                    <Star size={16} className="mr-2" />
-                    Remove
-                  </button>
+            {activeDropdown.id === chat.id &&
+              activeDropdown.section === "favorite" && (
+                <div
+                  data-dropdown-menu
+                  className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)] z-50"
+                >
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleRename(chat.id)}
+                      className="px-4 py-2 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                    >
+                      <Pencil size={16} className="mr-2" />
+                      Rename
+                    </button>
+                    <button
+                      onClick={() => handleDelete(chat.id)}
+                      className="px-4 py-2 text-sm text-[var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                    >
+                      <Trash2 size={16} className="mr-2" />
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => handleRemoveFromFavorites(chat.id)}
+                      className="px-4 py-2 text-sm text-yellow-500 hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                    >
+                      <Star size={16} className="mr-2" />
+                      Remove
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         ))}
     </div>

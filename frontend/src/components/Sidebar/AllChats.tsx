@@ -6,7 +6,7 @@ interface AllChatsProps {
   chats: ChatState["chatList"];
   chatId: string | undefined;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: { id: string | null; section: "favorite" | "all" | null };
+  activeDropdown: { id: string | null; section: 'favorite' | 'all' | null };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }
