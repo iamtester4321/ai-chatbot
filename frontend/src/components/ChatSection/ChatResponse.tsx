@@ -9,9 +9,9 @@ import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { formatMarkdownResponse } from "../../utils/responseRenderer";
 import StreamLoader from "../StreamLoader/StreamLoader";
 import PromptInput from "./PromptInput";
+import MarkdownRenderer from "../../utils/responseRenderer";
 
 const ChatResponse = ({
   messages,
@@ -169,12 +169,10 @@ const ChatResponse = ({
 
               return (
                 <div key={index} className="space-y-2">
-                  <div
-                    className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2"
-                    dangerouslySetInnerHTML={{
-                      __html: formatMarkdownResponse(msg.content),
-                    }}
-                  />
+                  <div className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2">
+                    {/* Use MarkdownRenderer here */}
+                    <MarkdownRenderer content={msg.content} />
+                  </div>
                   <div className="flex items-center space-x-3 text-gray-400">
                     <button
                       className="p-1 hover:text-white cursor-pointer"
@@ -236,12 +234,10 @@ const ChatResponse = ({
             {/* Current AI response */}
             {chatResponse && (
               <div className="space-y-2">
-                <div
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{
-                    __html: formatMarkdownResponse(chatResponse),
-                  }}
-                />
+                <div className="prose prose-invert max-w-none">
+                  {/* Use MarkdownRenderer for AI response */}
+                  <MarkdownRenderer content={chatResponse} />
+                </div>
 
                 {/* Action buttons */}
                 {showResponseActions && (
