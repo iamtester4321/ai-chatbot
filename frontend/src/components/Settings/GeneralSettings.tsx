@@ -100,16 +100,17 @@ const GeneralSettings = () => {
         </h3>
         <button
           onClick={() => setIsLogoutModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 border border-border text-red-600 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 border border-border color-error"
           style={{
-            backgroundColor: "var(--color-muted)",
+            backgroundColor: "var(--color-muted-hover)",
             borderRadius: "8px",
+            color: "var(--color-error)"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--color-muted-hover)";
+            e.currentTarget.style.backgroundColor = "var(--color-muted)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--color-muted)";
+            e.currentTarget.style.backgroundColor = "var(--color-muted-hover)";
           }}
         >
           <LogOut size={18} />

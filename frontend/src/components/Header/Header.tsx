@@ -191,10 +191,12 @@ export default function Header({
           }}
           title={
             mode === "system"
-              ? "Switch to Light Mode"
+              ? isDarkMode
+                ? "Switch to Light Mode" 
+                : "Switch to Dark Mode" 
               : mode === "light"
-              ? "Switch to Dark Mode"
-              : "Switch to System Theme"
+              ? "Switch to Dark Mode" 
+              : "Switch to Light Mode" 
           }
           onClick={handleToggleTheme}
         >
@@ -289,8 +291,10 @@ export default function Header({
                   }}
                 >
                   <div className="py-1">
-                    <button className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
-                      style={{ color: "var(--color-text)" }}>
+                    <button
+                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       <Share2 size={18} className="mr-2" />
                       Share
                     </button>

@@ -3,7 +3,7 @@
 /* Default light theme */
 :root {
   --color-bg: #f9fafb;
-  --color-text: #111827;
+  --color-text: #0b101c;
   --color-muted: #e5e7eb;
   --color-border: #e5e7eb;
   --color-primary: #10b981;
@@ -13,7 +13,11 @@
   --color-google-hover: #e5e7eb;
   --color-disabled-bg: #f3f4f6;
   --color-disabled-text: #9ca3af;
-  --color-hover-bg: #cecccc;
+  --color-hover-bg: var(--color-muted-hover);
+  --color-delete-hover: #e53e3e;
+  --color-delete-base: #e74141;
+  --color-delete-hover: #e53e3e;
+  --color-delete-text: white;
 }
 
 /* Auto dark theme using system preference */
@@ -48,6 +52,9 @@
   --color-google-hover: #334155;
   --color-disabled-bg: #334155;
   --color-disabled-text: #6b7280;
+  --color-delete-base: #e42c2c;
+  --color-delete-hover: #e53e3e;
+  --color-delete-text: white;
 }
 
 body {
@@ -71,4 +78,21 @@ body {
   border-right: 6px solid transparent;
   border-left: 6px solid transparent;
   border-bottom: 6px solid var(--color-muted);
+}
+
+.custom-toast {
+  background-color: var(--color-muted) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+/* Success toast */
+.success-toast {
+  border-left: 4px solid var(--color-success, #22c55e); /* fallback green */
+}
+
+/* Error toast */
+.error-toast {
+  border-left: 4px solid var(--color-error, #ef4444); /* fallback red */
 }

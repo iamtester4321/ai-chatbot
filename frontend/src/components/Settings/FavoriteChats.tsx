@@ -42,7 +42,10 @@ const FavoriteChats = ({ favoriteChats }: FavoriteChatsProps) => {
 
   if (!favoriteChats?.length) {
     return (
-      <div style={{ color: "var(--color-disabled-text)" }} className="text-center py-8">
+      <div
+        style={{ color: "var(--color-disabled-text)" }}
+        className="text-center py-8"
+      >
         No favorite chats found
       </div>
     );
@@ -50,7 +53,10 @@ const FavoriteChats = ({ favoriteChats }: FavoriteChatsProps) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium mb-2" style={{ color: "var(--color-text)" }}>
+      <h3
+        className="text-lg font-medium mb-2"
+        style={{ color: "var(--color-text)" }}
+      >
         Favorite Chats
       </h3>
       {favoriteChats.map((chat) => (
@@ -80,14 +86,13 @@ const FavoriteChats = ({ favoriteChats }: FavoriteChatsProps) => {
                 onClick={() => openDeleteModal(chat.id)}
                 className="p-2 rounded-lg transition-colors"
                 style={{
-                  color: "var(--color-disabled-text)",
+                  color: "var(--color-error)",
+                  backgroundColor: "transparent",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "red";
-                  e.currentTarget.style.backgroundColor = "var(--color-muted-hover)";
+                  e.currentTarget.style.backgroundColor = "var(--color-muted)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "var(--color-disabled-text)";
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
                 title="Delete"

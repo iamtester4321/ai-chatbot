@@ -73,7 +73,7 @@ const FavoriteChats = ({
             <Link
               to={`/chat/${chat.id}`}
               className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
-                chatId === chat.id ? "bg-[var(--color-muted)] text-[var(--color-primary)]" : ""
+                chatId === chat.id ? "bg-[var(--color-muted)] text-yellow-500" : ""
               }`}
             >
               <span className="truncate flex-1" title={chat.name}>

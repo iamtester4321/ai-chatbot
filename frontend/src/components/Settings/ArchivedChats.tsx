@@ -42,7 +42,10 @@ const ArchivedChats = ({ archivedChats }: ArchivedChatsProps) => {
 
   if (!archivedChats?.length) {
     return (
-      <div className="text-[#e8e8e6b3] text-center py-8">
+      <div
+        style={{ color: "var(--color-disabled-text)" }}
+        className="text-center py-8"
+      >
         No archived chats found
       </div>
     );
@@ -50,27 +53,55 @@ const ArchivedChats = ({ archivedChats }: ArchivedChatsProps) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-white mb-2">Archived Chats</h3>
+      <h3
+        className="text-lg font-medium mb-2"
+        style={{ color: "var(--color-text)" }}
+      >
+        Archived Chats
+      </h3>
       {archivedChats.map((chat) => (
-        <div key={chat.id} className="bg-[#202222] rounded-lg p-4">
+        <div
+          key={chat.id}
+          className="rounded-lg p-4"
+          style={{ backgroundColor: "var(--color-muted)" }}
+        >
           <div className="flex items-center justify-between">
             <Link
               to={`/chat/${chat.id}`}
-              className="text-white font-medium hover:text-[#20b8cd] transition-colors"
+              style={{ color: "var(--color-text)" }}
+              className="font-medium hover:text-[var(--color-primary)] transition-colors"
             >
               {chat.name}
             </Link>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleRestoreChat(chat.id)}
-                className="p-2 hover:bg-[#2c2c2c] rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-muted-hover)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="Restore Chat"
               >
                 <CornerUpLeft size={16} />
               </button>
               <button
                 onClick={() => openDeleteModal(chat.id)}
-                className="p-2 text-[#e8e8e6b3] hover:text-red-500 hover:bg-[#2c2c2c] rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{
+                  color: "var(--color-error)",
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--color-muted)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
                 title="Delete"
               >
                 <Trash2 size={16} />
