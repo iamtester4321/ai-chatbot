@@ -20,10 +20,6 @@ export type PromptInputProps = {
 export type SidebarProps = {
   isLogoutModalOpen: boolean;
   setIsLogoutModalOpen: (isOpen: boolean) => void;
-  user: {
-    id: string;
-    email: string;
-  } | null;
   setIsSettingsOpen: (open: boolean) => void;
   chatList: ChatState["chatList"];
   isInShareRoute: boolean;

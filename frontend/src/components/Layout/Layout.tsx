@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { fetchChatNames } from "../../actions/chat.actions";
-import { fetchUserProfile } from "../../actions/user.actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
@@ -16,7 +15,6 @@ function Layout() {
   const chatList = useAppSelector((state) => state.chat.chatList);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChat, setSelectedChat] = useState<{
@@ -49,19 +47,17 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    if (!isInShareRoute) {
-      const getChatNames = async () => {
-        try {
-          const { success } = await fetchChatNames(dispatch);
-          if (!success) {
-            console.error("Failed to fetch chat names");
-          }
-        } catch (error) {
-          console.log(error);
+    const getChatNames = async () => {
+      try {
+        const { success } = await fetchChatNames(dispatch);
+        if (!success) {
+          console.error("Failed to fetch chat names");
         }
-      };
-      getChatNames();
-    }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getChatNames();
   }, []);
 
   useEffect(() => {
@@ -74,22 +70,6 @@ function Layout() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (!isInShareRoute) {
-      const getUserProfile = async () => {
-        try {
-          const { success, data } = await fetchUserProfile();
-          if (success && data) {
-            setUser(data);
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
-      };
-      getUserProfile();
-    }
   }, []);
 
   useEffect(() => {
@@ -136,7 +116,6 @@ function Layout() {
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
           setIsLogoutModalOpen={setIsLogoutModalOpen}
-          user={user}
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
           isInShareRoute={isInShareRoute}
