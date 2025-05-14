@@ -54,41 +54,41 @@ const FavoriteChats = ({
   if (chats.length === 0) return null;
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 overflow-hidden">
       <button
         onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
-        className="flex items-center gap-2 px-2.5 py-2 text-sm text-[#e8e8e6b3] w-full hover:bg-[#202222] rounded-lg transition-all duration-200"
+        className="flex items-center gap-2 px-2.5 py-2 text-sm text-[#e8e8e6b3] w-full hover:bg-[#202222] rounded-lg transition-all duration-200 overflow-hidden"
       >
         {isFavoritesOpen ? (
-          <ChevronDown size={16} className="text-[#e8e8e6b3]" />
+          <ChevronDown size={16} className="text-[#e8e8e6b3] flex-shrink-0" />
         ) : (
-          <ChevronRight size={16} className="text-[#e8e8e6b3]" />
+          <ChevronRight size={16} className="text-[#e8e8e6b3] flex-shrink-0" />
         )}
-        <Star size={16} fill={"gold"} color={"gold"} />
-        <span>Favorites</span>
+        <Star size={16} fill={"gold"} color={"gold"} className="flex-shrink-0" />
+        <span className="truncate">Favorites</span>
       </button>
       {isFavoritesOpen &&
         chats.map((chat) => (
-          <div key={chat.id} className="relative group">
+          <div key={chat.id} className="relative group overflow-hidden">
             <Link
               to={`/chat/${chat.id}`}
-              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200 hover:text-yellow-500 ${
+              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200 hover:text-yellow-500 overflow-hidden ${
                 chatId === chat.id ? "bg-[#202222] text-[#20b8cd]" : ""
               }`}
             >
-              <span className="truncate flex-1" title={chat.name}>
+              <span className="truncate flex-1 min-w-0" title={chat.name}>
                 {chat.name}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {chat.isArchived && (
-                  <Archive size={16} className="text-gray-500" />
+                  <Archive size={16} className="text-gray-500 flex-shrink-0" />
                 )}
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     toggleDropdown(chat.id);
                   }}
-                  className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200"
+                  className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200 flex-shrink-0"
                 >
                   <MoreHorizontal size={16} />
                 </button>

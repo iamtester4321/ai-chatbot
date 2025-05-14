@@ -29,6 +29,8 @@ export const streamChat = async (req: any, res: any) => {
   }
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
+  const userMessageId = req.body.userMessageId;
+  const assistantMessageId = req.body.assistantMessageId;
   let assistantReply = "";
 
   const model = google("gemini-2.0-flash");
@@ -36,26 +38,22 @@ export const streamChat = async (req: any, res: any) => {
   try {
     const result = streamText({
       model,
-
       messages: [...messages, { role: "user", content: req.body.prompt }],
-
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
-
       onFinish: async () => {
         await saveChat(
           userId,
           [
-            { role: "user", content: req.body.prompt },
-            { role: "assistant", content: assistantReply },
+            { id: userMessageId, role: "user", content: req.body.prompt },
+            { id: assistantMessageId, role: "assistant", content: assistantReply },
           ],
           chatId
         );
       },
-
       onError: (err) => console.error("Stream error:", err),
     });
     result.pipeTextStreamToResponse(res);

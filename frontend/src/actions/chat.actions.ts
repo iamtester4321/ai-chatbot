@@ -33,8 +33,12 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
+      const userMessageId = uuidv4();
+      const assistantMessageId = uuidv4();
+      
       dispatch(
         addMessage({
+          id: userMessageId,
           role: "user",
           content: input,
           createdAt: new Date().toISOString(),
@@ -48,6 +52,8 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          userMessageId,
+          assistantMessageId,
           prompt: input,
           messages: messages,
           chatId: chatId || "",
@@ -76,6 +82,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         }
         dispatch(
           addMessage({
+            id: assistantMessageId,
             role: "assistant",
             content: accumulatedText,
             createdAt: new Date().toISOString(),
@@ -328,6 +335,7 @@ export async function generateShareId(chatId: string) {
       message: data.message,
     };
   } catch (error) {
+    console.error(error)
     return { success: false, message: "Network error" };
   }
 }

@@ -7,6 +7,7 @@ import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
+import { useParams } from "react-router-dom";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -16,6 +17,7 @@ function Layout() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { chatId } = useParams();
   const location = useLocation();
   const isInShareRoute = location.pathname.startsWith("/share/");
 
@@ -102,6 +104,12 @@ function Layout() {
       window.removeEventListener("chat-archived", handleChatUpdates);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMobile && chatId) {
+      setIsSidebarOpen(false);
+    }
+  }, [chatId, isMobile]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

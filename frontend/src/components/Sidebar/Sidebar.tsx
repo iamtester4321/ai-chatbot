@@ -105,28 +105,30 @@ const Sidebar = ({
     <>
       {!isInShareRoute && (
         <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
+        <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
           <Link
             to={"/chat"}
             onClick={() => dispatch(resetChat())}
-            className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full"
+            className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full cursor-pointer truncate"
           >
-            <PlusIcon />
-            <span className="text-sm whitespace-nowrap text-white">
-              New Chat
-            </span>
+            <div className="flex items-center justify-center gap-2 w-full truncate">
+              <PlusIcon className="flex-shrink-0" />
+              <span className="text-sm whitespace-nowrap text-white truncate">New Chat</span>
+            </div>
           </Link>
-
-          {/* Conditionally render the search input */}
-          {chatList.filter((chat) => !chat.isArchived).length > 0 && (
-            <div className="relative mb-4">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search chats"
-                className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd]"
-              />
-              <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3]" />
+        </span>
+  
+        {/* Conditionally render the search input */}
+        {chatList.filter((chat) => !chat.isArchived).length > 0 && (
+          <div className="relative mb-4 truncate">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search chats"
+              className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd] truncate"
+            />
+            <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3] flex-shrink-0" />
             </div>
           )}
 
