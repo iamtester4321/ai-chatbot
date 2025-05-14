@@ -11,6 +11,11 @@ export const createShare = async (
   chatId: string,
   userId: string
 ) => {
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: { isShare: true },
+  });
+
   return prisma.share.create({
     data: {
       id,

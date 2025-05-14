@@ -28,6 +28,7 @@ model Chat {
   name       String
   isFavorite Boolean      @default(false)
   isArchived Boolean      @default(false)
+  isShare Boolean      @default(false)
   type       ChatType     @default(text)
   createdAt  DateTime     @default(now())
   user       User         @relation(fields: [userId], references: [id])
