@@ -3,11 +3,11 @@ export type ChatResponseProps = {
   chatResponse: string;
   isLoading: boolean;
   chatName: string;
-  input:string;
+  input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
-  chatId:string;
-  shareId:string;
+  chatId: string;
+  shareId: string;
 };
 
 export type PromptInputProps = {
@@ -17,18 +17,29 @@ export type PromptInputProps = {
   handleFormSubmit: (e: React.FormEvent) => void;
 };
 
-export type SidebarItemProps = {
-  icon: React.ReactNode;
-  label: string;
+export type SidebarProps = {
+  isLogoutModalOpen: boolean;
+  setIsLogoutModalOpen: (isOpen: boolean) => void;
+  user: {
+    id: string;
+    email: string;
+  } | null;
+  setIsSettingsOpen: (open: boolean) => void;
+  chatList: ChatState["chatList"];
+  isInShareRoute: boolean;
+  setIsRenameModalOpen: (isOpen: boolean) => void;
+  setIsDeleteModalOpen: (isOpen: boolean) => void;
+  setSelectedChatId: (id: string | null) => void;
+  setSelectedChat: (chat: { id: string; name: string } | null) => void;
 };
 
 export type Message = {
-  id?:string
+  id?: string;
   role: string;
   content: string;
   createdAt: string;
   isLiked?: boolean;
-  isDisliked?: boolean; 
+  isDisliked?: boolean;
 };
 
 export type ChatState = {
@@ -36,8 +47,8 @@ export type ChatState = {
   currentResponse: string;
   isLoading: boolean;
   chatName: string;
-  chatList: Array<{ 
-    id: string; 
+  chatList: Array<{
+    id: string;
     name: string;
     isFavorite: boolean;
     isArchived: boolean;

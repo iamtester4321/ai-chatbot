@@ -1,29 +1,15 @@
+import { LogOut, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
-import { ChatState } from "../../lib/types";
+import { SidebarProps } from "../../lib/types";
 import { resetChat } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
-import DeleteModal from "../Modal/DeleteModal";
 import LogoutModal from "../Modal/LogoutModal";
-import RenameModal from "../Modal/RenameModal";
+import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
-import { LogOut, Settings } from "lucide-react";
-import { UserDetail } from "../UserDetail/UserDetail";
-
-interface SidebarProps {
-  isLogoutModalOpen: boolean;
-  setIsLogoutModalOpen: (isOpen: boolean) => void;
-  user: {
-    id: string;
-    email: string;
-  } | null;
-  setIsSettingsOpen: (open: boolean) => void;
-  chatList: ChatState["chatList"];
-  isInShareRoute: boolean;
-}
 
 const Sidebar = ({
   isLogoutModalOpen,
@@ -32,6 +18,10 @@ const Sidebar = ({
   setIsSettingsOpen,
   chatList,
   isInShareRoute,
+  setIsRenameModalOpen,
+  setIsDeleteModalOpen,
+  setSelectedChat,
+  setSelectedChatId,
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -44,13 +34,7 @@ const Sidebar = ({
   });
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -105,30 +89,32 @@ const Sidebar = ({
     <>
       {!isInShareRoute && (
         <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
-        <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
-          <Link
-            to={"/chat"}
-            onClick={() => dispatch(resetChat())}
-            className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full cursor-pointer truncate"
-          >
-            <div className="flex items-center justify-center gap-2 w-full truncate">
-              <PlusIcon className="flex-shrink-0" />
-              <span className="text-sm whitespace-nowrap text-white truncate">New Chat</span>
-            </div>
-          </Link>
-        </span>
-  
-        {/* Conditionally render the search input */}
-        {chatList.filter((chat) => !chat.isArchived).length > 0 && (
-          <div className="relative mb-4 truncate">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search chats"
-              className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd] truncate"
-            />
-            <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3] flex-shrink-0" />
+          <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
+            <Link
+              to={"/chat"}
+              onClick={() => dispatch(resetChat())}
+              className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full cursor-pointer truncate"
+            >
+              <div className="flex items-center justify-center gap-2 w-full truncate">
+                <PlusIcon className="flex-shrink-0" />
+                <span className="text-sm whitespace-nowrap text-white truncate">
+                  New Chat
+                </span>
+              </div>
+            </Link>
+          </span>
+
+          {/* Conditionally render the search input */}
+          {chatList.filter((chat) => !chat.isArchived).length > 0 && (
+            <div className="relative mb-4 truncate">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search chats"
+                className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd] truncate"
+              />
+              <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3] flex-shrink-0" />
             </div>
           )}
 
@@ -194,25 +180,6 @@ const Sidebar = ({
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
             />
           </div>
-
-          <DeleteModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => {
-              setIsDeleteModalOpen(false);
-              setSelectedChatId(null);
-            }}
-            chatId={selectedChatId || ""}
-          />
-
-          <RenameModal
-            isOpen={isRenameModalOpen}
-            onClose={() => {
-              setIsRenameModalOpen(false);
-              setSelectedChat(null);
-            }}
-            chatId={selectedChat?.id || ""}
-            currentName={selectedChat?.name || ""}
-          />
           <LogoutModal
             isOpen={isLogoutModalOpen}
             onClose={() => setIsLogoutModalOpen(false)}

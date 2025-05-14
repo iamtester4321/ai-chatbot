@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { fetchChatNames } from "../../actions/chat.actions";
 import { fetchUserProfile } from "../../actions/user.actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
+import DeleteModal from "../Modal/DeleteModal";
+import RenameModal from "../Modal/RenameModal";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
-import { useParams } from "react-router-dom";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -17,6 +18,15 @@ function Layout() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const { chatId } = useParams();
   const location = useLocation();
   const isInShareRoute = location.pathname.startsWith("/share/");
@@ -130,6 +140,10 @@ function Layout() {
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
           isInShareRoute={isInShareRoute}
+          setIsRenameModalOpen={setIsRenameModalOpen}
+          setIsDeleteModalOpen={setIsDeleteModalOpen}
+          setSelectedChat={setSelectedChat}
+          setSelectedChatId={setSelectedChatId}
         />
       </div>
 
@@ -143,14 +157,11 @@ function Layout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col transition-all duration-300 w-full">
-        {!isSettingsOpen && (
-          <Header
-            toggleSidebar={toggleSidebar}
-            isLogoutModalOpen={isLogoutModalOpen}
-            isInShareRoute={isInShareRoute}
-          />
-        )}
-
+        <Header
+          toggleSidebar={toggleSidebar}
+          isLogoutModalOpen={isLogoutModalOpen}
+          isInShareRoute={isInShareRoute}
+        />
         <div className="flex-1 overflow-y-auto">
           <ChatSection />
         </div>
@@ -159,6 +170,23 @@ function Layout() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         chatList={chatList}
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedChatId(null);
+        }}
+        chatId={selectedChatId || ""}
+      />
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => {
+          setIsRenameModalOpen(false);
+          setSelectedChat(null);
+        }}
+        chatId={selectedChat?.id || ""}
+        currentName={selectedChat?.name || ""}
       />
     </div>
   );
