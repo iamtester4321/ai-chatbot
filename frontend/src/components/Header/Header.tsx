@@ -36,7 +36,7 @@ interface HeaderProps {
 export default function Header({
   toggleSidebar,
   isLogoutModalOpen,
-  isInShareRoute
+  isInShareRoute,
 }: HeaderProps) {
   const { chatId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,7 +50,7 @@ export default function Header({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isShareOpen, setShareOpen] = useState(false);
   const dispatch = useAppDispatch();
-    const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
+  const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
 
   const openDeleteModal = () => {
     setIsDeleteModalOpen(true);
@@ -89,7 +89,7 @@ export default function Header({
 
   const renderThemeIcon = () => {
     if (mode === "system") return <Monitor size={20} />;
-    return isDarkMode ? <Sun size={20} /> : <Moon size={20} />;
+    return isDarkMode ? <Moon size={20} /> : <Sun size={20} />;
   };
 
   const showToast = useToast();
@@ -181,21 +181,22 @@ export default function Header({
       }}
     >
       <div className="flex items-center">
-        {!isInShareRoute &&
-        <button
-          className="p-2 rounded-full transition duration-200"
-          style={{ backgroundColor: "transparent" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          onClick={toggleSidebar}
-          title="Toggle Sidebar"
-        >
-          <Sidebar size={20} />
-        </button>}
+        {!isInShareRoute && (
+          <button
+            className="p-2 rounded-full transition duration-200"
+            style={{ backgroundColor: "transparent" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            onClick={toggleSidebar}
+            title="Toggle Sidebar"
+          >
+            <Sidebar size={20} />
+          </button>
+        )}
         <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
           AI Assistant
         </h1>
@@ -212,13 +213,13 @@ export default function Header({
             e.currentTarget.style.backgroundColor = "transparent";
           }}
           title={
-            mode === "system"
-              ? isDarkMode
-                ? "Switch to Light Mode" 
-                : "Switch to Dark Mode" 
-              : mode === "light"
-              ? "Switch to Dark Mode" 
-              : "Switch to Light Mode" 
+            mode === "light"
+              ? "Switch to Dark Mode"
+              : mode === "dark"
+              ? "Switch to System Mode"
+              : isDarkMode
+              ? "Switch to Light Mode"
+              : "Switch to Dark Mode"
           }
           onClick={handleToggleTheme}
         >
@@ -244,26 +245,26 @@ export default function Header({
                 <Share2 size={20} />
               </button>
 
-                {!isArchive && (
-              <button
-                className="p-2 rounded-full transition duration-200"
-                style={{ backgroundColor: "transparent" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    "var(--color-hover-bg)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-                title="Favorite"
-                onClick={toggleFavorite}
-              >
-                <Star
-                  size={20}
-                  fill={isFavorite ? "gold" : "none"}
-                  color={isFavorite ? "gold" : "currentColor"}
-                />
-              </button>
+              {!isArchive && (
+                <button
+                  className="p-2 rounded-full transition duration-200"
+                  style={{ backgroundColor: "transparent" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      "var(--color-hover-bg)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                  title="Favorite"
+                  onClick={toggleFavorite}
+                >
+                  <Star
+                    size={20}
+                    fill={isFavorite ? "gold" : "none"}
+                    color={isFavorite ? "gold" : "currentColor"}
+                  />
+                </button>
               )}
             </div>
 
@@ -304,32 +305,32 @@ export default function Header({
                     </button>
                     {!isArchive && (
                       <>
-                      <button
-                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
-                      style={{ color: "var(--color-text)" }}
-                      onClick={toggleChartMode}
-                    >
-                      {isChartMode ? (
-                        <MessageSquare size={18} className="mr-2" />
-                      ) : (
-                        <BarChart2 size={18} className="mr-2" />
-                      )}
-                      {isChartMode ? "Chat Mode" : "Chart Mode"}
-                    </button>
-                    <button
-                      onClick={toggleFavorite}
-                      className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
-                      style={{ color: "var(--color-text)" }}
-                    >
-                      <Star
-                        className="mr-2"
-                        size={18}
-                        fill={isFavorite ? "gold" : "none"}
-                        color={isFavorite ? "gold" : "currentColor"}
-                      />
-                      Favourite
-                    </button>
-                    </>
+                        <button
+                          className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                          style={{ color: "var(--color-text)" }}
+                          onClick={toggleChartMode}
+                        >
+                          {isChartMode ? (
+                            <MessageSquare size={18} className="mr-2" />
+                          ) : (
+                            <BarChart2 size={18} className="mr-2" />
+                          )}
+                          {isChartMode ? "Chat Mode" : "Chart Mode"}
+                        </button>
+                        <button
+                          onClick={toggleFavorite}
+                          className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                          style={{ color: "var(--color-text)" }}
+                        >
+                          <Star
+                            className="mr-2"
+                            size={18}
+                            fill={isFavorite ? "gold" : "none"}
+                            color={isFavorite ? "gold" : "currentColor"}
+                          />
+                          Favourite
+                        </button>
+                      </>
                     )}
                     <button
                       onClick={archiveCurrentChat}

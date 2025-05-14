@@ -88,14 +88,14 @@ const Sidebar = ({
   return (
     <>
       {!isInShareRoute && (
-        <div className="flex flex-col h-screen md:h-full w-full bg-[#121212] text-white p-3 overflow-hidden">
+        <div className="flex flex-col h-screen md:h-full w-full bg-[var(--color-bg)] text-[color:var(--color-text)] p-3 overflow-hidden">
           <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
             <Link
               to={"/chat"}
               onClick={() => dispatch(resetChat())}
-              className="flex items-center gap-2 p-2 mb-4 bg-[#20b8cd] border border-[#e8e8e61a] rounded-lg hover:bg-[#1a9eb2] transition-all duration-200 w-full cursor-pointer truncate"
+              className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
             >
-              <div className="flex items-center justify-center gap-2 w-full truncate">
+              <div className="flex items-center justify-center gap-2 p-2 w-full truncate cursor-pointer transition-all">
                 <PlusIcon className="flex-shrink-0" />
                 <span className="text-sm whitespace-nowrap text-white truncate">
                   New Chat
@@ -104,7 +104,6 @@ const Sidebar = ({
             </Link>
           </span>
 
-          {/* Conditionally render the search input */}
           {chatList.filter((chat) => !chat.isArchived).length > 0 && (
             <div className="relative mb-4 truncate">
               <input
@@ -112,15 +111,15 @@ const Sidebar = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search chats"
-                className="w-full px-8 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-gray-200 placeholder-[#e8e8e6b3] focus:outline-none focus:border-[#20b8cd] truncate"
+                className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[color:var(--color-placeholder)] focus:outline-none focus:border-[var(--color-primary)] truncate"
               />
-              <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[#e8e8e6b3] flex-shrink-0" />
+              <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[color:var(--color-placeholder)] flex-shrink-0" />
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#20b8cd] scrollbar-track-transparent pb-4">
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-primary)] scrollbar-track-transparent pb-4">
             {chatList.length === 0 ? (
-              <div className="text-center text-gray-400">
+              <div className="text-center text-[color:var(--color-disabled-text)]">
                 No Chats Available
               </div>
             ) : (
@@ -148,7 +147,7 @@ const Sidebar = ({
             )}
           </div>
 
-          <div className="border-t border-[#e8e8e61a] pt-3 pb-2 text-sm sticky bottom-0 bg-[#121212]">
+          <div className="border-t border-[var(--color-border)] pt-3 pb-2 text-sm sticky bottom-0 bg-[var(--color-bg)]">
             {isUserMenuOpen && (
               <div className="mt-2 space-y-2">
                 <button
@@ -156,7 +155,7 @@ const Sidebar = ({
                     setIsSettingsOpen(true);
                     setIsUserMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#e8e8e6b3] hover:bg-[#202222] transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors"
                 >
                   <Settings size={16} />
                   Settings
@@ -167,7 +166,7 @@ const Sidebar = ({
                     handleLogoutClick();
                     setIsUserMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-500 hover:bg-[#202222] transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
                 >
                   <LogOut size={16} />
                   Logout

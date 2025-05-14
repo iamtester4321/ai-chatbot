@@ -142,12 +142,11 @@ const ChatResponse = ({
   }, [messages]);
 
   return (
-    <div className="w-full min-h-screen bg-[#1a1a1a] text-white flex flex-col">
-      {/* Scrollable content area */}
+    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 md:px-8 py-10">
           {chatName && (
-            <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-white text-center md:text-left">
+            <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-center md:text-left">
               {chatName}
             </h2>
           )}
@@ -160,7 +159,7 @@ const ChatResponse = ({
               if (isUser) {
                 return (
                   <div key={index} className="flex justify-end">
-                    <div className="bg-[#2b2b2b] text-white px-4 py-2 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
+                    <div className="bg-[var(--color-muted)] text-[var(--color-text)] px-4 py-2 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
                       {msg.content}
                     </div>
                   </div>
@@ -170,14 +169,14 @@ const ChatResponse = ({
               return (
                 <div key={index} className="space-y-2">
                   <div
-                    className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2"
+                    className="max-w-none prose prose-invert p-2"
                     dangerouslySetInnerHTML={{
                       __html: formatMarkdownResponse(msg.content),
                     }}
                   />
-                  <div className="flex items-center space-x-3 text-gray-400">
+                  <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
                     <button
-                      className="p-1 hover:text-white cursor-pointer"
+                      className="p-1 hover:text-[var(--color-text)] cursor-pointer"
                       aria-label="Copy to clipboard"
                       onClick={() => copyToClipboard(msg.content, index)}
                     >
@@ -187,7 +186,7 @@ const ChatResponse = ({
                       <>
                         {msg?.id && (
                           <button
-                            className="p-1 hover:text-white transition-colors"
+                            className="p-1 hover:text-[var(--color-text)] transition-colors"
                             aria-label="Like"
                             onClick={() => handleLike(msg.id)}
                           >
@@ -207,7 +206,7 @@ const ChatResponse = ({
 
                         {msg?.id && (
                           <button
-                            className="p-1 hover:text-white transition-colors"
+                            className="p-1 hover:text-[var(--color-text)] transition-colors"
                             aria-label="Dislike"
                             onClick={() => handleDislike(msg.id)}
                           >
@@ -245,9 +244,9 @@ const ChatResponse = ({
 
                 {/* Action buttons */}
                 {showResponseActions && (
-                  <div className="flex items-center space-x-3 text-gray-400">
+                  <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
                     <button
-                      className="p-1 hover:text-white"
+                      className="p-1 hover:text-[var(--color-text)]"
                       aria-label="Copy to clipboard"
                       onClick={() => copyToClipboard(chatResponse, -1)}
                     >
@@ -256,7 +255,7 @@ const ChatResponse = ({
                     {!shareId && (
                       <>
                         <button
-                          className="p-1 hover:text-white transition-colors"
+                          className="p-1 hover:text-[var(--color-text)] transition-colors"
                           aria-label="Like"
                         >
                           <ThumbsUp
@@ -274,7 +273,7 @@ const ChatResponse = ({
                           />
                         </button>
                         <button
-                          className="p-1 hover:text-white transition-colors"
+                          className="p-1 hover:text-[var(--color-text)] transition-colors"
                           aria-label="Dislike"
                         >
                           <ThumbsDown
@@ -305,9 +304,9 @@ const ChatResponse = ({
       </div>
 
       {/* Sticky input bar */}
-      <div className="sticky bottom-0 bg-[#1a1a1a] px-4 py-4 border-t border-[#2a2a2a] z-10">
+      <div className="sticky bottom-0 bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)] z-10">
         {isArchived ? (
-          <div className="text-center text-white">
+          <div className="text-center text-[var(--color-text)]">
             <p className="mb-4">
               This conversation is archived. To continue, please unarchive it
               first.
@@ -316,7 +315,7 @@ const ChatResponse = ({
               onClick={() => {
                 handleRestoreChat(chatId);
               }}
-              className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition cursor-pointer"
+              className="bg-[var(--color-primary)] text-[var(--color-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
               <span className="flex items-center">
                 <Archive size={16} className="mr-2" />
@@ -327,12 +326,12 @@ const ChatResponse = ({
         ) : (
           <>
             {!shareId && (
-              <PromptInput
-                input={input}
+      <PromptInput
+        input={input}
                 isLoading={isLoading}
-                handleInputChange={handleInputChange}
-                handleFormSubmit={handleFormSubmit}
-              />
+        handleInputChange={handleInputChange}
+        handleFormSubmit={handleFormSubmit}
+      />
             )}
           </>
         )}

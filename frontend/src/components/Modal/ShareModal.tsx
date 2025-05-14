@@ -65,8 +65,8 @@ export default function ShareModal({
     <>
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
-        <div className="bg-[#121212] border border-[#e8e8e61a] rounded-lg p-6 max-w-sm w-full mx-4">
-          <h2 className="text-xl font-semibold text-[#e8e8e6] mb-4">
+        <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-6 max-w-sm w-full mx-4">
+          <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
             Share Chat
           </h2>
           <div className="flex items-center space-x-2 mb-6">
@@ -76,12 +76,12 @@ export default function ShareModal({
               readOnly
               value={shareUrl}
               placeholder="Generating link..."
-              className="w-full px-4 py-2 text-sm rounded-lg bg-[#202222] border border-[#e8e8e61a] text-[#e8e8e6b3] focus:outline-none"
+              className="w-full px-4 py-2 text-sm rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] focus:outline-none"
             />
             <button
               onClick={handleCopy}
               disabled={!shareId}
-              className="p-2 rounded-md bg-[#20b8cd] hover:bg-[#1a9cb0] text-white transition-colors disabled:opacity-50"
+              className="p-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-text)] transition-colors disabled:opacity-50"
             >
               {copied ? (
                 <span className="flex items-center">
@@ -97,7 +97,7 @@ export default function ShareModal({
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-[#e8e8e6b3] hover:bg-[#202222] rounded-md transition-colors"
+              className="px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
             >
               Close
             </button>

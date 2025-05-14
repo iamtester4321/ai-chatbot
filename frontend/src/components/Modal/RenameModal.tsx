@@ -104,6 +104,15 @@ export default function RenameModal({
               style={{
                 color: "var(--color-disabled-text)",
               }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-muted-hover)";
+                e.currentTarget.style.color = "var(--color-text)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--color-disabled-text)";
+              }}
             >
               Cancel
             </button>
@@ -116,7 +125,8 @@ export default function RenameModal({
                 color: "white",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--color-primary-hover)";
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-primary-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--color-primary)";
