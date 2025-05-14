@@ -52,17 +52,16 @@ export async function findChatById(chatId: string) {
   const cached = await redisClient.get(key);
   const currentVersion = await getChatVersion(chatId);
   
-  // Always fetch fresh data from DB
-  const dbChat = await chatRepo.findById(chatId);
-  
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChat)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
+  // Only fetch from DB if cache is invalid or missing
+  const dbChat = await chatRepo.findById(chatId);
+  
   if (dbChat) {
     const version = await updateChatVersion(chatId);
     await redisClient.set(key, JSON.stringify({
@@ -78,17 +77,16 @@ export async function findChatsByService(userId: string) {
   const cached = await redisClient.get(key);
   const currentVersion = await getUserVersion(userId);
   
-  // Always fetch fresh data from DB
-  const dbChats = await chatRepo.getChatsByUser(userId);
-  
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChats)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
+  // Only fetch from DB if cache is invalid or missing
+  const dbChats = await chatRepo.getChatsByUser(userId);
+  
   const version = await updateUserVersion(userId);
   await redisClient.set(key, JSON.stringify({
     _version: version,
@@ -102,17 +100,16 @@ export async function findChatNamesByService(userId: string) {
   const cached = await redisClient.get(key);
   const currentVersion = await getUserVersion(userId);
   
-  // Always fetch fresh data from DB
-  const dbChatNames = await chatRepo.getChatNamesByUser(userId);
-  
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChatNames)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
+  // Only fetch from DB if cache is invalid or missing
+  const dbChatNames = await chatRepo.getChatNamesByUser(userId);
+  
   const version = await updateUserVersion(userId);
   await redisClient.set(key, JSON.stringify({
     _version: version,
