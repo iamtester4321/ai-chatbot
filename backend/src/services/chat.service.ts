@@ -1,14 +1,23 @@
 import * as chatRepo from "../repositories/chat.repository";
+import * as shareRepo from "../repositories/share.repository";
 import { redisClient } from "../config/redis";
 
 const CHAT_CACHE_PREFIX = "chat:";
 const USER_CHATS_PREFIX = "user:";
+const SHARE_CACHE_PREFIX = "share:";
 const CHAT_VERSION_PREFIX = "chat_version:";
 const USER_VERSION_PREFIX = "user_version:";
+const SHARE_VERSION_PREFIX = "share_version:";
 
 async function updateChatVersion(chatId: string) {
   const version = Date.now().toString();
   await redisClient.set(`${CHAT_VERSION_PREFIX}${chatId}`, version);
+  return version;
+}
+
+async function updateShareVersion(shareId: string) {
+  const version = Date.now().toString();
+  await redisClient.set(`${SHARE_VERSION_PREFIX}${shareId}`, version);
   return version;
 }
 
@@ -22,13 +31,17 @@ async function getChatVersion(chatId: string) {
   return await redisClient.get(`${CHAT_VERSION_PREFIX}${chatId}`);
 }
 
+async function getShareVersion(shareId: string) {
+  return await redisClient.get(`${SHARE_VERSION_PREFIX}${shareId}`);
+}
+
 async function getUserVersion(userId: string) {
   return await redisClient.get(`${USER_VERSION_PREFIX}${userId}`);
 }
 
 export async function saveChat(
   userId: string,
-  messages: { role: string; content: string }[],
+  messages: { id: string; role: string; content: string }[],
   chatId: string
 ) {
   const result = await chatRepo.createChatWithMessagesOrApendMesages(
@@ -72,6 +85,33 @@ export async function findChatById(chatId: string) {
   }
   return dbChat;
 }
+
+export async function findShareById(shareId: string) {
+  const key = `${SHARE_CACHE_PREFIX}${shareId}`;
+  const cached = await redisClient.get(key);
+  const currentVersion = await getShareVersion(shareId);
+  
+  // Always fetch fresh data from DB
+  const dbShare = await shareRepo.findById(shareId);
+  
+  if (cached && currentVersion) {
+    const cachedData = JSON.parse(cached);
+    // Compare cached data with DB data
+    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbShare)) {
+      return cachedData.data;
+    }
+  }
+
+  if (dbShare) {
+    const version = await updateShareVersion(shareId);
+    await redisClient.set(key, JSON.stringify({
+      _version: version,
+      data: dbShare
+    }));
+  }
+  return dbShare;
+}
+
 
 export async function findChatsByService(userId: string) {
   const key = `${USER_CHATS_PREFIX}${userId}:chats`;

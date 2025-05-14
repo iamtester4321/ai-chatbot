@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { fetchUserProfile } from "../../actions/user.actions";
-import ChatInputField from "../ChatInputField/ChatInputField";
+import { useLocation, useParams } from "react-router-dom";
+import { fetchChatNames } from "../../actions/chat.actions";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
+import DeleteModal from "../Modal/DeleteModal";
+import RenameModal from "../Modal/RenameModal";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchChatNames } from "../../actions/chat.actions";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -13,17 +15,35 @@ function Layout() {
   const chatList = useAppSelector((state) => state.chat.chatList);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { chatId } = useParams();
+  const location = useLocation();
+  const isInShareRoute = location.pathname.startsWith("/share/");
+
+  useEffect(() => {
+    if (isInShareRoute) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [isInShareRoute]);
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -38,7 +58,7 @@ function Layout() {
       }
     };
     getChatNames();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -53,41 +73,33 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const getUserProfile = async () => {
-      try {
-        const { success, data } = await fetchUserProfile();
-        if (success && data) {
-          setUser(data);
-        }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-    getUserProfile();
-  }, []);
-
-  useEffect(() => {
     const handleChatUpdates = () => {
       // Refresh chat list
       fetchChatNames(dispatch);
     };
 
     // Add event listeners for all chat-related events
-    window.addEventListener('chat-deleted', handleChatUpdates);
-    window.addEventListener('chat-favorite-toggled', handleChatUpdates);
-    window.addEventListener('chat-renamed', handleChatUpdates);
-    window.addEventListener('chat-names-updated', handleChatUpdates);
-    window.addEventListener('chat-archived', handleChatUpdates);
+    window.addEventListener("chat-deleted", handleChatUpdates);
+    window.addEventListener("chat-favorite-toggled", handleChatUpdates);
+    window.addEventListener("chat-renamed", handleChatUpdates);
+    window.addEventListener("chat-names-updated", handleChatUpdates);
+    window.addEventListener("chat-archived", handleChatUpdates);
 
     return () => {
       // Clean up event listeners
-      window.removeEventListener('chat-deleted', handleChatUpdates);
-      window.removeEventListener('chat-favorite-toggled', handleChatUpdates);
-      window.removeEventListener('chat-renamed', handleChatUpdates);
-      window.removeEventListener('chat-names-updated', handleChatUpdates);
-      window.removeEventListener('chat-archived', handleChatUpdates);
+      window.removeEventListener("chat-deleted", handleChatUpdates);
+      window.removeEventListener("chat-favorite-toggled", handleChatUpdates);
+      window.removeEventListener("chat-renamed", handleChatUpdates);
+      window.removeEventListener("chat-names-updated", handleChatUpdates);
+      window.removeEventListener("chat-archived", handleChatUpdates);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMobile && chatId) {
+      setIsSidebarOpen(false);
+    }
+  }, [chatId, isMobile]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -104,11 +116,15 @@ function Layout() {
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
           setIsLogoutModalOpen={setIsLogoutModalOpen}
-          user={user}
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
+          isInShareRoute={isInShareRoute}
+          setIsRenameModalOpen={setIsRenameModalOpen}
+          setIsDeleteModalOpen={setIsDeleteModalOpen}
+          setSelectedChat={setSelectedChat}
+          setSelectedChatId={setSelectedChatId}
         />
-      </div>  
+      </div>
 
       {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && (
@@ -120,21 +136,36 @@ function Layout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col transition-all duration-300 w-full">
-        {!isSettingsOpen && (
-          <Header
-            toggleSidebar={toggleSidebar}
-            isLogoutModalOpen={isLogoutModalOpen}
-          />
-        )}
-
+        <Header
+          toggleSidebar={toggleSidebar}
+          isLogoutModalOpen={isLogoutModalOpen}
+          isInShareRoute={isInShareRoute}
+        />
         <div className="flex-1 overflow-y-auto">
-          <ChatInputField />
+          <ChatSection />
         </div>
       </div>
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         chatList={chatList}
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedChatId(null);
+        }}
+        chatId={selectedChatId || ""}
+      />
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => {
+          setIsRenameModalOpen(false);
+          setSelectedChat(null);
+        }}
+        chatId={selectedChat?.id || ""}
+        currentName={selectedChat?.name || ""}
       />
     </div>
   );

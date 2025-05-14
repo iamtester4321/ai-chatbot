@@ -1,19 +1,24 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
-import {
-  saveChat,
-  findChatById as findChatByIdService,
-  findChatsByService,
-  addOrRemoveFavoriteService,
-  addOrRemoveArchiveService,
-  deleteChatService,
-  findChatNamesByService,
-  renameChatService,
-} from "../services/chat.service";
 import { Request, Response } from "express";
+import {
+  addOrRemoveArchiveService,
+  addOrRemoveFavoriteService,
+  deleteChatService,
+  findChatById as findChatByIdService,
+  findChatNamesByService,
+  findChatsByService,
+  findShareById,
+  renameChatService,
+  saveChat,
+} from "../services/chat.service";
 
 interface ChatRequestParams {
   chatId: string;
+}
+
+interface ChatRequestByshareIdParams {
+  shareId: string;
 }
 
 export const streamChat = async (req: any, res: any) => {
@@ -24,6 +29,8 @@ export const streamChat = async (req: any, res: any) => {
   }
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
+  const userMessageId = req.body.userMessageId;
+  const assistantMessageId = req.body.assistantMessageId;
   let assistantReply = "";
 
   const model = google("gemini-2.0-flash");
@@ -31,25 +38,22 @@ export const streamChat = async (req: any, res: any) => {
   try {
     const result = streamText({
       model,
-
       messages: [...messages, { role: "user", content: req.body.prompt }],
-
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
-
       onFinish: async () => {
-        const allMessages = [
-          ...messages,
-          { role: "user", content: req.body.prompt },
-          { role: "assistant", content: assistantReply },
-        ];
-
-        await saveChat(userId, allMessages, chatId);
+        await saveChat(
+          userId,
+          [
+            { id: userMessageId, role: "user", content: req.body.prompt },
+            { id: assistantMessageId, role: "assistant", content: assistantReply },
+          ],
+          chatId
+        );
       },
-
       onError: (err) => console.error("Stream error:", err),
     });
     result.pipeTextStreamToResponse(res);
@@ -66,6 +70,21 @@ export async function findChatById(
   try {
     const { chatId } = req.params;
     const chat = await findChatByIdService(chatId);
+    res.status(200).json(chat);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch chat";
+    res.status(404).json({ message: errorMessage });
+  }
+}
+
+export async function findChatByshareId(
+  req: Request<ChatRequestByshareIdParams>,
+  res: Response
+) {
+  try {
+    const { shareId } = req.params;
+    const chat = await findShareById(shareId);
     res.status(200).json(chat);
   } catch (error) {
     const errorMessage =
@@ -160,7 +179,7 @@ export const renameChat = async (req: any, res: any) => {
   const { chatId } = req.params;
   const { newName } = req.body;
 
-  if (!newName || typeof newName !== 'string') {
+  if (!newName || typeof newName !== "string") {
     return res.status(400).json({ error: "New name is required" });
   }
 

@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = (req: Request, res: Response) => {
   res.clearCookie("authToken");
-  res.status(200).json({ message: "Logged out" });
+  res.status(200).json({ success: true, message: "Logged out" });
 };
 
 export const googleAuth = authService.googleAuth;

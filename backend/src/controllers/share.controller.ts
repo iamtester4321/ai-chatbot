@@ -1,8 +1,8 @@
 import { generateShareIdService } from "../services/share.service";
 
 export const generateShareId = async (req: any, res: any) => {
-  const { id, chatId, userId } = req.body;
-
+  const { id, chatId } = req.body;
+  const userId = (req.user as { id: string }).id;
   try {
     const shareId = await generateShareIdService(id, chatId, userId);
     return res.status(200).json({ shareId });

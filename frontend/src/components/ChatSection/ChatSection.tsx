@@ -3,20 +3,22 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, useChatActions } from "../../actions/chat.actions";
+import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
+  setIsArchived,
   setIsLoading,
   setMessages,
 } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import MessageDisplay from "../MessageDisplay/MessageDisplay";
-import PromptInput from "../PromptInput/PromptInput";
+import ChatResponse from "./ChatResponse";
+import PromptInput from "./PromptInput";
 
-const ChatInputField = () => {
+const ChatSection = () => {
   const navigate = useNavigate();
   const { chatId } = useParams();
+  const { shareId } = useParams();
   const dispatch = useAppDispatch();
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
@@ -36,12 +38,28 @@ const ChatInputField = () => {
         if (success && data) {
           dispatch(setMessages(data.messages));
           dispatch(setChatName(data.name));
+          dispatch(setIsArchived(data.isArchived));
         } else {
           console.error(error);
         }
       };
 
       loadMessages();
+    }
+  }, [chatId, dispatch]);
+
+  useEffect(() => {
+    if (shareId) {
+      const loadMessagesByShareId = async () => {
+        const { success, data, error } = await fetchMessagesByShareId(shareId);
+        if (success && data) {
+          dispatch(setMessages(data.messages));
+        } else {
+          console.error(error);
+        }
+      };
+
+      loadMessagesByShareId();
     }
   }, [chatId, dispatch]);
 
@@ -104,24 +122,29 @@ const ChatInputField = () => {
   }, [messages]);
 
   return (
-    <div className="bg-[#121212] min-h-screen text-white">
+    <div className="bg-[#121212] min-h-dvh sm:min-h-0 text-white">
       {messages.length > 0 && (
-        <MessageDisplay
+        <ChatResponse
           messages={messages}
           chatResponse={currentResponse}
           isLoading={isLoading}
           chatName={chatName}
+          input={input}
+          handleInputChange={handleInputChange}
+          handleFormSubmit={handleFormSubmit}
+          chatId={chatId || ""}
+          shareId={shareId || ""}
         />
       )}
 
       <section
         className={`${
-          messages.length > 0 ? "pt-8" : "pt-[200px]"
+          messages.length > 0 ? "" : "pt-[200px]"
         } h-100vh transition-all duration-300`}
       >
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-            {messages.length === 0 && (
+            {messages.length === 0 && !shareId && (
               <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
                 Ai-chatbot
               </h3>
@@ -134,12 +157,14 @@ const ChatInputField = () => {
               What do you want to know?
             </h3>
 
-            <PromptInput
-              input={input}
-              isLoading={isLoading}
-              handleInputChange={handleInputChange}
-              handleFormSubmit={handleFormSubmit}
-            />
+            {!chatId && !shareId && (
+              <PromptInput
+                input={input}
+                isLoading={isLoading}
+                handleInputChange={handleInputChange}
+                handleFormSubmit={handleFormSubmit}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -147,4 +172,4 @@ const ChatInputField = () => {
   );
 };
 
-export default ChatInputField;
+export default ChatSection;

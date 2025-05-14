@@ -7,6 +7,7 @@ const initialState: ChatState = {
   isLoading: false,
   chatName: "",
   chatList: [],
+  isArchived: false,
 };
 
 const chatSlice = createSlice({
@@ -34,13 +35,21 @@ const chatSlice = createSlice({
       state.isLoading = initialState.isLoading;
       state.chatName = initialState.chatName;
     },
-    setChatList: (state, action: PayloadAction<Array<{ 
-      id: string; 
-      name: string;
-      isFavorite: boolean;
-      isArchived: boolean;
-    }>>) => {
+    setChatList: (
+      state,
+      action: PayloadAction<
+        Array<{
+          id: string;
+          name: string;
+          isFavorite: boolean;
+          isArchived: boolean;
+        }>
+      >
+    ) => {
       state.chatList = action.payload;
+    },
+    setIsArchived: (state, action: PayloadAction<boolean>) => {
+      state.isArchived = action.payload;
     },
   },
 });
@@ -53,6 +62,7 @@ export const {
   setChatName,
   resetChat,
   setChatList,
+  setIsArchived,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

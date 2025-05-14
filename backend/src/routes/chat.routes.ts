@@ -2,12 +2,12 @@ import { Router } from "express";
 import {
   addOrRemoveArchive,
   addOrRemoveFavorite,
-  findChatById,
-  findChatsByUsrerId,
-  findChatNamesByUserId,
-  streamChat,
   deleteChat,
+  findChatById,
+  findChatNamesByUserId,
+  findChatsByUsrerId,
   renameChat,
+  streamChat,
 } from "../controllers/chat.controller";
 import { generateShareId } from "../controllers/share.controller";
 
@@ -23,6 +23,6 @@ router.patch("/addOrRemoveFavrate/:chatId", addOrRemoveFavorite);
 router.patch("/addOrRemoveArchive/:chatId", addOrRemoveArchive);
 router.patch("/rename/:chatId", renameChat);
 
-router.post("/generate-share-id", generateShareId);
+router.post("/generate-share-id/", generateShareId);
 
 export default router;

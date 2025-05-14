@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { updateMessageReaction } from "../controllers/message.controller";
+import { updateMessageReactionLike, updateMessageReactionDislike } from "../controllers/message.controller";
 
 const router = Router();
 
-router.get("/:messageId", updateMessageReaction);
+router.patch("/:messageId/reaction/like", updateMessageReactionLike);
+router.patch("/:messageId/reaction/dislike", updateMessageReactionDislike);
 
 export default router;
