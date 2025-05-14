@@ -24,32 +24,32 @@ const AllChats = ({
 
   if (nonArchivedChats.length === 0) return null;
   return (
-    <div className="border-t border-[#e8e8e61a] pt-2 overflow-hidden">
-      <div className="px-2.5 py-2 text-sm text-[#e8e8e6b3] truncate">All Chats</div>
+    <div className="border-t border-[#e8e8e61a] pt-2">
+      <div className="px-2.5 py-2 text-sm text-[#e8e8e6b3]">All Chats</div>
       {nonArchivedChats.map((chat) => (
-        <div key={chat.id} className="relative group overflow-hidden">
+        <div key={chat.id} className="relative group">
           <Link
             to={`/chat/${chat.id}`}
-            className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200 hover:text-[#20b8cd] overflow-hidden ${
+            className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[#202222] cursor-pointer mb-1.5 text-[#e8e8e6b3] transition-all duration-200 hover:text-[#20b8cd] ${
               chatId === chat.id ? "bg-[#202222] text-[#20b8cd]" : ""
             }`}
           >
-            <span className="truncate flex-1 min-w-0" title={chat.name}>
+            <span className="truncate flex-1 " title={chat.name}>
               {chat.name}
             </span>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2">
               {chat.isFavorite && (
-                <Star size={16} fill={"gold"} color={"gold"} className="flex-shrink-0" />
+                <Star size={16} fill={"gold"} color={"gold"} />
               )}
               {chat.isArchived && (
-                <Archive size={16} className="text-gray-500 flex-shrink-0" />
+                <Archive size={16} className="text-gray-500" />
               )}
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   toggleDropdown(chat.id);
                 }}
-                className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200 flex-shrink-0"
+                className="p-1 hover:bg-[#2c2c2c] rounded-lg transition-all duration-200"
               >
                 <MoreHorizontal size={16} />
               </button>
