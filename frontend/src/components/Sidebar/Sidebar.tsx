@@ -14,7 +14,6 @@ import FavoriteChats from "./FavoriteChats";
 const Sidebar = ({
   isLogoutModalOpen,
   setIsLogoutModalOpen,
-  user,
   setIsSettingsOpen,
   chatList,
   isInShareRoute,
@@ -176,7 +175,6 @@ const Sidebar = ({
             )}
 
             <UserDetail
-              user={user}
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
             />
           </div>
