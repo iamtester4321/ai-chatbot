@@ -5,6 +5,7 @@ import {
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
+  GET_SHARE_CHAT_MESSAGES,
   RENAME_CHAT,
   SHARE_CHAT,
   STREAM_CHAT_RESPONSE,
@@ -114,6 +115,25 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
 export const fetchMessages = async (chatId: string) => {
   try {
     const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch messages");
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return { success: false, error: "Error fetching messages" };
+  }
+};
+
+export const fetchMessagesByShareId = async (shareId: string) => {
+  try {
+    const response = await fetch(`${GET_SHARE_CHAT_MESSAGES(shareId)}`, {
       method: "GET",
       credentials: "include",
     });

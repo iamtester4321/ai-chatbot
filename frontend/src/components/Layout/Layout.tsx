@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { fetchChatNames } from "../../actions/chat.actions";
 import { fetchUserProfile } from "../../actions/user.actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -17,6 +18,16 @@ function Layout() {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { chatId } = useParams();
+  const location = useLocation();
+  const isInShareRoute = location.pathname.startsWith("/share/");
+
+  useEffect(() => {
+    if (isInShareRoute) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [isInShareRoute]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,17 +39,19 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const getChatNames = async () => {
-      try {
-        const { success } = await fetchChatNames(dispatch);
-        if (!success) {
-          console.error("Failed to fetch chat names");
+    if (!isInShareRoute) {
+      const getChatNames = async () => {
+        try {
+          const { success } = await fetchChatNames(dispatch);
+          if (!success) {
+            console.error("Failed to fetch chat names");
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getChatNames();
+      };
+      getChatNames();
+    }
   }, []);
 
   useEffect(() => {
@@ -54,17 +67,19 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const getUserProfile = async () => {
-      try {
-        const { success, data } = await fetchUserProfile();
-        if (success && data) {
-          setUser(data);
+    if (!isInShareRoute) {
+      const getUserProfile = async () => {
+        try {
+          const { success, data } = await fetchUserProfile();
+          if (success && data) {
+            setUser(data);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
         }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-    getUserProfile();
+      };
+      getUserProfile();
+    }
   }, []);
 
   useEffect(() => {
@@ -114,6 +129,7 @@ function Layout() {
           user={user}
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
+          isInShareRoute={isInShareRoute}
         />
       </div>
 
@@ -131,6 +147,7 @@ function Layout() {
           <Header
             toggleSidebar={toggleSidebar}
             isLogoutModalOpen={isLogoutModalOpen}
+            isInShareRoute={isInShareRoute}
           />
         )}
 

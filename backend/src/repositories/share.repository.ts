@@ -19,3 +19,20 @@ export const createShare = async (
     },
   });
 };
+
+export const findById = async (shareId: string) => {
+  const share = await prisma.share.findUnique({
+    where: { id: shareId },
+    select: { chatId: true },
+  });
+
+  if (!share) {
+    throw new Error(`Share with ID ${shareId} not found`);
+  }
+  return await prisma.chat.findUnique({
+    where: { id: share.chatId },
+    include: {
+      messages: true,
+    },
+  });
+};

@@ -7,6 +7,7 @@ export type ChatResponseProps = {
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
   chatId:string;
+  shareId:string;
 };
 
 export type PromptInputProps = {

@@ -22,6 +22,7 @@ const ChatResponse = ({
   handleInputChange,
   handleFormSubmit,
   chatId,
+  shareId,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
@@ -72,8 +73,12 @@ const ChatResponse = ({
     }
   };
 
-  const [likedMessages, setLikedMessages] = useState<{ [key: string]: boolean }>({});
-  const [dislikedMessages, setDislikedMessages] = useState<{ [key: string]: boolean }>({});
+  const [likedMessages, setLikedMessages] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [dislikedMessages, setDislikedMessages] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   const handleLike = async (messageId: string | undefined) => {
     if (!messageId) return;
@@ -178,33 +183,50 @@ const ChatResponse = ({
                     >
                       {copiedIndex === index ? <Check /> : <Copy />}
                     </button>
+                    {!shareId && (
+                      <>
+                        {msg?.id && (
+                          <button
+                            className="p-1 hover:text-white transition-colors"
+                            aria-label="Like"
+                            onClick={() => handleLike(msg.id)}
+                          >
+                            <ThumbsUp
+                              size={20}
+                              fill={
+                                likedMessages[msg.id] ? "currentColor" : "none"
+                              }
+                              color={
+                                likedMessages[msg.id]
+                                  ? "currentColor"
+                                  : "currentColor"
+                              }
+                            />
+                          </button>
+                        )}
 
-                    {msg?.id && (
-                      <button
-                        className="p-1 hover:text-white transition-colors"
-                        aria-label="Like"
-                        onClick={() => handleLike(msg.id)}
-                      >
-                        <ThumbsUp
-                          size={20}
-                          fill={likedMessages[msg.id] ? "currentColor" : "none"}
-                          color={likedMessages[msg.id] ? "currentColor" : "currentColor"}
-                        />
-                      </button>
-                    )}
-
-                    {msg?.id && (
-                      <button
-                        className="p-1 hover:text-white transition-colors"
-                        aria-label="Dislike"
-                        onClick={() => handleDislike(msg.id)}
-                      >
-                        <ThumbsDown
-                          size={20}
-                          fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
-                          color={dislikedMessages[msg.id] ? "currentColor" : "currentColor"}
-                        />
-                      </button>
+                        {msg?.id && (
+                          <button
+                            className="p-1 hover:text-white transition-colors"
+                            aria-label="Dislike"
+                            onClick={() => handleDislike(msg.id)}
+                          >
+                            <ThumbsDown
+                              size={20}
+                              fill={
+                                dislikedMessages[msg.id]
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              color={
+                                dislikedMessages[msg.id]
+                                  ? "currentColor"
+                                  : "currentColor"
+                              }
+                            />
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -231,28 +253,46 @@ const ChatResponse = ({
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
-
-                    <button
-                      className="p-1 hover:text-white transition-colors"
-                      aria-label="Like"
-                    >
-                      <ThumbsUp
-                        size={20}
-                        fill={likedMessages[chatResponse] ? "currentColor" : "none"}
-                        color={likedMessages[chatResponse] ? "currentColor" : "currentColor"}
-                      />
-                    </button>
-
-                    <button
-                      className="p-1 hover:text-white transition-colors"
-                      aria-label="Dislike"
-                    >
-                      <ThumbsDown
-                        size={20}
-                        fill={dislikedMessages[chatResponse] ? "currentColor" : "none"}
-                        color={dislikedMessages[chatResponse] ? "currentColor" : "currentColor"}
-                      />
-                    </button>
+                    {!shareId && (
+                      <>
+                        <button
+                          className="p-1 hover:text-white transition-colors"
+                          aria-label="Like"
+                        >
+                          <ThumbsUp
+                            size={20}
+                            fill={
+                              likedMessages[chatResponse]
+                                ? "currentColor"
+                                : "none"
+                            }
+                            color={
+                              likedMessages[chatResponse]
+                                ? "currentColor"
+                                : "currentColor"
+                            }
+                          />
+                        </button>
+                        <button
+                          className="p-1 hover:text-white transition-colors"
+                          aria-label="Dislike"
+                        >
+                          <ThumbsDown
+                            size={20}
+                            fill={
+                              dislikedMessages[chatResponse]
+                                ? "currentColor"
+                                : "none"
+                            }
+                            color={
+                              dislikedMessages[chatResponse]
+                                ? "currentColor"
+                                : "currentColor"
+                            }
+                          />
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -285,12 +325,16 @@ const ChatResponse = ({
             </button>
           </div>
         ) : (
-          <PromptInput
-            input={input}
-            isLoading={isLoading}
-            handleInputChange={handleInputChange}
-            handleFormSubmit={handleFormSubmit}
-          />
+          <>
+            {!shareId && (
+              <PromptInput
+                input={input}
+                isLoading={isLoading}
+                handleInputChange={handleInputChange}
+                handleFormSubmit={handleFormSubmit}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

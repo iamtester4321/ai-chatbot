@@ -3,7 +3,7 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, useChatActions } from "../../actions/chat.actions";
+import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
@@ -18,6 +18,7 @@ import PromptInput from "./PromptInput";
 const ChatSection = () => {
   const navigate = useNavigate();
   const { chatId } = useParams();
+  const { shareId } = useParams();
   const dispatch = useAppDispatch();
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
@@ -44,6 +45,22 @@ const ChatSection = () => {
       };
 
       loadMessages();
+    }
+  }, [chatId, dispatch]);
+
+  useEffect(() => {
+    if (shareId) {
+      const loadMessagesByShareId = async () => {
+        const { success, data, error } = await fetchMessagesByShareId(shareId);
+        if (success && data) {
+          console.log(data.messages);
+          dispatch(setMessages(data.messages));
+        } else {
+          console.error(error);
+        }
+      };
+
+      loadMessagesByShareId();
     }
   }, [chatId, dispatch]);
 
@@ -117,6 +134,7 @@ const ChatSection = () => {
           handleInputChange={handleInputChange}
           handleFormSubmit={handleFormSubmit}
           chatId={chatId || ""}
+          shareId={shareId || ""}
         />
       )}
 
@@ -127,7 +145,7 @@ const ChatSection = () => {
       >
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-            {messages.length === 0 && (
+            {messages.length === 0 && !shareId && (
               <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
                 Ai-chatbot
               </h3>
@@ -140,7 +158,7 @@ const ChatSection = () => {
               What do you want to know?
             </h3>
 
-            {!chatId && (
+            {!chatId && !shareId && (
               <PromptInput
                 input={input}
                 isLoading={isLoading}
