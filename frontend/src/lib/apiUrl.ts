@@ -12,6 +12,7 @@ export const GET_USER_PROFILE = `${BASE_API}/api/user/myprofile`;
 // chat API
 export const STREAM_CHAT_RESPONSE = `${BASE_API}/api/chat/stream`;
 export const GET_CHAT_MESSAGES = `${BASE_API}/api/chat`;
+export const GET_SHARE_CHAT_MESSAGES = (shareId:string) => `${BASE_API}/api/share/${shareId}`;
 export const DELETE_CHAT = (chatId: string) => `${BASE_API}/api/chat/${chatId}`;
 export const TOGGLE_FAVORITE_CHAT = (chatId: string) => `${BASE_API}/api/chat/addOrRemoveFavrate/${chatId}`;
 export const GET_CHAT_NAMES = `${BASE_API}/api/chat/names`;

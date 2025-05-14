@@ -14,6 +14,7 @@ function App() {
             <Route path="/" />
             <Route path="/chat" />
             <Route path="/chat/:chatId" />
+            <Route path="/share/:shareId" />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

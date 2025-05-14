@@ -8,12 +8,17 @@ import {
   findChatById as findChatByIdService,
   findChatNamesByService,
   findChatsByService,
+  findShareById,
   renameChatService,
   saveChat,
 } from "../services/chat.service";
 
 interface ChatRequestParams {
   chatId: string;
+}
+
+interface ChatRequestByshareIdParams {
+  shareId: string;
 }
 
 export const streamChat = async (req: any, res: any) => {
@@ -67,6 +72,21 @@ export async function findChatById(
   try {
     const { chatId } = req.params;
     const chat = await findChatByIdService(chatId);
+    res.status(200).json(chat);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch chat";
+    res.status(404).json({ message: errorMessage });
+  }
+}
+
+export async function findChatByshareId(
+  req: Request<ChatRequestByshareIdParams>,
+  res: Response
+) {
+  try {
+    const { shareId } = req.params;
+    const chat = await findShareById(shareId);
     res.status(200).json(chat);
   } catch (error) {
     const errorMessage =

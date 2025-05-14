@@ -26,11 +26,13 @@ import ShareModal from "../Modal/ShareModal";
 interface HeaderProps {
   toggleSidebar: () => void;
   isLogoutModalOpen: boolean;
+  isInShareRoute: boolean;
 }
 
 export default function Header({
   toggleSidebar,
   isLogoutModalOpen,
+  isInShareRoute
 }: HeaderProps) {
   const { chatId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -163,13 +165,14 @@ export default function Header({
   return (
     <header className="sticky top-0 w-full bg-[#121212] text-white z-[1000] py-3 px-4 border-b border-gray-800 flex items-center justify-between">
       <div className="flex items-center">
+        {!isInShareRoute &&
         <button
           className="p-2 rounded-full hover:bg-gray-700 transition duration-200"
           onClick={toggleSidebar}
           title="Toggle Sidebar"
         >
           <Sidebar size={20} />
-        </button>
+        </button>}
         <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
           AI Assistant
         </h1>
