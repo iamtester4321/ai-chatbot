@@ -1,4 +1,5 @@
 import { useChat } from "@ai-sdk/react";
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import {
   ARCHIVE_CHAT,
@@ -9,7 +10,7 @@ import {
   RENAME_CHAT,
   SHARE_CHAT,
   STREAM_CHAT_RESPONSE,
-  TOGGLE_FAVORITE_CHAT
+  TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
 import {
   addMessage,
@@ -35,7 +36,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     onResponse: async () => {
       const userMessageId = uuidv4();
       const assistantMessageId = uuidv4();
-      
+
       dispatch(
         addMessage({
           id: userMessageId,
@@ -114,61 +115,66 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
 
 export const fetchMessages = async (chatId: string) => {
   try {
-    const response = await fetch(`${GET_CHAT_MESSAGES}/${chatId}`, {
-      method: "GET",
-      credentials: "include",
+    const response = await axios.get(`${GET_CHAT_MESSAGES}/${chatId}`, {
+      withCredentials: true,
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch messages");
+    return { success: true, data: response.data };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching messages:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("An unknown error occurred:", error);
     }
-
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
   }
 };
 
 export const fetchMessagesByShareId = async (shareId: string) => {
   try {
-    const response = await fetch(`${GET_SHARE_CHAT_MESSAGES(shareId)}`, {
-      method: "GET",
-      credentials: "include",
+    const response = await axios.get(`${GET_SHARE_CHAT_MESSAGES(shareId)}`, {
+      withCredentials: true,
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch messages");
+    return { success: true, data: response.data };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching messages:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("An unknown error occurred:", error);
     }
-
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error("Error fetching messages:", error);
     return { success: false, error: "Error fetching messages" };
   }
 };
 
 export const fetchChatNames = async (dispatch: AppDispatch) => {
   try {
-    const response = await fetch(GET_CHAT_NAMES, {
-      method: "GET",
-      credentials: "include",
+    const response = await axios.get(GET_CHAT_NAMES, {
+      withCredentials: true,
     });
 
-    const text = await response.text();
-
-    if (response.ok) {
-      const data = JSON.parse(text);
-      dispatch(setChatList(data));
-      return { success: true, data };
+    if (response.status === 200) {
+      dispatch(setChatList(response.data));
+      return { success: true, data: response.data };
     } else {
       console.error("Failed to fetch chat names");
       return { success: false, error: "Failed to fetch chat names" };
     }
-  } catch (error) {
-    console.error("Error fetching chat names:", error);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching chat names:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("An unknown error occurred:", error);
+    }
     return { success: false, error: "Error fetching chat names" };
   }
 };
@@ -182,16 +188,15 @@ export const deleteChat = async (
   chatId: string
 ): Promise<DeleteChatResponse> => {
   try {
-    const response = await fetch(DELETE_CHAT(chatId), {
-      method: "DELETE",
-      credentials: "include",
+    const response = await axios.delete(DELETE_CHAT(chatId), {
+      withCredentials: true,
     });
 
-    if (!response.ok) {
-      const result = await response.json();
+    if (response.status !== 200) {
+      const message = response.data.message || "Failed to delete chat";
       return {
         success: false,
-        message: result.message || "Failed to delete chat",
+        message: message,
       };
     }
 
@@ -200,8 +205,15 @@ export const deleteChat = async (
     return {
       success: true,
     };
-  } catch (error) {
-    console.error(error);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error deleting chat:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("An unknown error occurred:", error);
+    }
     return {
       success: false,
       message: "Network error. Please try again later.",
@@ -213,17 +225,18 @@ export const toggleFavoriteChat = async (
   chatId: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const response = await fetch(TOGGLE_FAVORITE_CHAT(chatId), {
-      method: "PATCH",
-      credentials: "include",
-    });
+    const response = await axios.patch(
+      TOGGLE_FAVORITE_CHAT(chatId),
+      {},
+      {
+        withCredentials: true,
+      }
+    );
 
-    const result = await response.json();
-
-    if (!response.ok) {
+    if (response.status !== 200) {
       return {
         success: false,
-        message: result.message || "Failed to toggle favorite status",
+        message: response.data.message || "Failed to toggle favorite status",
       };
     }
 
@@ -231,9 +244,9 @@ export const toggleFavoriteChat = async (
 
     return {
       success: true,
-      message: result.message,
+      message: response.data.message,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
     return {
       success: false,
@@ -247,21 +260,21 @@ export const renameChat = async (
   newName: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const response = await fetch(RENAME_CHAT(chatId), {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ newName }),
-    });
+    const response = await axios.patch(
+      RENAME_CHAT(chatId),
+      { newName },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const result = await response.json();
-
-    if (!response.ok) {
+    if (response.status !== 200) {
       return {
         success: false,
-        message: result.message || "Failed to rename chat",
+        message: response.data.message || "Failed to rename chat",
       };
     }
 
@@ -269,9 +282,9 @@ export const renameChat = async (
 
     return {
       success: true,
-      message: result.message,
+      message: response.data.message,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
     return {
       success: false,
@@ -284,17 +297,18 @@ export const archiveChat = async (
   chatId: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const response = await fetch(ARCHIVE_CHAT(chatId), {
-      method: "PATCH",
-      credentials: "include",
-    });
+    const response = await axios.patch(
+      ARCHIVE_CHAT(chatId),
+      {},
+      {
+        withCredentials: true,
+      }
+    );
 
-    const result = await response.json();
-
-    if (!response.ok) {
+    if (response.status !== 200) {
       return {
         success: false,
-        message: result.message || "Failed to archive chat",
+        message: response.data.message || "Failed to archive chat",
       };
     }
 
@@ -302,9 +316,9 @@ export const archiveChat = async (
 
     return {
       success: true,
-      message: result.message || "Chat archived successfully",
+      message: response.data.message || "Chat archived successfully",
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error archiving chat:", error);
     return {
       success: false,
@@ -313,29 +327,29 @@ export const archiveChat = async (
   }
 };
 
-
 export async function generateShareId(chatId: string) {
   try {
-    const response = await fetch(SHARE_CHAT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
+    const response = await axios.post(
+      SHARE_CHAT,
+      {
         chatId,
         id: uuidv4(),
-      }),
-    });
+      },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const data = await response.json();
     return {
-      success: response.ok,
-      shareId: data.shareId,
-      message: data.message,
+      success: response.status === 200,
+      shareId: response.data.shareId,
+      message: response.data.message,
     };
-  } catch (error) {
-    console.error(error)
+  } catch (error: unknown) {
+    console.error(error);
     return { success: false, message: "Network error" };
   }
 }

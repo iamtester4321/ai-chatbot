@@ -1,28 +1,27 @@
+import axios from "axios";
 import { GET_USER_PROFILE } from "../lib/apiUrl";
 
 export const fetchUserProfile = async () => {
   try {
-    const response = await fetch(GET_USER_PROFILE, {
-      credentials: "include",
+    const response = await axios.get(GET_USER_PROFILE, {
+      withCredentials: true,
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: data.error || "Failed to fetch user profile",
-      };
-    }
 
     return {
       success: true,
-      data,
+      data: response.data,
     };
-  } catch (error) {
-    return {
-      success: false,
-      error: "Network error",
-    };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message || "Network error",
+      };
+    } else {
+      return {
+        success: false,
+        error: "An unknown error occurred",
+      };
+    }
   }
 };

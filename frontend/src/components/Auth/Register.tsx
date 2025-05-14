@@ -104,9 +104,7 @@ const Register = () => {
     <section className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text)]">
       <div className="container">
         <div className="max-w-[350px] w-full flex flex-col items-center mx-auto">
-          <h2 className="text-center text-4xl font-medium mb-6">
-            Register
-          </h2>
+          <h2 className="text-center text-4xl font-medium mb-6">Register</h2>
 
           <button
             onClick={handleGoogleAuth}
@@ -130,7 +128,9 @@ const Register = () => {
               className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
             />
             {errors.email && (
-              <p className="text-[var(--color-error)] text-sm mb-2">{errors.email}</p>
+              <p className="text-[var(--color-error)] text-sm mb-2">
+                {errors.email}
+              </p>
             )}
 
             <label htmlFor="password" className="text-sm mb-1">
@@ -146,7 +146,9 @@ const Register = () => {
               className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
             />
             {errors.password && (
-              <p className="text-[var(--color-error)] text-sm mb-2">{errors.password}</p>
+              <p className="text-[var(--color-error)] text-sm mb-2">
+                {errors.password}
+              </p>
             )}
 
             <label htmlFor="confirmPassword" className="text-sm mb-1">

@@ -1,14 +1,28 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchUserProfile } from "../../actions/user.actions";
 
 interface UserDetailProps {
-  user: {
-    id: string;
-    email: string;
-  } | null;
   onClick: () => void;
 }
 
-export const UserDetail = ({ user, onClick }: UserDetailProps) => {
+export const UserDetail = ({ onClick }: UserDetailProps) => {
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const { success, data } = await fetchUserProfile();
+        if (success && data) {
+          setUser(data);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    getUserProfile();
+  }, []);
+
   if (!user) {
     return (
       <Link

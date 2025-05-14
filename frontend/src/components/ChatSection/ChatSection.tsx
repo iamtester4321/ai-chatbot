@@ -53,7 +53,6 @@ const ChatSection = () => {
       const loadMessagesByShareId = async () => {
         const { success, data, error } = await fetchMessagesByShareId(shareId);
         if (success && data) {
-          console.log(data.messages);
           dispatch(setMessages(data.messages));
         } else {
           console.error(error);

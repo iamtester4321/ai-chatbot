@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   GOOGLE_AUTH_API,
   LOGIN_API,
@@ -7,67 +8,82 @@ import {
 
 export const registerUser = async (email: string, password: string) => {
   try {
-    const response = await fetch(REGISTER_API, {
-      method: "POST",
-      credentials: "include",
+    const response = await axios.post(REGISTER_API, {
+      email,
+      password,
+    }, {
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
     });
+    return {
+      success: response.status === 201,
+      data: response.data.user,
+    };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      const errorMessage = error.response?.data?.message || "Network error. Please try again later.";
 
-    const result = await response.json();
+      if (error.response?.data?.message === "User already exists") {
+        return {
+          success: false,
+          message: "User already exists",
+        };
+      }
 
-    if (!response.ok) {
       return {
         success: false,
-        message: result.message || "Registration failed",
+        message: errorMessage,
       };
     }
-
-    return {
-      success: true,
-      data: result.user,
-    };
-  } catch (error) {
     return {
       success: false,
       message: "Network error. Please try again later.",
     };
   }
 };
+
+
 
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await fetch(LOGIN_API, {
-      method: "POST",
-      credentials: "include",
+    const response = await axios.post(LOGIN_API, {
+      email,
+      password,
+    }, {
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
     });
 
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
+    if (!response.data.success) {
       return {
         success: false,
-        message: result.message || "Login failed",
+        message: response.data.message || "Login failed",
       };
     }
 
     return {
       success: true,
-      data: result.user,
+      data: response.data.user,
     };
-  } catch (error) {
-    return {
-      success: false,
-      message: "Network error. Please try again later.",
-    };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Network error. Please try again later.",
+      };
+    } else {
+      return {
+        success: false,
+        message: "Network error. Please try again later.",
+      };
+    }
   }
 };
+
 
 export const googleAuth = () => {
   try {
@@ -82,17 +98,13 @@ export const googleAuth = () => {
 
 export const logoutUser = async () => {
   try {
-    const response = await fetch(LOGOUT_API, {
-      method: "POST",
-      credentials: "include",
+    const response = await axios.post(LOGOUT_API, {}, {
+      withCredentials: true,
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
+    if (!response.data.success) {
       return {
         success: false,
-        message: result.message || "Logout failed",
+        message: response.data.message || "Logout failed",
       };
     }
 
@@ -100,10 +112,17 @@ export const logoutUser = async () => {
       success: true,
       message: "Logged out successfully",
     };
-  } catch (error) {
-    return {
-      success: false,
-      message: "Network error. Please try again later.",
-    };
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Network error. Please try again later.",
+      };
+    } else {
+      return {
+        success: false,
+        message: "Network error. Please try again later.",
+      };
+    }
   }
 };
