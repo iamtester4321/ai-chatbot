@@ -1,5 +1,5 @@
 import { Archive, Settings, Star } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ArchivedChats from "../Settings/ArchivedChats";
 import FavoriteChats from "../Settings/FavoriteChats";
 import GeneralSettings from "../Settings/GeneralSettings";
@@ -13,6 +13,23 @@ interface SettingsModalProps {
 
 const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState("general");
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -30,6 +47,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
         <div
+          ref={modalRef}
           className="rounded-lg w-full max-w-4xl mx-4 h-[80vh] flex flex-col md:flex-row overflow-hidden"
           style={{
             backgroundColor: "var(--color-bg)",
@@ -104,8 +122,12 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
             {/* Tab content */}
             <div style={{ color: "var(--color-text)" }}>
               {activeTab === "general" && <GeneralSettings />}
-              {activeTab === "archive" && <ArchivedChats onClose={onClose} archivedChats={archivedChats} />}
-              {activeTab === "favorite" && <FavoriteChats onClose={onClose} favoriteChats={favoriteChats} />}
+              {activeTab === "archive" && (
+                <ArchivedChats onClose={onClose} archivedChats={archivedChats} />
+              )}
+              {activeTab === "favorite" && (
+                <FavoriteChats onClose={onClose} favoriteChats={favoriteChats} />
+              )}
             </div>
           </div>
         </div>

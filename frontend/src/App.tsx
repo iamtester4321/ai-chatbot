@@ -1,12 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from 'sonner';
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import Layout from "./components/Layout/Layout";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { applyStoredTheme } from "./store/features/themeSlice"; // Update the path if different
+import { applyStoredTheme } from "./store/features/themeSlice";
 
 function App() {
 

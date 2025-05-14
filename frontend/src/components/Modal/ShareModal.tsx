@@ -16,6 +16,7 @@ export default function ShareModal({
 }: ShareModalProps) {
   const showToast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
 
@@ -47,11 +48,26 @@ export default function ShareModal({
     fetchShareId();
   }, [isOpen, chatId]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      showToast.success("Link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       showToast.error("Failed to copy link.");
@@ -65,7 +81,10 @@ export default function ShareModal({
     <>
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
-        <div className="bg-[#121212] border border-[#e8e8e61a] rounded-lg p-6 max-w-sm w-full mx-4">
+        <div
+          ref={modalRef}
+          className="bg-[#121212] border border-[#e8e8e61a] rounded-lg p-6 max-w-sm w-full mx-4"
+        >
           <h2 className="text-xl font-semibold text-[#e8e8e6] mb-4">
             Share Chat
           </h2>

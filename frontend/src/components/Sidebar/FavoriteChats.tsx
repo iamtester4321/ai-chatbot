@@ -40,7 +40,6 @@ const FavoriteChats = ({
       const result = await toggleFavoriteChat(chatId);
 
       if (result.success) {
-        showToast.success(result.message || "Removed from favorites");
         toggleDropdown(chatId);
       } else {
         showToast.error(result.message || "Failed to remove from favorites");

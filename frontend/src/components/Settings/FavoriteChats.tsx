@@ -30,9 +30,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
     try {
       const result = await toggleFavoriteChat(chatId);
 
-      if (result.success) {
-        showToast.success("Chat removed from favorite");
-      } else {
+      if (!result.success) {
         showToast.error(result.message || "Failed to update favorite status");
       }
     } catch (error) {

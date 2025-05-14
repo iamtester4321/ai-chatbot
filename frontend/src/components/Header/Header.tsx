@@ -85,7 +85,6 @@ export default function Header({
     const result = await toggleFavoriteChat(chatId);
     if (result.success) {
       setIsFavorite(!isFavorite);
-      showToast.success(result.message || "Favorite status updated");
     } else {
       showToast.error(result.message || "Failed to update favorite status");
     }
