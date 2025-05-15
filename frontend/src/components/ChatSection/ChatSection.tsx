@@ -122,7 +122,7 @@ const ChatSection = () => {
   }, [messages]);
 
   return (
-    <div className="bg-[#121212] min-h-dvh sm:min-h-0 text-white">
+    <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {messages.length > 0 && (
         <ChatResponse
           messages={messages}
@@ -145,12 +145,12 @@ const ChatSection = () => {
         <div className="container">
           <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
             {messages.length === 0 && !shareId && (
-              <h3 className="text-[48px] text-[#ffffffd6] font-light text-center font-inter hidden md:block">
+              <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
                 Ai-chatbot
               </h3>
             )}
             <h3
-              className={`text-3xl sm:text-4xl md:text-[48px] text-[#ffffffd6] font-light text-center font-inter ${
+              className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
                 messages.length > 0 ? "hidden" : "block md:hidden"
               }`}
             >

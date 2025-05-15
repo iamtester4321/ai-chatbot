@@ -117,13 +117,11 @@ export default function RenameModal({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm rounded-md transition-colors disabled:opacity-50"
-              style={{
-                color: "var(--color-disabled-text)",
-              }}
+              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
             >
               Cancel
             </button>
+
             <button
               onClick={handleRename}
               disabled={isLoading}
@@ -133,7 +131,8 @@ export default function RenameModal({
                 color: "white",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--color-primary-hover)";
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-primary-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--color-primary)";

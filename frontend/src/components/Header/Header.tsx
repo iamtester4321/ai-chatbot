@@ -48,6 +48,7 @@ export default function Header({
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const showToast = useToast();
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchFavoriteStatus = async () => {

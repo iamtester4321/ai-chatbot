@@ -106,12 +106,12 @@ function Layout() {
   };
 
   return (
-    <div className="flex max-h-screen bg-[#121212]">
+    <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
       {/* Sidebar */}
       <div
         className={`${
           isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[#121212] z-20 top-0`}
+        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[var(--color-bg)] z-20 top-0`}
       >
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
@@ -129,7 +129,7 @@ function Layout() {
       {/* Overlay for mobile */}
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-10"
+          className="fixed inset-0 bg-[var(--color-bg)] bg-opacity-50 z-10"
           onClick={toggleSidebar}
         ></div>
       )}
