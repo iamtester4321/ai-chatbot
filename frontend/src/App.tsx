@@ -6,9 +6,9 @@ import Layout from "./components/Layout/Layout";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { applyStoredTheme } from "./store/features/themeSlice";
+import { ProtectedRoute } from "./components/Auth/ProtectedRoute";
 
 function App() {
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -19,18 +19,26 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" />
-            <Route path="/chat" />
-            <Route path="/chat/:chatId" />
-            <Route path="/share/:shareId" />
-          </Route>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/share/:shareId" element={<Layout />} />
+          
+          {/* Protected Routes */}
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/"/>
+                  <Route path="/chat"/>
+                  <Route path="/chat/:chatId"/>
+                </Route>
+              </Routes>
+            </ProtectedRoute>
+          } />
         </Routes>
+        <Toaster position="bottom-right" />
       </BrowserRouter>
-
-      <Toaster position="bottom-right" />
     </>
   );
 }
