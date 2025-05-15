@@ -83,6 +83,84 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
         .markdown-content .syntax-highlighter-wrapper {
           background-color: transparent;
         }
+        /* Ensure the overflow container doesn't add extra space or borders */
+        .markdown-content .overflow-x-auto {
+          width: 100% !important;
+          overflow-x: auto !important;
+          margin: 1.5rem 0 !important; /* my-6 */
+          padding: 0 !important;
+          border: none !important; /* Remove any inherited border */
+          outline: none !important; /* Remove any outline */
+          box-shadow: none !important; /* Remove any shadow */
+        }
+        /* Override table styles with high specificity */
+        .markdown-content .overflow-x-auto table {
+          width: 100% !important; /* Force full width */
+          min-width: 100% !important;
+          border: 1px solid #d1d5db !important; /* border-gray-300 */
+          border-radius: 0.5rem !important; /* rounded-lg */
+          box-shadow: none !important;
+          background: transparent !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-collapse: collapse !important;
+          outline: none !important; /* Remove any outline */
+          table-layout: fixed !important; /* Ensure columns stretch evenly */
+        }
+        .markdown-content .overflow-x-auto table thead {
+          background: #f3f4f6 !important; /* bg-gray-100 */
+        }
+        .markdown-content .overflow-x-auto table tbody {
+          background: transparent !important;
+        }
+        .markdown-content .overflow-x-auto table tr {
+          border: none !important;
+          background: transparent !important;
+        }
+        .markdown-content .overflow-x-auto table tr:hover {
+          background: #f9fafb !important; /* hover:bg-gray-50 */
+        }
+        .markdown-content .overflow-x-auto table th,
+        .markdown-content .overflow-x-auto table td {
+          padding: 0.75rem 1rem !important; /* px-4 py-3 */
+          border: 1px solid #d1d5db !important; /* border-gray-300 for grid */
+          text-align: left !important;
+          font-size: 0.875rem !important; /* text-sm */
+          width: auto !important; /* Allow columns to stretch */
+          overflow-wrap: break-word !important; /* Ensure content wraps */
+        }
+        .markdown-content .overflow-x-auto table th {
+          font-weight: 600 !important; /* font-semibold */
+          color: #111827 !important; /* text-gray-900 */
+        }
+        .markdown-content .overflow-x-auto table td {
+          color: #1f2937 !important; /* text-gray-800 */
+        }
+        /* Dark mode overrides */
+        .dark .markdown-content .overflow-x-auto table {
+          border: 1px solid #374151 !important; /* dark:border-gray-700 */
+        }
+        .dark .markdown-content .overflow-x-auto table thead {
+          background: #1f2937 !important; /* dark:bg-gray-800 */
+        }
+        .dark .markdown-content .overflow-x-auto table tr:hover {
+          background: rgba(31, 41, 55, 0.6) !important; /* dark:hover:bg-gray-800/60 */
+        }
+        .dark .markdown-content .overflow-x-auto table th,
+        .dark .markdown-content .overflow-x-auto table td {
+          border: 1px solid #374151 !important; /* dark:border-gray-700 for grid */
+        }
+        .dark .markdown-content .overflow-x-auto table th {
+          color: #f3f4f6 !important; /* dark:text-gray-100 */
+        }
+        .dark .markdown-content .overflow-x-auto table td {
+          color: #e5e7eb !important; /* dark:text-gray-200 */
+        }
+        /* Reset any inherited prose table styles */
+        .markdown-content .overflow-x-auto table * {
+          border-collapse: collapse !important;
+          box-shadow: none !important;
+        }
       `}</style>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
@@ -114,8 +192,8 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
             <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-4 italic text-gray-700 dark:text-gray-300" {...props} />
           ),
           table: ({ node, ...props }) => (
-            <div className="overflow-x-auto my-6">
-              <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg" {...props} />
+            <div className="my-6">
+              <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 rounded-lg" {...props} />
             </div>
           ),
           thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
