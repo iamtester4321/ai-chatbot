@@ -51,7 +51,10 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(({
               {isArchive ? "Un-archive" : "Archive"}
             </button>
             <button
-              onClick={openDeleteModal}
+              onClick={() => {
+                toggleMenu();
+                openDeleteModal();
+              }}
               className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
               style={{ color: "var(--color-error)" }}
             >

@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatState } from "../../lib/types";
+import { setIsFavorite } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 
 interface FavoriteChatsProps {
@@ -15,6 +17,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
+  const dispatch = useAppDispatch();
 
   const openDeleteModal = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -29,7 +32,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const handleToggleFavorite = async (chatId: string) => {
     try {
       const result = await toggleFavoriteChat(chatId);
-
+      dispatch(setIsFavorite(false));
       if (!result.success) {
         showToast.error(result.message || "Failed to update favorite status");
       }
