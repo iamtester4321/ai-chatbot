@@ -59,7 +59,7 @@ const CodeBlock = ({ language, children }: { language: string; children?: React.
           borderRadius: 0,
           fontSize: "0.9rem",
           lineHeight: 1.5,
-          background: "#121212"
+          background: "#130f29"
         }}
         PreTag="div"
       >

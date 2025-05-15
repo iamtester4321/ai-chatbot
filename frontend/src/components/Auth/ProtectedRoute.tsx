@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { fetchUserProfile } from '../../actions/user.actions';
 
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,9 +27,19 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }, []);
 
   if (isLoading) {
-    console.log(isLoading)
     return null;
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  if (isAuthenticated) {
+    const validPaths = ["/", "/chat", "/chat/"];
+    const isValidPath = validPaths.some(path => location.pathname === path) || 
+                       location.pathname.match(/^\/chat\/[\w-]+$/);
+    
+    if (!isValidPath) {
+      return <Navigate to="/" replace />;
+    }
+    return children;
+  }
+
+  return <Navigate to="/login" replace />;
 };

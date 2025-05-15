@@ -1,6 +1,6 @@
 import "github-markdown-css/github-markdown-dark.css";
 import "highlight.js/styles/github-dark.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
@@ -14,6 +14,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
+import Error from "../Common/Error";
 
 const ChatSection = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const ChatSection = () => {
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
   );
+  const [error, setError] = useState<string | null>(null);
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
@@ -39,8 +41,11 @@ const ChatSection = () => {
           dispatch(setMessages(data.messages));
           dispatch(setChatName(data.name));
           dispatch(setIsArchived(data.isArchived));
+          setError(null);
         } else {
           console.error(error);
+          setError("Chat not found. This chat might have been deleted or doesn't exist.");
+          dispatch(setMessages([]));
         }
       };
 
@@ -123,51 +128,55 @@ const ChatSection = () => {
 
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
-      {messages.length > 0 && (
-        <ChatResponse
-          messages={messages}
-          chatResponse={currentResponse}
-          isLoading={isLoading}
-          chatName={chatName}
-          input={input}
-          handleInputChange={handleInputChange}
-          handleFormSubmit={handleFormSubmit}
-          chatId={chatId || ""}
-          shareId={shareId || ""}
-        />
+      {error ? (
+        <Error message={error} />
+      ) : (
+        <>
+          {messages.length > 0 && (
+            <ChatResponse
+              messages={messages}
+              chatResponse={currentResponse}
+              isLoading={isLoading}
+              chatName={chatName}
+              input={input}
+              handleInputChange={handleInputChange}
+              handleFormSubmit={handleFormSubmit}
+              chatId={chatId || ""}
+              shareId={shareId || ""}
+            />
+          )}
+
+          <section
+            className={`${messages.length > 0 ? "" : "pt-[200px]"} h-100vh transition-all duration-300`}
+          >
+            <div className="container">
+              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
+                {messages.length === 0 && !shareId && (
+                  <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
+                    Ai-chatbot
+                  </h3>
+                )}
+                <h3
+                  className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
+                    messages.length > 0 ? "hidden" : "block md:hidden"
+                  }`}
+                >
+                  What do you want to know?
+                </h3>
+
+                {!chatId && !shareId && (
+                  <PromptInput
+                    input={input}
+                    isLoading={isLoading}
+                    handleInputChange={handleInputChange}
+                    handleFormSubmit={handleFormSubmit}
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+        </>
       )}
-
-      <section
-        className={`${
-          messages.length > 0 ? "" : "pt-[200px]"
-        } h-100vh transition-all duration-300`}
-      >
-        <div className="container">
-          <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-            {messages.length === 0 && !shareId && (
-              <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
-                Ai-chatbot
-              </h3>
-            )}
-            <h3
-              className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
-                messages.length > 0 ? "hidden" : "block md:hidden"
-              }`}
-            >
-              What do you want to know?
-            </h3>
-
-            {!chatId && !shareId && (
-              <PromptInput
-                input={input}
-                isLoading={isLoading}
-                handleInputChange={handleInputChange}
-                handleFormSubmit={handleFormSubmit}
-              />
-            )}
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
