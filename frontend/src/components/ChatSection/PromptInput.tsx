@@ -56,9 +56,22 @@ const PromptInput = ({
     }
   };
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
+  const handleFormSubmitWithFocus = async (e: React.FormEvent) => {
+    await handleFormSubmit(e);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   return (
     <form
-      onSubmit={handleFormSubmit}
+      onSubmit={handleFormSubmitWithFocus}
       className="bg-[var(--color-bg)] border border-[var(--color-border)] flex flex-col rounded-2xl px-4 py-4 w-full max-w-3xl mx-auto shadow-md gap-4"
     >
       {/* Input Field */}

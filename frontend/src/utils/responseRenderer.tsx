@@ -2,15 +2,53 @@ import { CSSProperties, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { vscDarkPlus, vs} from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Copy, Check } from "lucide-react";
+import { RootState } from "../store/store";
+import { useSelector } from "react-redux";
+import "../styles/markdown.css";
 
-// Define types for better TypeScript support
 interface CodeProps {
   className?: string;
   children?: React.ReactNode;
   [key: string]: any;
 }
+
+
+// Function to replace opening ``` with ```bash when no language is specified
+const setDefaultBashLanguage = (text: string) => {
+  // Split the text into lines to process each line individually
+  const lines = text.split("\n");
+  let insideCodeBlock = false;
+
+  const processedLines = lines.map((line) => {
+    // Trim whitespace for comparison
+    const trimmedLine = line.trim();
+
+    if (trimmedLine.startsWith("```")) {
+      if (!insideCodeBlock) {
+        // This is an opening backtick
+        // Check if it has a language specified (e.g., ```javascript)
+        if (trimmedLine === "```") {
+          // No language specified, replace with ```bash
+          insideCodeBlock = true;
+          return line.replace("```", "```bash");
+        }
+        // Language already specified, leave it as is
+        insideCodeBlock = true;
+        return line;
+      } else {
+        // This is a closing backtick, leave it unchanged
+        insideCodeBlock = false;
+        return line;
+      }
+    }
+    // Not a backtick line, return unchanged
+    return line;
+  });
+
+  return processedLines.join("\n");
+};
 
 // Function to fix unclosed code blocks
 const fixUnclosedCodeBlock = (text: string) => {
@@ -23,6 +61,7 @@ const fixUnclosedCodeBlock = (text: string) => {
 
 // Code block component with copy functionality
 const CodeBlock = ({ language, children }: { language: string; children?: React.ReactNode }) => {
+  const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -34,16 +73,16 @@ const CodeBlock = ({ language, children }: { language: string; children?: React.
   };
 
   return (
-    <div className="relative group rounded-lg overflow-hidden my-4 border border-blue-400 dark:border-gray-600">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-gray-300 text-sm border-b border-gray-700">
-        <span className="font-mono">{language || "text"}</span>
+    <div className={`relative group rounded-lg overflow-hidden my-4 border ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+      <div className={`flex items-center justify-between px-4 py-2 ${isDarkMode ? 'bg-gray-800 text-gray-300 border-gray-700' : 'bg-gray-300 text-gray-700 border-gray-300'} text-sm border-b`}>
+        <span className={`font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{language || "text"}</span>
         <button 
           onClick={handleCopy}
-          className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors p-1 rounded"
+          className={`flex items-center gap-1 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'} transition-colors p-1 rounded`}
           aria-label={copied ? "Copied!" : "Copy code"}
         >
           {copied ? (
-            <Check size={16} className="text-green-500" />
+            <Check size={16} className={isDarkMode ? 'text-green-500' : 'text-green-600'} />
           ) : (
             <Copy size={16} />
           )}
@@ -52,14 +91,14 @@ const CodeBlock = ({ language, children }: { language: string; children?: React.
       </div>
       <SyntaxHighlighter
         language={language || "text"}
-        style={vscDarkPlus as { [key: string]: CSSProperties }}
+        style={isDarkMode ? vscDarkPlus : vs as { [key: string]: CSSProperties }}
         customStyle={{ 
           margin: 0,
           padding: "1rem",
           borderRadius: 0,
           fontSize: "0.9rem",
           lineHeight: 1.5,
-          background: "#130f29"
+          background: isDarkMode ? "#130f29" : "#f3f4f6",
         }}
         PreTag="div"
       >
@@ -70,98 +109,12 @@ const CodeBlock = ({ language, children }: { language: string; children?: React.
 };
 
 const MarkdownRenderer = ({ content }: { content: string }) => {
+  const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const safeContent = fixUnclosedCodeBlock(content);
+  const processedContent = setDefaultBashLanguage(safeContent);
 
   return (
     <div className="markdown-content prose prose-slate dark:prose-invert max-w-none">
-      <style>{`
-        .markdown-content pre {
-          background: transparent !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        .markdown-content .syntax-highlighter-wrapper {
-          background-color: transparent;
-        }
-        /* Ensure the overflow container doesn't add extra space or borders */
-        .markdown-content .overflow-x-auto {
-          width: 100% !important;
-          overflow-x: auto !important;
-          margin: 1.5rem 0 !important; /* my-6 */
-          padding: 0 !important;
-          border: none !important; /* Remove any inherited border */
-          outline: none !important; /* Remove any outline */
-          box-shadow: none !important; /* Remove any shadow */
-        }
-        /* Override table styles with high specificity */
-        .markdown-content .overflow-x-auto table {
-          width: 100% !important; /* Force full width */
-          min-width: 100% !important;
-          border: 1px solid #d1d5db !important; /* border-gray-300 */
-          border-radius: 0.5rem !important; /* rounded-lg */
-          box-shadow: none !important;
-          background: transparent !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          border-collapse: collapse !important;
-          outline: none !important; /* Remove any outline */
-          table-layout: fixed !important; /* Ensure columns stretch evenly */
-        }
-        .markdown-content .overflow-x-auto table thead {
-          background: #f3f4f6 !important; /* bg-gray-100 */
-        }
-        .markdown-content .overflow-x-auto table tbody {
-          background: transparent !important;
-        }
-        .markdown-content .overflow-x-auto table tr {
-          border: none !important;
-          background: transparent !important;
-        }
-        .markdown-content .overflow-x-auto table tr:hover {
-          background: #f9fafb !important; /* hover:bg-gray-50 */
-        }
-        .markdown-content .overflow-x-auto table th,
-        .markdown-content .overflow-x-auto table td {
-          padding: 0.75rem 1rem !important; /* px-4 py-3 */
-          border: 1px solid #d1d5db !important; /* border-gray-300 for grid */
-          text-align: left !important;
-          font-size: 0.875rem !important; /* text-sm */
-          width: auto !important; /* Allow columns to stretch */
-          overflow-wrap: break-word !important; /* Ensure content wraps */
-        }
-        .markdown-content .overflow-x-auto table th {
-          font-weight: 600 !important; /* font-semibold */
-          color: #111827 !important; /* text-gray-900 */
-        }
-        .markdown-content .overflow-x-auto table td {
-          color: #1f2937 !important; /* text-gray-800 */
-        }
-        /* Dark mode overrides */
-        .dark .markdown-content .overflow-x-auto table {
-          border: 1px solid #374151 !important; /* dark:border-gray-700 */
-        }
-        .dark .markdown-content .overflow-x-auto table thead {
-          background: #1f2937 !important; /* dark:bg-gray-800 */
-        }
-        .dark .markdown-content .overflow-x-auto table tr:hover {
-          background: rgba(31, 41, 55, 0.6) !important; /* dark:hover:bg-gray-800/60 */
-        }
-        .dark .markdown-content .overflow-x-auto table th,
-        .dark .markdown-content .overflow-x-auto table td {
-          border: 1px solid #374151 !important; /* dark:border-gray-700 for grid */
-        }
-        .dark .markdown-content .overflow-x-auto table th {
-          color: #f3f4f6 !important; /* dark:text-gray-100 */
-        }
-        .dark .markdown-content .overflow-x-auto table td {
-          color: #e5e7eb !important; /* dark:text-gray-200 */
-        }
-        /* Reset any inherited prose table styles */
-        .markdown-content .overflow-x-auto table * {
-          border-collapse: collapse !important;
-          box-shadow: none !important;
-        }
-      `}</style>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -170,7 +123,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
             const isInline = !match;
 
             return isInline ? (
-              <code className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 font-mono text-sm" {...props}>
+              <code className={`px-1.5 py-0.5 rounded font-mono text-sm ${isDarkMode ? "bg-gray-800" : "bg-gray-200" }`} {...props}>
                 {children}
               </code>
             ) : (
@@ -192,7 +145,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
             <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-4 italic text-gray-700 dark:text-gray-300" {...props} />
           ),
           table: ({ node, ...props }) => (
-            <div className="my-6">
+            <div className=" my-6">
               <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700 rounded-lg" {...props} />
             </div>
           ),
@@ -200,12 +153,12 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           tbody: ({ node, ...props }) => <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />,
           tr: ({ node, ...props }) => <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/60" {...props} />,
           th: ({ node, ...props }) => <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100" {...props} />,
-          td: ({ node, ...props }) => <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200" {...props} />,
+          td: ({ node, ...props }) => <td className="px-4 py-3 text-sm" {...props} />,
           img: ({ node, ...props }) => <img className="max-w-full h-auto rounded-lg my-4" {...props} />,
           hr: ({ node, ...props }) => <hr className="my-8 border-gray-200 dark:border-gray-800" {...props} />,
         }}
       >
-        {safeContent}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );

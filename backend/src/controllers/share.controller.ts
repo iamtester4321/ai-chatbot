@@ -6,8 +6,6 @@ export const generateShareId = async (req: any, res: any) => {
   try {
     const shareId = await generateShareIdService(id, chatId, userId);
 
-    console.log("Generated share ID:", shareId);
-
     return res.status(200).json({ shareId });
   } catch (err) {
     console.error("Error generating share ID:", err);

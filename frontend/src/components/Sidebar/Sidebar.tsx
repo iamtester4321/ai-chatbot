@@ -87,7 +87,7 @@ const Sidebar = ({
   return (
     <>
       {!isInShareRoute && (
-        <div className="flex flex-col h-screen md:h-full w-full bg-[var(--color-bg)] text-[color:var(--color-text)] p-3 overflow-hidden">
+        <div className="flex flex-col h-screen md:h-full w-full bg-[var(--color-bg)] text-[color:var(--color-text)] p-3 overflow-hidden border-r border-[var(--color-border)]">
           <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
             <Link
               to={"/chat"}
