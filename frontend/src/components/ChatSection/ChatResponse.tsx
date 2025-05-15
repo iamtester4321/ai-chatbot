@@ -315,7 +315,7 @@ const ChatResponse = ({
               onClick={() => {
                 handleRestoreChat(chatId);
               }}
-              className="bg-[var(--color-primary)] text-[var(--color-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
               <span className="flex items-center">
                 <Archive size={16} className="mr-2" />

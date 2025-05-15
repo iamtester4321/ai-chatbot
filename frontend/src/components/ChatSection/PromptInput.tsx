@@ -43,19 +43,18 @@ const PromptInput = ({
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
-      
+      textarea.style.height = "auto";
+
       const lineHeight = 24;
       const maxHeight = lineHeight * 3;
-      
+
       const newHeight = Math.min(textarea.scrollHeight, maxHeight);
       textarea.style.height = `${newHeight}px`;
-      
-      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+
+      textarea.style.overflowY =
+        textarea.scrollHeight > maxHeight ? "auto" : "hidden";
     }
   };
-
-
 
   return (
     <form
@@ -66,7 +65,9 @@ const PromptInput = ({
       <textarea
         ref={textareaRef}
         className="bg-transparent [color:var(--color-text)] text-base placeholder-[color:var(--color-disabled-text)] outline-none min-h-[48px] px-1 resize-none scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
-        placeholder={`Ask anything in ${mode === "chat" ? "chat" : "chart"} mode...`}
+        placeholder={`Ask anything in ${
+          mode === "chat" ? "chat" : "chart"
+        } mode...`}
         value={input}
         onChange={(e) => {
           handleInputChange(e);
@@ -86,7 +87,7 @@ const PromptInput = ({
             className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
       ${
         mode === "chat"
-          ? "bg-[var(--color-primary)] text-[var(--color-text)] shadow-sm"
+          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
           : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
       }`}
           >
@@ -99,7 +100,7 @@ const PromptInput = ({
             className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
       ${
         mode === "chart"
-          ? "bg-[var(--color-primary)] text-[var(--color-text)] shadow-sm"
+          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
           : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
       }`}
           >
@@ -114,7 +115,7 @@ const PromptInput = ({
           disabled={isLoading || input.trim() === ""}
           className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ArrowUpRight size={18} />
+          <ArrowUpRight size={18} color="var(--color-button-text)" />
         </button>
       </div>
     </form>

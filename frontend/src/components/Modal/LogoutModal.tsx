@@ -60,20 +60,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm rounded-md transition-colors disabled:opacity-50"
-              style={{
-                color: "var(--color-disabled-text)",
-                backgroundColor: "transparent",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "var(--color-muted-hover)";
-                e.currentTarget.style.color = "var(--color-text)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "var(--color-disabled-text)";
-              }}
+              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
             >
               Cancel
             </button>

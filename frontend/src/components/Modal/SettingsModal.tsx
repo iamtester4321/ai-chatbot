@@ -44,7 +44,10 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
           >
             {/* Mobile header */}
             <div className="flex items-center justify-between md:hidden mb-2">
-              <h2 style={{ color: "var(--color-text)" }} className="text-xl font-semibold">
+              <h2
+                style={{ color: "var(--color-text)" }}
+                className="text-xl font-semibold"
+              >
                 Settings
               </h2>
               <button
@@ -62,22 +65,19 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="flex items-center gap-2 p-3 rounded-lg transition-colors whitespace-nowrap"
-                  style={{
-                    backgroundColor:
-                      activeTab === tab.id ? "var(--color-muted)" : "transparent",
-                    color:
-                      activeTab === tab.id ? "var(--color-primary)" : "var(--color-disabled-text)",
-                    border: activeTab === tab.id ? "1px solid var(--color-primary)" : "none",
-                  }}
+                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-[var(--color-muted)] border border-[var(--color-primary)] text-[var(--color-primary)]"
+                      : "text-[var(--color-disabled-text)] hover:bg-[var(--color-hover-bg)]"
+                  }`}
                 >
                   <tab.icon
                     size={18}
-                    style={{
-                      color: activeTab === tab.id
-                        ? "var(--color-primary)"
-                        : "var(--color-disabled-text)",
-                    }}
+                    className={`transition duration-200 ${
+                      activeTab === tab.id
+                        ? "text-[var(--color-primary)]"
+                        : "text-[var(--color-disabled-text)] group-hover:text-[var(--color-primary)]"
+                    }`}
                   />
                   <span>{tab.label}</span>
                 </button>
@@ -89,13 +89,15 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
           <div className="flex-1 p-6 overflow-y-auto">
             {/* Desktop header */}
             <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 style={{ color: "var(--color-text)" }} className="text-xl font-semibold">
+              <h2
+                style={{ color: "var(--color-text)" }}
+                className="text-xl font-semibold"
+              >
                 Settings
               </h2>
               <button
                 onClick={onClose}
-                style={{ color: "var(--color-disabled-text)" }}
-                className="hover:text-text transition-colors"
+                className="text-[var(--color-disabled-text)] hover:text-[var(--color-text)] transition duration-200"
               >
                 ✕
               </button>
@@ -104,8 +106,18 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
             {/* Tab content */}
             <div style={{ color: "var(--color-text)" }}>
               {activeTab === "general" && <GeneralSettings />}
-              {activeTab === "archive" && <ArchivedChats onClose={onClose} archivedChats={archivedChats} />}
-              {activeTab === "favorite" && <FavoriteChats onClose={onClose} favoriteChats={favoriteChats} />}
+              {activeTab === "archive" && (
+                <ArchivedChats
+                  onClose={onClose}
+                  archivedChats={archivedChats}
+                />
+              )}
+              {activeTab === "favorite" && (
+                <FavoriteChats
+                  onClose={onClose}
+                  favoriteChats={favoriteChats}
+                />
+              )}
             </div>
           </div>
         </div>

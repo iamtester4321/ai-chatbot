@@ -4,6 +4,7 @@
 :root {
   --color-bg: #f9fafb;
   --color-text: #0b101c;
+  --color-button-text: white;
   --color-muted: #e5e7eb;
   --color-border: #e5e7eb;
   --color-primary: #10b981;

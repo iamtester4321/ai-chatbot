@@ -78,25 +78,16 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleToggleFavorite(chat.id)}
-                className="p-2 rounded-lg transition-colors"
-                style={{ backgroundColor: "transparent" }}
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
                 title="Remove from favorites"
               >
                 <Star size={16} fill="gold" color="gold" />
               </button>
+
               <button
                 onClick={() => openDeleteModal(chat.id)}
-                className="p-2 rounded-lg transition-colors"
-                style={{
-                  color: "var(--color-error)",
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--color-muted)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                style={{ color: "var(--color-error)" }}
                 title="Delete"
               >
                 <Trash2 size={16} />
