@@ -1,6 +1,8 @@
 import { useChat } from "@ai-sdk/react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import useToast from "../hooks/useToast";
 import {
   ARCHIVE_CHAT,
   DELETE_CHAT,
@@ -14,6 +16,7 @@ import {
 } from "../lib/apiUrl";
 import {
   addMessage,
+  resetChat,
   setChatList,
   setChatName,
   setCurrentResponse,
@@ -29,77 +32,88 @@ interface ChatHookProps {
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
   const { messages } = useAppSelector((state) => state.chat);
+  const showToast = useToast();
+  const navigate = useNavigate();
 
   const { input, handleInputChange, handleSubmit, status } = useChat({
     api: STREAM_CHAT_RESPONSE,
     id: chatId,
     onResponse: async () => {
-      const userMessageId = uuidv4();
-      const assistantMessageId = uuidv4();
+      const moderationResult = await moderationCheck(input);
+      if (moderationResult.flagged) {
+        showToast.warning(
+          "Your message contains language that may violate our content guidelines. Please revise and try again."
+        );
+        navigate("/");
+        dispatch(resetChat());
+      } else {
+        const userMessageId = uuidv4();
+        const assistantMessageId = uuidv4();
 
-      dispatch(
-        addMessage({
-          id: userMessageId,
-          role: "user",
-          content: input,
-          createdAt: new Date().toISOString(),
-        })
-      );
-
-      const response = await fetch(STREAM_CHAT_RESPONSE, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userMessageId,
-          assistantMessageId,
-          prompt: input,
-          messages: messages,
-          chatId: chatId || "",
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("API request failed");
-      }
-
-      if (!response.body) {
-        throw new Error("Response body is empty");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      try {
-        let accumulatedText = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
-          dispatch(setCurrentResponse(accumulatedText));
-          onResponseUpdate?.(accumulatedText);
-        }
         dispatch(
           addMessage({
-            id: assistantMessageId,
-            role: "assistant",
-            content: accumulatedText,
+            id: userMessageId,
+            role: "user",
+            content: input,
             createdAt: new Date().toISOString(),
           })
         );
-        dispatch(setCurrentResponse(""));
-        onResponseUpdate?.("");
 
-        await fetchChatNames(dispatch);
-        if (!chatId) return;
-        const updatedChat = await fetchMessages(chatId);
-        if (updatedChat.success && updatedChat.data) {
-          dispatch(setChatName(updatedChat.data.name));
+        const response = await fetch(STREAM_CHAT_RESPONSE, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userMessageId,
+            assistantMessageId,
+            prompt: input,
+            messages: messages,
+            chatId: chatId || "",
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("API request failed");
         }
-      } finally {
-        reader.releaseLock();
+
+        if (!response.body) {
+          throw new Error("Response body is empty");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        try {
+          let accumulatedText = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedText += chunk;
+            dispatch(setCurrentResponse(accumulatedText));
+            onResponseUpdate?.(accumulatedText);
+          }
+          dispatch(
+            addMessage({
+              id: assistantMessageId,
+              role: "assistant",
+              content: accumulatedText,
+              createdAt: new Date().toISOString(),
+            })
+          );
+          dispatch(setCurrentResponse(""));
+          onResponseUpdate?.("");
+
+          await fetchChatNames(dispatch);
+          if (!chatId) return;
+          const updatedChat = await fetchMessages(chatId);
+          if (updatedChat.success && updatedChat.data) {
+            dispatch(setChatName(updatedChat.data.name));
+          }
+        } finally {
+          reader.releaseLock();
+        }
       }
     },
   });
@@ -353,3 +367,39 @@ export async function generateShareId(chatId: string) {
     return { success: false, message: "Network error" };
   }
 }
+
+export const moderationCheck = async (input: string) => {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/moderations",
+      { input },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    const results = response?.data?.results?.[0];
+
+    const profanityThreshold = 0.1;
+
+    const isOffensive =
+      results?.category_scores?.sexual > profanityThreshold ||
+      results?.category_scores?.hate > profanityThreshold ||
+      results?.category_scores?.harassment > profanityThreshold ||
+      results?.category_scores?.violence > profanityThreshold ||
+      results?.flagged;
+
+    return {
+      flagged: isOffensive,
+      apiResult: results,
+      categories: results?.categories,
+      categoryScores: results?.category_scores,
+    };
+  } catch (error) {
+    console.error("Moderation API error:", error);
+    return { flagged: false, categories: {}, categoryScores: {} };
+  }
+};

@@ -25,6 +25,7 @@ const ChatSection = () => {
     (state) => state.chat
   );
   const [error, setError] = useState<string | null>(null);
+  const [generatedChatId, setGeneratedChatId] = useState<string | null>(null);
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
@@ -44,14 +45,30 @@ const ChatSection = () => {
           setError(null);
         } else {
           console.error(error);
-          setError("Chat not found. This chat might have been deleted or doesn't exist.");
-          dispatch(setMessages([]));
+          if (chatId !== generatedChatId) {
+            setError("Chat not found. This chat might have been deleted or doesn't exist.");
+            dispatch(setMessages([]));
+          }
         }
       };
 
       loadMessages();
     }
-  }, [chatId, dispatch]);
+  }, [chatId, dispatch, generatedChatId]);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatId) {
+      const newChatId = generateChatId();
+      setGeneratedChatId(newChatId);
+      sessionStorage.setItem("initialPrompt", input);
+      navigate(`/chat/${newChatId}`, { replace: true });
+      return;
+    }
+    dispatch(setIsLoading(true));
+    await handleSubmit(e);
+    dispatch(setIsLoading(false));
+  };
 
   useEffect(() => {
     if (shareId) {
@@ -92,19 +109,6 @@ const ChatSection = () => {
     return uuidv4();
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatId) {
-      const newChatId = generateChatId();
-      sessionStorage.setItem("initialPrompt", input);
-      navigate(`/chat/${newChatId}`, { replace: true });
-      return;
-    }
-    dispatch(setIsLoading(true));
-    await handleSubmit(e);
-    dispatch(setIsLoading(false));
-  };
-
   useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -128,7 +132,7 @@ const ChatSection = () => {
 
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
-      {error ? (
+      {error && chatId !== generatedChatId ? (
         <Error message={error} />
       ) : (
         <>
