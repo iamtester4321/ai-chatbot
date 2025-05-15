@@ -1,16 +1,18 @@
-import { Link } from "react-router-dom";
 import {
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  Star,
   Archive,
   ChevronDown,
   ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Star,
+  Trash2,
 } from "lucide-react";
-import { ChatState } from "../../lib/types";
+import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
+import { ChatState } from "../../lib/types";
+import { setIsFavorite } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
 
 interface FavoriteChatsProps {
   chats: ChatState["chatList"];
@@ -34,11 +36,12 @@ const FavoriteChats = ({
   handleDelete,
 }: FavoriteChatsProps) => {
   const showToast = useToast();
+  const dispatch = useAppDispatch();
 
   const handleRemoveFromFavorites = async (chatId: string) => {
     try {
       const result = await toggleFavoriteChat(chatId);
-
+      dispatch(setIsFavorite(false));
       if (result.success) {
         toggleDropdown(chatId);
       } else {
@@ -72,15 +75,26 @@ const FavoriteChats = ({
             <Link
               to={`/chat/${chat.id}`}
               className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
-                chatId === chat.id ? "bg-[var(--color-muted)] text-yellow-500" : ""
+                chatId === chat.id
+                  ? "bg-[var(--color-muted)] text-yellow-600"
+                  : ""
               }`}
             >
-              <span className="truncate flex-1" title={chat.name}>
+              <span
+                className={`truncate flex-1 ${
+                  chatId === chat.id ? "font-semibold" : ""
+                }`}
+                title={chat.name}
+              >
                 {chat.name}
               </span>
+
               <div className="flex items-center gap-2">
                 {chat.isArchived && (
-                  <Archive size={16} className="text-[color:var(--color-disabled-text)]" />
+                  <Archive
+                    size={16}
+                    className="text-[color:var(--color-disabled-text)]"
+                  />
                 )}
                 <button
                   onClick={(e) => {
@@ -117,7 +131,7 @@ const FavoriteChats = ({
                     </button>
                     <button
                       onClick={() => handleRemoveFromFavorites(chat.id)}
-                      className="px-4 py-2 text-sm text-yellow-500 hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-yellow-600 hover:bg-[var(--color-muted)] w-full text-left flex items-center"
                     >
                       <Star size={16} className="mr-2" />
                       Remove

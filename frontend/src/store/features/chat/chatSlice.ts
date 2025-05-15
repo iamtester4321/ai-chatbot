@@ -8,6 +8,7 @@ const initialState: ChatState = {
   chatName: "",
   chatList: [],
   isArchived: false,
+  isFavorite: false,
 };
 
 const chatSlice = createSlice({
@@ -51,6 +52,9 @@ const chatSlice = createSlice({
     setIsArchived: (state, action: PayloadAction<boolean>) => {
       state.isArchived = action.payload;
     },
+    setIsFavorite: (state, action: PayloadAction<boolean>) => {
+      state.isFavorite = action.payload;
+    },
   },
 });
 
@@ -63,6 +67,7 @@ export const {
   resetChat,
   setChatList,
   setIsArchived,
+  setIsFavorite,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

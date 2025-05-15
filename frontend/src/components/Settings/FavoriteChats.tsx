@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatState } from "../../lib/types";
+import { setIsFavorite } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 
 interface FavoriteChatsProps {
@@ -15,6 +17,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
+  const dispatch = useAppDispatch();
 
   const openDeleteModal = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -29,7 +32,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const handleToggleFavorite = async (chatId: string) => {
     try {
       const result = await toggleFavoriteChat(chatId);
-
+      dispatch(setIsFavorite(false));
       if (!result.success) {
         showToast.error(result.message || "Failed to update favorite status");
       }
@@ -76,25 +79,16 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleToggleFavorite(chat.id)}
-                className="p-2 rounded-lg transition-colors"
-                style={{ backgroundColor: "transparent" }}
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
                 title="Remove from favorites"
               >
                 <Star size={16} fill="gold" color="gold" />
               </button>
+
               <button
                 onClick={() => openDeleteModal(chat.id)}
-                className="p-2 rounded-lg transition-colors"
-                style={{
-                  color: "var(--color-error)",
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--color-muted)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                style={{ color: "var(--color-error)" }}
                 title="Delete"
               >
                 <Trash2 size={16} />

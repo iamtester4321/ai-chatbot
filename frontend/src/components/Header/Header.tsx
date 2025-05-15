@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   archiveChat,
   fetchMessages,
-  toggleFavoriteChat
+  toggleFavoriteChat,
 } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { setIsArchived } from "../../store/features/chat/chatSlice";
+import {
+  resetChat,
+  setIsArchived,
+  setIsFavorite,
+} from "../../store/features/chat/chatSlice";
 import { toggleTheme } from "../../store/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { RootState } from "../../store/store";
@@ -29,34 +33,34 @@ interface HeaderProps {
 export default function Header({
   toggleSidebar,
   isLogoutModalOpen,
-  isInShareRoute
+  isInShareRoute,
 }: HeaderProps) {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
   const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
   const isArchive = useAppSelector((state) => state.chat.isArchived);
-
-  const [isFavorite, setIsFavorite] = useState(false);
+  const isFavorite = useSelector((state: RootState) => state.chat.isFavorite);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isShareOpen, setShareOpen] = useState(false);
-
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const showToast = useToast();
+  const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
       if (!chatId) {
-        setIsFavorite(false);
+        dispatch(setIsFavorite(false));
         dispatch(setIsArchived(false));
         return;
       }
 
       const result = await fetchMessages(chatId);
       if (result.success) {
-        setIsFavorite(result.data.isFavorite || false);
+        dispatch(setIsFavorite(result.data.isFavorite || false));
         dispatch(setIsArchived(result.data.isArchived || false));
       }
     };
@@ -66,10 +70,16 @@ export default function Header({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
         setIsMobileMenuOpen(false);
       }
-      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+      if (
+        desktopMenuRef.current &&
+        !desktopMenuRef.current.contains(event.target as Node)
+      ) {
         setIsMenuOpen(false);
       }
     };
@@ -84,7 +94,8 @@ export default function Header({
     if (!chatId) return;
     const result = await toggleFavoriteChat(chatId);
     if (result.success) {
-      setIsFavorite(!isFavorite);
+      const newStatus = !isFavorite;
+      dispatch(setIsFavorite(newStatus));
     } else {
       showToast.error(result.message || "Failed to update favorite status");
     }
@@ -95,6 +106,8 @@ export default function Header({
     const result = await archiveChat(chatId);
     if (result.success) {
       dispatch(setIsArchived(!isArchive));
+      dispatch(resetChat())
+      navigate("/");
       showToast.success(result.message || "Chat archived");
       setIsMenuOpen(false);
       setIsMobileMenuOpen(false);
@@ -104,17 +117,25 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 w-full z-[1000] py-3 px-4 border-b flex items-center justify-between"
+    <header
+      className="sticky top-0 w-full z-[1000] py-3 px-4 border-b flex items-center justify-between"
       style={{
         backgroundColor: "var(--color-bg)",
         color: "var(--color-text)",
         borderColor: "var(--color-border)",
       }}
     >
-      <HeaderTitle toggleSidebar={toggleSidebar} isInShareRoute={isInShareRoute} />
+      <HeaderTitle
+        toggleSidebar={toggleSidebar}
+        isInShareRoute={isInShareRoute}
+      />
 
       <div className="flex items-center space-x-1 sm:space-x-3">
-        <ThemeToggleButton isDarkMode={isDarkMode} mode={mode} toggleTheme={() => dispatch(toggleTheme())} />
+        <ThemeToggleButton
+          isDarkMode={isDarkMode}
+          mode={mode}
+          toggleTheme={() => dispatch(toggleTheme())}
+        />
 
         {chatId && (
           <>

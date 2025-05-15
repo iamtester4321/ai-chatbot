@@ -12,13 +12,12 @@ export default function ChatActions({
   isFavorite,
   isArchive,
   toggleFavorite,
-  setShareOpen
+  setShareOpen,
 }: ChatActionsProps) {
   return (
     <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
       <button
         className="p-2 rounded-full transition duration-200"
-        title="Share"
         style={{ backgroundColor: "transparent" }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
@@ -26,6 +25,7 @@ export default function ChatActions({
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = "transparent";
         }}
+        title="Share"
         onClick={() => setShareOpen(true)}
       >
         <Share2 size={20} />
@@ -34,7 +34,6 @@ export default function ChatActions({
       {!isArchive && (
         <button
           className="p-2 rounded-full transition duration-200"
-          title="Favorite"
           style={{ backgroundColor: "transparent" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
@@ -42,6 +41,7 @@ export default function ChatActions({
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
           }}
+          title="Favorite"
           onClick={toggleFavorite}
         >
           <Star

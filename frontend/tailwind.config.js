@@ -3,7 +3,11 @@
 export default {
   content: [],
   theme: {
-    extend: {},
+    extend: {
+      prose: {
+        table: false,
+      },
+    },
   },
   plugins: [
     

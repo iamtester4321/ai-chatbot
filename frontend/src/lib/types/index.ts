@@ -50,4 +50,5 @@ export type ChatState = {
     isArchived: boolean;
   }>;
   isArchived: boolean;
+  isFavorite: boolean;
 };
