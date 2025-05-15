@@ -29,9 +29,13 @@ interface ChatHookProps {
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
   const { messages } = useAppSelector((state) => state.chat);
+  const { mode } = useAppSelector((state) => state.chat);
+
+  let modeStr = "";
+  if (mode === "chart") modeStr = "?mode=chart";
 
   const { input, handleInputChange, handleSubmit, status } = useChat({
-    api: STREAM_CHAT_RESPONSE,
+    api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
       const userMessageId = uuidv4();
@@ -46,7 +50,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         })
       );
 
-      const response = await fetch(STREAM_CHAT_RESPONSE, {
+      const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
         method: "POST",
         credentials: "include",
         headers: {

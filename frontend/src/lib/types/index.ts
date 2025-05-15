@@ -51,4 +51,5 @@ export type ChatState = {
   }>;
   isArchived: boolean;
   isFavorite: boolean;
+  mode: "chat" | "chart";
 };

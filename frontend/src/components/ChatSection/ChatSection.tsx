@@ -3,7 +3,11 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
+import {
+  fetchMessages,
+  fetchMessagesByShareId,
+  useChatActions,
+} from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
@@ -20,12 +24,14 @@ const ChatSection = () => {
   const { chatId } = useParams();
   const { shareId } = useParams();
   const dispatch = useAppDispatch();
+
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
   );
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
+
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
     },
@@ -89,6 +95,7 @@ const ChatSection = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!chatId) {
       const newChatId = generateChatId();
       sessionStorage.setItem("initialPrompt", input);

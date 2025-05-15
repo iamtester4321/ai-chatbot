@@ -31,6 +31,25 @@ const ChatResponse = ({
   const showToast = useToast();
   const dispatch = useAppDispatch();
 
+  //
+
+  function extractJsonObjects(text: string) {
+    const jsonObjects = [];
+    const jsonRegex = /```json\s*({[\s\S]*?})\s*```/g;
+
+    let match;
+    while ((match = jsonRegex.exec(text)) !== null) {
+      try {
+        const parsed = JSON.parse(match[1]);
+        jsonObjects.push(parsed);
+      } catch (err) {
+        console.warn("Invalid JSON block skipped:", err);
+      }
+    }
+
+    return jsonObjects;
+  }
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -141,6 +160,8 @@ const ChatResponse = ({
     setDislikedMessages(newDislikedMessages);
   }, [messages]);
 
+  const { mode } = useAppSelector((state) => state.chat);
+
   return (
     <div className="w-full min-h-screen bg-[#1a1a1a] text-white flex flex-col">
       {/* Scrollable content area */}
@@ -156,7 +177,6 @@ const ChatResponse = ({
             {/* All messages */}
             {messages.map((msg, index) => {
               const isUser = msg.role === "user";
-
               if (isUser) {
                 return (
                   <div key={index} className="flex justify-end">
@@ -165,70 +185,75 @@ const ChatResponse = ({
                     </div>
                   </div>
                 );
+              } else {
+                return (
+                  <div key={index} className="space-y-2">
+                    <div className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2">
+                      {/* Use MarkdownRenderer here */}
+                      <MarkdownRenderer
+                        content={msg.content}
+                        flag={mode === "chart" ? true : false}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-3 text-gray-400">
+                      <button
+                        className="p-1 hover:text-white cursor-pointer"
+                        aria-label="Copy to clipboard"
+                        onClick={() => copyToClipboard(msg.content, index)}
+                      >
+                        {copiedIndex === index ? <Check /> : <Copy />}
+                      </button>
+                      {!shareId && (
+                        <>
+                          {msg?.id && (
+                            <button
+                              className="p-1 hover:text-white transition-colors"
+                              aria-label="Like"
+                              onClick={() => handleLike(msg.id)}
+                            >
+                              <ThumbsUp
+                                size={20}
+                                fill={
+                                  likedMessages[msg.id]
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                                color={
+                                  likedMessages[msg.id]
+                                    ? "currentColor"
+                                    : "currentColor"
+                                }
+                              />
+                            </button>
+                          )}
+
+                          {msg?.id && (
+                            <button
+                              className="p-1 hover:text-white transition-colors"
+                              aria-label="Dislike"
+                              onClick={() => handleDislike(msg.id)}
+                            >
+                              <ThumbsDown
+                                size={20}
+                                fill={
+                                  dislikedMessages[msg.id]
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                                color={
+                                  dislikedMessages[msg.id]
+                                    ? "currentColor"
+                                    : "currentColor"
+                                }
+                              />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
               }
-
-              return (
-                <div key={index} className="space-y-2">
-                  <div className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2">
-                    {/* Use MarkdownRenderer here */}
-                    <MarkdownRenderer content={msg.content} />
-                  </div>
-                  <div className="flex items-center space-x-3 text-gray-400">
-                    <button
-                      className="p-1 hover:text-white cursor-pointer"
-                      aria-label="Copy to clipboard"
-                      onClick={() => copyToClipboard(msg.content, index)}
-                    >
-                      {copiedIndex === index ? <Check /> : <Copy />}
-                    </button>
-                    {!shareId && (
-                      <>
-                        {msg?.id && (
-                          <button
-                            className="p-1 hover:text-white transition-colors"
-                            aria-label="Like"
-                            onClick={() => handleLike(msg.id)}
-                          >
-                            <ThumbsUp
-                              size={20}
-                              fill={
-                                likedMessages[msg.id] ? "currentColor" : "none"
-                              }
-                              color={
-                                likedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
-                            />
-                          </button>
-                        )}
-
-                        {msg?.id && (
-                          <button
-                            className="p-1 hover:text-white transition-colors"
-                            aria-label="Dislike"
-                            onClick={() => handleDislike(msg.id)}
-                          >
-                            <ThumbsDown
-                              size={20}
-                              fill={
-                                dislikedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "none"
-                              }
-                              color={
-                                dislikedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
-                            />
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
             })}
 
             {/* Current AI response */}
@@ -236,7 +261,7 @@ const ChatResponse = ({
               <div className="space-y-2">
                 <div className="prose prose-invert max-w-none">
                   {/* Use MarkdownRenderer for AI response */}
-                  <MarkdownRenderer content={chatResponse} />
+                  <MarkdownRenderer content={chatResponse} flag={true} />
                 </div>
 
                 {/* Action buttons */}

@@ -33,12 +33,38 @@ export const streamChat = async (req: any, res: any) => {
   const assistantMessageId = req.body.assistantMessageId;
   let assistantReply = "";
 
+  const { mode } = req.query;
+
+  let tempPrompt =
+    req.body.prompt ||
+    "user forget to put prompt || if chat type is chart show return some rutin data ";
+
+  if (mode === "chart") {
+    tempPrompt =
+      `
+You are a data analysis assistant. Your response must include detailed observations or explanations alongside one or more valid JSON objects. Each JSON object must be parseable by JSON.parse() and clearly labeled with a name indicating its purpose or type (e.g., "MonthlyRevenue", "UserGrowth", etc.).
+
+✅ JSON must:
+- Be suitable for visualizing with charts (line, bar, pie, stacked, scatter, area, composed)
+- Include arrays of data (e.g., labels and corresponding values)
+- Be named when multiple datasets are returned (e.g., {"name": "MonthlyRevenue", "data": {...}})
+- Be parseable and not wrapped in backticks or markdown
+- Be accompanied by text that describes or analyzes the data
+
+Your response format:
+1. Explanatory text describing the data, trends, insights, and relationships.
+2. One or more named JSON objects, each on its own line.
+
+Now return the data and explanation for the following request:
+` + req.body.prompt.trim();
+  } else tempPrompt = tempPrompt;
+
   const model = google("gemini-2.0-flash");
 
   try {
     const result = streamText({
       model,
-      messages: [...messages, { role: "user", content: req.body.prompt }],
+      messages: [...messages, { role: "user", content: tempPrompt }],
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
@@ -49,7 +75,11 @@ export const streamChat = async (req: any, res: any) => {
           userId,
           [
             { id: userMessageId, role: "user", content: req.body.prompt },
-            { id: assistantMessageId, role: "assistant", content: assistantReply },
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              content: assistantReply,
+            },
           ],
           chatId
         );

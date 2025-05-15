@@ -1,7 +1,9 @@
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setMode } from "../../store/features/chat/chatSlice";
 
 const PromptInput = ({
   input,
@@ -10,10 +12,9 @@ const PromptInput = ({
   handleFormSubmit,
 }: PromptInputProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mode, setMode] = useState<"chat" | "chart">(
-    searchParams.get("mode") === "chart" ? "chart" : "chat"
-  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mode = useAppSelector((state) => state.chat.mode);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (mode === "chart") {
@@ -26,7 +27,7 @@ const PromptInput = ({
   }, [mode, setSearchParams]);
 
   const handleModeChange = (newMode: "chat" | "chart") => {
-    setMode(newMode);
+    dispatch(setMode(newMode));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -43,19 +44,18 @@ const PromptInput = ({
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
-      
+      textarea.style.height = "auto";
+
       const lineHeight = 24;
       const maxHeight = lineHeight * 3;
-      
+
       const newHeight = Math.min(textarea.scrollHeight, maxHeight);
       textarea.style.height = `${newHeight}px`;
-      
-      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+
+      textarea.style.overflowY =
+        textarea.scrollHeight > maxHeight ? "auto" : "hidden";
     }
   };
-
-
 
   return (
     <form
@@ -66,7 +66,9 @@ const PromptInput = ({
       <textarea
         ref={textareaRef}
         className="bg-transparent text-gray-200 text-base placeholder:text-gray-500 outline-none min-h-[48px] px-1 resize-none scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
-        placeholder={`Ask anything in ${mode === "chat" ? "chat" : "chart"} mode...`}
+        placeholder={`Ask anything in ${
+          mode === "chat" ? "chat" : "chart"
+        } mode...`}
         value={input}
         onChange={(e) => {
           handleInputChange(e);
