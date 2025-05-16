@@ -9,16 +9,37 @@ const Error = ({ message }: ErrorProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-6 px-4">
-      <div className="flex flex-col items-center gap-4">
-        <AlertCircle className="w-16 h-16 text-red-500" />
-        <div className="text-xl text-red-400 text-center max-w-md">{message}</div>
+    <div className="flex flex-col items-center justify-center h-screen gap-8 px-6">
+      <div className="flex flex-col items-center gap-6">
+        <AlertCircle 
+          className="w-20 h-20" 
+          style={{ 
+            color: 'var(--color-error)',
+            transition: 'color 0.2s ease-in-out'
+          }} 
+        />
+        <div 
+          className="text-xl text-center max-w-lg" 
+          style={{ 
+            color: 'var(--color-error)',
+            transition: 'color 0.2s ease-in-out'
+          }}
+        >
+          {message}
+        </div>
       </div>
       <button
-        onClick={() => navigate('/')}
-        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2"
+        onClick={() => navigate('/chat')}
+        className="px-8 py-3 text-base font-medium rounded-lg transition-colors"
+        style={{
+          backgroundColor: 'var(--color-primary)',
+          color: 'var(--color-button-text)',
+          transition: 'all 0.2s ease-in-out'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)'}
+        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary)'}
       >
-        Back to Home
+        Create a New Chat
       </button>
     </div>
   );

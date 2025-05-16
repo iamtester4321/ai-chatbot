@@ -10,7 +10,7 @@
 .markdown-content { color: #111827; }
 .markdown-content p { 
   color: #111827;
-  margin: 1.5rem 0;
+  margin: 1.0rem 0;
   line-height: 1.75;
   font-size: 1rem;
   letter-spacing: 0.01em;
@@ -19,7 +19,7 @@
 .dark .markdown-content { color: #e5e7eb; }
 .dark .markdown-content p {
   color: #e5e7eb;
-  margin: 1.5rem 0;
+  margin: 1.0rem 0;
   line-height: 1.75;
   font-size: 1rem;
   letter-spacing: 0.01em;

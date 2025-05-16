@@ -33,7 +33,7 @@ const ChatResponse = ({
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current.scrollIntoView();
     }
   }, [messages, chatResponse]);
 
@@ -159,8 +159,19 @@ const ChatResponse = ({
               if (isUser) {
                 return (
                   <div key={index} className="flex justify-end">
-                    <div className="bg-[var(--color-muted)] text-[var(--color-text)] px-4 py-2 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
-                      {msg.content}
+                    <div className="space-y-2">
+                      <div className="bg-[var(--color-muted)] px-4 py-1 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
+                        <MarkdownRenderer content={msg.content} />
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          className="p-1 text-[var(--color-disabled-text)] hover:text-[var(--color-text)] cursor-pointer"
+                          aria-label="Copy to clipboard"
+                          onClick={() => copyToClipboard(msg.content, index)}
+                        >
+                          {copiedIndex === index ? <Check /> : <Copy />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -184,29 +195,47 @@ const ChatResponse = ({
                       <>
                         {msg?.id && (
                           <button
-                            className="p-1 hover:text-[var(--color-text)] transition-colors"
+                            // className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`p-1 transition-colors ${
+                              !(
+                                likedMessages[msg.id] ||
+                                dislikedMessages[msg.id]
+                              )
+                                ? "hover:text-[var(--color-text)]"
+                                : ""
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
                             aria-label="Like"
                             onClick={() => handleLike(msg.id)}
+                            disabled={
+                              likedMessages[msg.id] || dislikedMessages[msg.id]
+                            }
                           >
                             <ThumbsUp
                               size={20}
                               fill={
                                 likedMessages[msg.id] ? "currentColor" : "none"
                               }
-                              color={
-                                likedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
+                              color="currentColor"
                             />
                           </button>
                         )}
 
                         {msg?.id && (
                           <button
-                            className="p-1 hover:text-[var(--color-text)] transition-colors"
+                            // className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`p-1 transition-colors ${
+                              !(
+                                likedMessages[msg.id] ||
+                                dislikedMessages[msg.id]
+                              )
+                                ? "hover:text-[var(--color-text)]"
+                                : ""
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
                             aria-label="Dislike"
                             onClick={() => handleDislike(msg.id)}
+                            disabled={
+                              likedMessages[msg.id] || dislikedMessages[msg.id]
+                            }
                           >
                             <ThumbsDown
                               size={20}
@@ -215,11 +244,7 @@ const ChatResponse = ({
                                   ? "currentColor"
                                   : "none"
                               }
-                              color={
-                                dislikedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
+                              color="currentColor"
                             />
                           </button>
                         )}
@@ -251,8 +276,12 @@ const ChatResponse = ({
                     {!shareId && (
                       <>
                         <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors"
+                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Like"
+                          disabled={
+                            likedMessages[chatResponse] ||
+                            dislikedMessages[chatResponse]
+                          }
                         >
                           <ThumbsUp
                             size={20}
@@ -261,16 +290,16 @@ const ChatResponse = ({
                                 ? "currentColor"
                                 : "none"
                             }
-                            color={
-                              likedMessages[chatResponse]
-                                ? "currentColor"
-                                : "currentColor"
-                            }
+                            color="currentColor"
                           />
                         </button>
                         <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors"
+                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Dislike"
+                          disabled={
+                            likedMessages[chatResponse] ||
+                            dislikedMessages[chatResponse]
+                          }
                         >
                           <ThumbsDown
                             size={20}
@@ -279,11 +308,7 @@ const ChatResponse = ({
                                 ? "currentColor"
                                 : "none"
                             }
-                            color={
-                              dislikedMessages[chatResponse]
-                                ? "currentColor"
-                                : "currentColor"
-                            }
+                            color="currentColor"
                           />
                         </button>
                       </>
@@ -322,12 +347,12 @@ const ChatResponse = ({
         ) : (
           <>
             {!shareId && (
-      <PromptInput
-        input={input}
+              <PromptInput
+                input={input}
                 isLoading={isLoading}
-        handleInputChange={handleInputChange}
-        handleFormSubmit={handleFormSubmit}
-      />
+                handleInputChange={handleInputChange}
+                handleFormSubmit={handleFormSubmit}
+              />
             )}
           </>
         )}
