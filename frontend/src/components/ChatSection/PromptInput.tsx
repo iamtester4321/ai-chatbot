@@ -2,9 +2,8 @@ import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
-import { textToMarkdown } from "../../utils/textToMarkdownConverter";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setMode } from "../../store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 const PromptInput = ({
   input,
@@ -87,8 +86,7 @@ const PromptInput = ({
         } mode...`}
         value={input}
         onChange={(e) => {
-          const markdownText = textToMarkdown(e.target.value);
-          handleInputChange({ ...e, target: { ...e.target, value: markdownText } });
+          handleInputChange(e);
           adjustTextareaHeight();
         }}
         onKeyDown={handleKeyDown}

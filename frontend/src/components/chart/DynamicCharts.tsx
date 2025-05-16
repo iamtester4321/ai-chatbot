@@ -1,5 +1,15 @@
 "use client";
-import { JSX, useEffect, useMemo, useState } from "react";
+import {
+  AreaChart as AreaIcon,
+  BarChart3,
+  ChartLine,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  PieChart as PieIcon,
+  ScatterChart as ScatterIcon,
+} from "lucide-react";
+import React, { JSX, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -21,29 +31,10 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
+import StreamLoader from "../StreamLoader/StreamLoader";
+import { chartOptions, COLORS } from "../../lib/constants";
+import { ChartType } from "../../lib/types";
 
-import {
-  AreaChart as AreaIcon,
-  BarChart3,
-  ChartLine,
-  ChevronDown,
-  ChevronUp,
-  LayoutGrid,
-  PieChart as PieIcon,
-  ScatterChart as ScatterIcon,
-} from "lucide-react";
-
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#00C49F"];
-
-type ChartType = "line" | "area" | "bar" | "composed" | "scatter" | "pie";
-const chartOptions: ChartType[] = [
-  "line",
-  "area",
-  "bar",
-  "composed",
-  "scatter",
-  "pie",
-];
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,
@@ -59,7 +50,7 @@ interface DynamicChartProps {
   name: string;
 }
 
-export default function DynamicChart({ data, name }: DynamicChartProps) {
+function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const [chartType, setChartType] = useState<ChartType>("line");
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
   const [open, setOpen] = useState(false);
@@ -101,29 +92,35 @@ export default function DynamicChart({ data, name }: DynamicChartProps) {
       ) || keys[0];
     const numericKeys = keys.filter((k) => typeof sample[k] === "number");
     return { categoryKey, numericKeys };
-  }, [jsonData, data]);
+  }, [jsonData]);
 
-  const renderSeries = () =>
-    numericKeys.map((key, idx) => {
-      const color = COLORS[idx % COLORS.length];
-      switch (chartType) {
-        case "line":
-          return <Line key={key} dataKey={key} stroke={color} />;
-        case "area":
-          return <Area key={key} dataKey={key} stroke={color} fill={color} />;
-        case "bar":
-          return <Bar key={key} dataKey={key} fill={color} />;
-        case "composed":
-          if (idx === 0)
+  const renderSeries = useCallback(
+    () =>
+      numericKeys.map((key, idx) => {
+        const color = COLORS[idx % COLORS.length];
+        switch (chartType) {
+          case "line":
+            return <Line key={key} dataKey={key} stroke={color} />;
+          case "area":
             return <Area key={key} dataKey={key} stroke={color} fill={color} />;
-          if (idx === 1) return <Bar key={key} dataKey={key} fill={color} />;
-          return <Line key={key} dataKey={key} stroke={color} />;
-        default:
-          return null;
-      }
-    });
+          case "bar":
+            return <Bar key={key} dataKey={key} fill={color} />;
+          case "composed":
+            if (idx === 0)
+              return (
+                <Area key={key} dataKey={key} stroke={color} fill={color} />
+              );
+            if (idx === 1) return <Bar key={key} dataKey={key} fill={color} />;
+            return <Line key={key} dataKey={key} stroke={color} />;
+          default:
+            return null;
+        }
+      }),
+    [chartType, numericKeys]
+  );
 
-  const renderChart = () => {
+  // Memoize the entire chart element
+  const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
       return <p className="text-red-500">Insufficient data for chart</p>;
     }
@@ -215,11 +212,13 @@ export default function DynamicChart({ data, name }: DynamicChartProps) {
       default:
         return null;
     }
-  };
+  }, [chartType, categoryKey, numericKeys, jsonData, renderSeries]);
 
   return (
     <div className="p-6">
-      <h2 className="text-[var(--color-text)] text-2xl font-semibold mb-4">{name}</h2>
+      <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
+        {name}
+      </p>
       <div className="relative inline-block text-left mb-4">
         <button
           onClick={() => setOpen((prev) => !prev)}
@@ -268,9 +267,17 @@ export default function DynamicChart({ data, name }: DynamicChartProps) {
       </div>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
-          {renderChart() || <div />}
+          {chartElement || <StreamLoader />}
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
+
+// Only re-render when `data` or `name` change
+export default React.memo(DynamicChartComponent, (prev, next) => {
+  return (
+    prev.name === next.name &&
+    JSON.stringify(prev.data) === JSON.stringify(next.data)
+  );
+});
