@@ -37,7 +37,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/chat", ensureAuthenticated, chatRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/message", ensureAuthenticated, messageRoutes);
 app.use("/api/user", ensureAuthenticated, userRoutes);
 app.use("/api/share", shareRoutes);
