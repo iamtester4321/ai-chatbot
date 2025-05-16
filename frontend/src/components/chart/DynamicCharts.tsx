@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -26,8 +25,28 @@ import { RootState } from "../../store/store";
 import React from "react";
 import StreamLoader from "../StreamLoader/StreamLoader";
 
-// const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#00C49F"];
-const COLORS = ["#4F46E5", "#0D9488", "#E11D48", "#D97706", "#0284C7", "#7C3AED", "#65A30D", "#DB2777", "#059669", "#EA580C", "#0891B2", "#C026D3", "#CA8A04", "#2563EB", "#DC2626", "#16A34A", "#9333EA", "#475569", "#57534E", "#8B5CF6"]
+const COLORS = [
+  "#4F46E5",
+  "#0D9488",
+  "#E11D48",
+  "#D97706",
+  "#0284C7",
+  "#7C3AED",
+  "#65A30D",
+  "#DB2777",
+  "#059669",
+  "#EA580C",
+  "#0891B2",
+  "#C026D3",
+  "#CA8A04",
+  "#2563EB",
+  "#DC2626",
+  "#16A34A",
+  "#9333EA",
+  "#475569",
+  "#57534E",
+  "#8B5CF6",
+];
 
 type ChartType = "line" | "area" | "bar" | "composed" | "scatter" | "pie";
 
@@ -82,27 +101,31 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
 
   const renderSeries = useCallback(
     () =>
-    numericKeys.map((key, idx) => {
-      const color = COLORS[idx % COLORS.length];
-      switch (chartType) {
-        case "line":
-          return <Line key={key} dataKey={key} stroke={color} />;
-        case "area":
-          return <Area key={key} dataKey={key} stroke={color} fill={color} />;
-        case "bar":
-          return <Bar key={key} dataKey={key} fill={color} />;
-        case "composed":
-          if (idx === 0)
+      numericKeys.map((key, idx) => {
+        const color = COLORS[idx % COLORS.length];
+        switch (chartType) {
+          case "line":
+            return <Line key={key} dataKey={key} stroke={color} />;
+          case "area":
             return <Area key={key} dataKey={key} stroke={color} fill={color} />;
-          if (idx === 1) return <Bar key={key} dataKey={key} fill={color} />;
-          return <Line key={key} dataKey={key} stroke={color} />;
-        default:
-          return null;
-      }
-    }),[chartType, numericKeys]);
+          case "bar":
+            return <Bar key={key} dataKey={key} fill={color} />;
+          case "composed":
+            if (idx === 0)
+              return (
+                <Area key={key} dataKey={key} stroke={color} fill={color} />
+              );
+            if (idx === 1) return <Bar key={key} dataKey={key} fill={color} />;
+            return <Line key={key} dataKey={key} stroke={color} />;
+          default:
+            return null;
+        }
+      }),
+    [chartType, numericKeys]
+  );
 
   // Memoize the entire chart element
-    const chartElement = useMemo(() => {
+  const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
       return <p className="text-red-500">Insufficient data for chart</p>;
     }
@@ -198,9 +221,17 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
 
   return (
     <div className="p-6">
-      <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"}`}>{name}</h2>
+      <h2
+        className={`text-2xl font-semibold mb-4 ${
+          isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"
+        }`}
+      >
+        {name}
+      </h2>
       <select
-        className={`border p-2 rounded mb-4  ${isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"}`}
+        className={`border p-2 rounded mb-4  ${
+          isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"
+        }`}
         value={chartType}
         onChange={(e) => setChartType(e.target.value as ChartType)}
       >
@@ -213,7 +244,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
       </select>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
-        {chartElement || <StreamLoader />}
+          {chartElement || <StreamLoader />}
         </ResponsiveContainer>
       </div>
     </div>

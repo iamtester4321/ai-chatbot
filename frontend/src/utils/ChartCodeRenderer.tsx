@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import DynamicChart from "../components/chart/DynamicCharts";
 import { CodeBlock } from "./responseRenderer";
 
-
 const ChartCodeRenderer = ({ children }: { children: string }) => {
   const content = useMemo(() => {
     try {

@@ -52,7 +52,9 @@ const ChatSection = () => {
         } else {
           console.error(error);
           if (chatId !== generatedChatId) {
-            setError("Chat not found. This chat might have been deleted or doesn't exist.");
+            setError(
+              "Chat not found. This chat might have been deleted or doesn't exist."
+            );
             dispatch(setMessages([]));
           }
         }
@@ -115,7 +117,7 @@ const ChatSection = () => {
   const generateChatId = () => {
     return uuidv4();
   };
-    useEffect(() => {
+  useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (target.classList.contains("copy-button")) {
@@ -136,10 +138,15 @@ const ChatSection = () => {
     return () => document.removeEventListener("click", handleCopyClick);
   }, [messages]);
 
+  const handleNewChat = () => {
+    setError(null);
+    navigate("/chat");
+  };
+
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {error && chatId !== generatedChatId ? (
-        <Error message={error} />
+        <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
           {messages.length > 0 && (
@@ -157,7 +164,9 @@ const ChatSection = () => {
           )}
 
           <section
-            className={`${messages.length > 0 ? "" : "pt-[200px]"} h-100vh transition-all duration-300`}
+            className={`${
+              messages.length > 0 ? "" : "pt-[200px]"
+            } h-100vh transition-all duration-300`}
           >
             <div className="container">
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
