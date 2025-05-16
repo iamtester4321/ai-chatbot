@@ -54,3 +54,11 @@ export type ChatState = {
   isShare: boolean;
   mode: "chat" | "chart";
 };
+
+export type ChartType =
+  | "line"
+  | "area"
+  | "bar"
+  | "composed"
+  | "scatter"
+  | "pie";
