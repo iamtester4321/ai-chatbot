@@ -1,8 +1,10 @@
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
 import { textToMarkdown } from "../../utils/textToMarkdownConverter";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setMode } from "../../store/features/chat/chatSlice";
 
 const PromptInput = ({
   input,
@@ -11,10 +13,9 @@ const PromptInput = ({
   handleFormSubmit,
 }: PromptInputProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mode, setMode] = useState<"chat" | "chart">(
-    searchParams.get("mode") === "chart" ? "chart" : "chat"
-  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mode = useAppSelector((state) => state.chat.mode);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (mode === "chart") {
@@ -27,7 +28,7 @@ const PromptInput = ({
   }, [mode, setSearchParams]);
 
   const handleModeChange = (newMode: "chat" | "chart") => {
-    setMode(newMode);
+    dispatch(setMode(newMode));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

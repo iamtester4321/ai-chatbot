@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import {
   addOrRemoveArchiveService,
   addOrRemoveFavoriteService,
@@ -19,13 +19,14 @@ interface ChatRequestParams {
 
 interface ChatRequestByshareIdParams {
   shareId: string;
+  user: { id: string };
 }
 
 export const streamChat = async (req: any, res: any) => {
-  const userId = (req.user as { id: string }).id;
+  const userId = (req.user as { id: string })?.id;
 
   if (!userId) {
-    return res.status(400).json({ error: "User ID is required" });
+    console.log("no user chating ");
   }
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
@@ -33,26 +34,58 @@ export const streamChat = async (req: any, res: any) => {
   const assistantMessageId = req.body.assistantMessageId;
   let assistantReply = "";
 
+  const { mode } = req.query;
+
+  let tempPrompt =
+    req.body.prompt ||
+    "user forget to put prompt || if chat type is chart show return some rutin data ";
+
+  if (mode === "chart") {
+    tempPrompt =
+      `
+You are a data analysis assistant. Your response must include detailed observations or explanations alongside one or more valid JSON objects. Each JSON object must be parseable by JSON.parse() and clearly labeled with a name indicating its purpose or type (e.g., "MonthlyRevenue", "UserGrowth", etc.).
+
+✅ JSON must:
+- Be suitable for visualizing with charts (line, bar, pie, stacked, scatter, area, composed)
+- Include arrays of data (e.g., labels and corresponding values)
+- Be named when multiple datasets are returned (e.g., {"name": "MonthlyRevenue", "data": {...}})
+- Be parseable and not wrapped in backticks or markdown
+- Be accompanied by text that describes or analyzes the data
+
+Your response format:
+1. Explanatory text describing the data, trends, insights, and relationships.
+2. One or more named JSON objects, each on its own line.
+
+Now return the data and explanation for the following request:
+` + req.body.prompt.trim();
+  } else tempPrompt = tempPrompt;
+
   const model = google("gemini-2.0-flash");
 
   try {
     const result = streamText({
       model,
-      messages: [...messages, { role: "user", content: req.body.prompt }],
+      messages: [...messages, { role: "user", content: tempPrompt }],
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
       onFinish: async () => {
-        await saveChat(
-          userId,
-          [
-            { id: userMessageId, role: "user", content: req.body.prompt },
-            { id: assistantMessageId, role: "assistant", content: assistantReply },
-          ],
-          chatId
-        );
+        if (userId) {
+          await saveChat(
+            userId,
+            [
+              { id: userMessageId, role: "user", content: req.body.prompt },
+              {
+                id: assistantMessageId,
+                role: "assistant",
+                content: assistantReply,
+              },
+            ],
+            chatId
+          );
+        }
       },
       onError: (err) => console.error("Stream error:", err),
     });
@@ -63,10 +96,7 @@ export const streamChat = async (req: any, res: any) => {
   }
 };
 
-export async function findChatById(
-  req: Request<ChatRequestParams>,
-  res: Response
-) {
+export const findChatById: RequestHandler = async (req, res) => {
   try {
     const { chatId } = req.params;
     const chat = await findChatByIdService(chatId);
@@ -76,7 +106,7 @@ export async function findChatById(
       error instanceof Error ? error.message : "Failed to fetch chat";
     res.status(404).json({ message: errorMessage });
   }
-}
+};
 
 export async function findChatByshareId(
   req: Request<ChatRequestByshareIdParams>,
@@ -93,27 +123,19 @@ export async function findChatByshareId(
   }
 }
 
-export async function findChatsByUsrerId(
-  req: Request<ChatRequestParams>,
-  res: Response
-) {
+export const findChatsForUser: RequestHandler = async (req, res) => {
   try {
     const userId = (req.user as { id: string }).id;
-
     const chats = await findChatsByService(userId);
-
     res.status(200).json(chats);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to fetch chats";
     res.status(404).json({ message: errorMessage });
   }
-}
+};
 
-export async function findChatNamesByUserId(
-  req: Request<ChatRequestParams>,
-  res: Response
-) {
+export const findChatNamesByUserId: RequestHandler = async (req, res) => {
   try {
     const userId = (req.user as { id: string }).id;
     const chatNames = await findChatNamesByService(userId);
@@ -123,7 +145,7 @@ export async function findChatNamesByUserId(
       error instanceof Error ? error.message : "Failed to fetch chat names";
     res.status(404).json({ message: errorMessage });
   }
-}
+};
 
 export const addOrRemoveFavorite = async (req: any, res: any) => {
   const { chatId } = req.params;

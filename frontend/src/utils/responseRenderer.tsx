@@ -7,6 +7,7 @@ import { Copy, Check } from "lucide-react";
 import { RootState } from "../store/store";
 import { useSelector } from "react-redux";
 import "../styles/markdown.css";
+import DynamicChart from "../components/chart/DynamicCharts";
 
 interface CodeProps {
   className?: string;
@@ -121,13 +122,26 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           code({ className, children, ...props }: CodeProps) {
             const match = /language-(\w+)/.exec(className || "");
             const isInline = !match;
+            const lang = match?.[1] || "";
 
-            return isInline ? (
+            if (isInline) {
+              return (
               <code className={`px-1.5 py-0.5 rounded font-mono text-sm ${isDarkMode ? "bg-gray-800" : "bg-gray-200" }`} {...props}>
                 {children}
               </code>
-            ) : (
+            )} else {
+              if (lang === "json" && flag && typeof children === "string") {
+                try {
+                  const parsed = JSON.parse(children.trim());
+                  return <DynamicChart data={parsed.data} name={parsed.name} />;
+                } catch (error) {
+                  console.error("Invalid JSON for DynamicChart:", error);
+                  return <CodeBlock language={lang}>{children}</CodeBlock>;
+                }
+              }
+            } return(
               <CodeBlock language={match?.[1] || "text"}>
+                
                 {children ? String(children).replace(/\n$/, "") : ""}
               </CodeBlock>
             );
@@ -142,7 +156,10 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           ol: ({ node, ...props }) => <ol className="list-decimal pl-5 my-4 space-y-2" {...props} />,
           li: ({ node, ...props }) => <li className="mb-1" {...props} />,
           blockquote: ({ node, ...props }) => (
-            <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-4 italic text-gray-700 dark:text-gray-300" {...props} />
+            <blockquote
+              className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-4 italic text-gray-700 dark:text-gray-300"
+              {...props}
+            />
           ),
           table: ({ node, ...props }) => (
             <div className=" my-6">

@@ -105,12 +105,6 @@ export const renameChat = async (chatId: string, newName: string) => {
 };
 
 export const deleteChatById = async (chatId: string) => {
-  await prisma.message.deleteMany({
-    where: {
-      chatId: chatId,
-    },
-  });
-
   return prisma.chat.delete({
     where: {
       id: chatId,

@@ -35,6 +35,7 @@ model Chat {
   userId     String
   messages   Message[]
   files      FileUpload[]
+  share      share?
 }
 
 model share {
@@ -42,6 +43,7 @@ model share {
   createdAt DateTime @default(now())
   userId    String
   chatId    String   @unique
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
 
 model Message {
@@ -51,7 +53,7 @@ model Message {
   createdAt  DateTime @default(now())
   isLiked    Boolean  @default(false)
   isDisliked Boolean  @default(false)
-  chat       Chat     @relation(fields: [chatId], references: [id])
+  chat       Chat     @relation(fields: [chatId], references: [id],onDelete: Cascade)
   chatId     String
 }
 

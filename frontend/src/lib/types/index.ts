@@ -53,4 +53,5 @@ export type ChatState = {
   isArchived: boolean;
   isFavorite: boolean;
   isShare: boolean;
+  mode: "chat" | "chart";
 };

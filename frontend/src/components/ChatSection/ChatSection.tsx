@@ -3,7 +3,11 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
+import {
+  fetchMessages,
+  fetchMessagesByShareId,
+  useChatActions,
+} from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
@@ -21,6 +25,7 @@ const ChatSection = () => {
   const { chatId } = useParams();
   const { shareId } = useParams();
   const dispatch = useAppDispatch();
+
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
   );
@@ -29,6 +34,7 @@ const ChatSection = () => {
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
+
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
     },
@@ -58,9 +64,9 @@ const ChatSection = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!chatId) {
       const newChatId = generateChatId();
-      setGeneratedChatId(newChatId);
       sessionStorage.setItem("initialPrompt", input);
       navigate(`/chat/${newChatId}`, { replace: true });
       return;
@@ -108,8 +114,7 @@ const ChatSection = () => {
   const generateChatId = () => {
     return uuidv4();
   };
-
-  useEffect(() => {
+    useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (target.classList.contains("copy-button")) {
