@@ -13,7 +13,6 @@ import {
   saveChat,
 } from "../services/chat.service";
 
-
 interface ChatRequestByshareIdParams {
   shareId: string;
   user: { id: string };
@@ -21,10 +20,6 @@ interface ChatRequestByshareIdParams {
 
 export const streamChat = async (req: any, res: any) => {
   const userId = (req.user as { id: string })?.id;
-
-  if (!userId) {
-    console.log("no user chating ");
-  }
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
   const userMessageId = req.body.userMessageId;
@@ -48,7 +43,7 @@ You are a data analysis assistant. Your response must include detailed observati
 - Be named when multiple datasets are returned (e.g., {"name": "MonthlyRevenue", "data": {...}})
 - Be parseable and not wrapped in backticks or markdown
 - Be accompanied by text that describes or analyzes the data
-
+s
 Your response format:
 1. Explanatory text describing the data, trends, insights, and relationships.
 2. One named JSON objects, each on its own line.

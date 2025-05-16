@@ -34,7 +34,8 @@ import {
 import StreamLoader from "../StreamLoader/StreamLoader";
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,
@@ -54,6 +55,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const [chartType, setChartType] = useState<ChartType>("line");
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
   const [open, setOpen] = useState(false);
+  const { isDarkMode } = useSelector((state: RootState) => state.theme);
 
   // Transform object-of-arrays into array-of-objects
   useEffect(() => {
@@ -131,7 +133,20 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                borderColor: isDarkMode ? "#374151" : "#e5e7eb",
+                color: isDarkMode ? "#f9fafb" : "#111827",
+              }}
+              itemStyle={{
+                color: isDarkMode ? "#f3f4f6" : "#111827",
+              }}
+              cursor={{
+                stroke: isDarkMode ? "#9ca3af" : "#6b7280",
+                strokeWidth: 1,
+              }}
+            />
             <Legend />
             {renderSeries()}
           </LineChart>
@@ -142,7 +157,20 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                borderColor: isDarkMode ? "#374151" : "#e5e7eb",
+                color: isDarkMode ? "#f9fafb" : "#111827",
+              }}
+              itemStyle={{
+                color: isDarkMode ? "#f3f4f6" : "#111827",
+              }}
+              cursor={{
+                stroke: isDarkMode ? "#9ca3af" : "#6b7280",
+                strokeWidth: 1,
+              }}
+            />
             <Legend />
             {renderSeries()}
           </AreaChart>
@@ -153,7 +181,20 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                borderColor: isDarkMode ? "#374151" : "#e5e7eb",
+                color: isDarkMode ? "#f9fafb" : "#111827",
+              }}
+              itemStyle={{
+                color: isDarkMode ? "#f3f4f6" : "#111827",
+              }}
+              cursor={{
+                stroke: isDarkMode ? "#9ca3af" : "#6b7280",
+                strokeWidth: 1,
+              }}
+            />
             <Legend />
             {renderSeries()}
           </BarChart>
@@ -164,7 +205,20 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                borderColor: isDarkMode ? "#374151" : "#e5e7eb",
+                color: isDarkMode ? "#f9fafb" : "#111827",
+              }}
+              itemStyle={{
+                color: isDarkMode ? "#f3f4f6" : "#111827",
+              }}
+              cursor={{
+                stroke: isDarkMode ? "#9ca3af" : "#6b7280",
+                strokeWidth: 1,
+              }}
+            />
             <Legend />
             {renderSeries()}
           </ComposedChart>
@@ -205,7 +259,20 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                borderColor: isDarkMode ? "#374151" : "#e5e7eb",
+                color: isDarkMode ? "#f9fafb" : "#111827",
+              }}
+              itemStyle={{
+                color: isDarkMode ? "#f3f4f6" : "#111827",
+              }}
+              cursor={{
+                stroke: isDarkMode ? "#9ca3af" : "#6b7280",
+                strokeWidth: 1,
+              }}
+            />
             <Legend />
           </PieChart>
         );
