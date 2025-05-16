@@ -20,7 +20,7 @@ interface FavoriteChatsProps {
   isFavoritesOpen: boolean;
   setIsFavoritesOpen: (value: boolean) => void;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: { id: string | null; section: "favorite" | "all" | null };
+  activeDropdown: { id: string | null; section: "favorite" | "all" | "spark" | null };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }

@@ -34,9 +34,13 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const { messages } = useAppSelector((state) => state.chat);
   const showToast = useToast();
   const navigate = useNavigate();
+  const { mode } = useAppSelector((state) => state.chat);
+
+  let modeStr = "";
+  if (mode === "chart") modeStr = "?mode=chart";
 
   const { input, handleInputChange, handleSubmit, status } = useChat({
-    api: STREAM_CHAT_RESPONSE,
+    api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
       const moderationResult = await moderationCheck(input);
@@ -59,7 +63,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           })
         );
 
-        const response = await fetch(STREAM_CHAT_RESPONSE, {
+        const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
           method: "POST",
           credentials: "include",
           headers: {

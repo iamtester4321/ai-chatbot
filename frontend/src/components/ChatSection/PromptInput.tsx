@@ -1,7 +1,9 @@
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
+import { setMode } from "../../store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 const PromptInput = ({
   input,
@@ -10,10 +12,9 @@ const PromptInput = ({
   handleFormSubmit,
 }: PromptInputProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [mode, setMode] = useState<"chat" | "chart">(
-    searchParams.get("mode") === "chart" ? "chart" : "chat"
-  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mode = useAppSelector((state) => state.chat.mode);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (mode === "chart") {
@@ -26,7 +27,7 @@ const PromptInput = ({
   }, [mode, setSearchParams]);
 
   const handleModeChange = (newMode: "chat" | "chart") => {
-    setMode(newMode);
+    dispatch(setMode(newMode));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -65,6 +66,8 @@ const PromptInput = ({
   const handleFormSubmitWithFocus = async (e: React.FormEvent) => {
     await handleFormSubmit(e);
     if (textareaRef.current) {
+      textareaRef.current.style.height = "48px";
+      textareaRef.current.style.overflowY = "hidden";
       textareaRef.current.focus();
     }
   };
@@ -89,7 +92,6 @@ const PromptInput = ({
         onKeyDown={handleKeyDown}
         rows={1}
       />
-
       {/* Bottom Buttons */}
       <div className="flex items-center justify-between">
         {/* Mode Toggle */}

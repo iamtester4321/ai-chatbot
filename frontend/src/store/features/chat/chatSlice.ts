@@ -9,6 +9,8 @@ const initialState: ChatState = {
   chatList: [],
   isArchived: false,
   isFavorite: false,
+  isShare: false,
+  mode: "chat",
 };
 
 const chatSlice = createSlice({
@@ -44,6 +46,7 @@ const chatSlice = createSlice({
           name: string;
           isFavorite: boolean;
           isArchived: boolean;
+          isShare: boolean;
         }>
       >
     ) => {
@@ -54,6 +57,12 @@ const chatSlice = createSlice({
     },
     setIsFavorite: (state, action: PayloadAction<boolean>) => {
       state.isFavorite = action.payload;
+    },
+    setIsShare: (state, action: PayloadAction<boolean>) => {
+      state.isShare = action.payload;
+    },
+    setMode: (state, action: PayloadAction<"chat" | "chart">) => {
+      state.mode = action.payload;
     },
   },
 });
@@ -68,6 +77,8 @@ export const {
   setChatList,
   setIsArchived,
   setIsFavorite,
+  setIsShare,
+  setMode,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

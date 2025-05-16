@@ -2,14 +2,12 @@ import { Sidebar } from "lucide-react";
 
 interface HeaderTitleProps {
   toggleSidebar: () => void;
-  isInShareRoute: boolean;
 }
 
-export default function HeaderTitle({ toggleSidebar, isInShareRoute }: HeaderTitleProps) {
+export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
   return (
     <div className="flex items-center">
-      {!isInShareRoute && (
-        <button
+      <button
         className="p-2 rounded-full transition duration-200"
         style={{ backgroundColor: "transparent" }}
         onMouseEnter={(e) => {
@@ -23,10 +21,9 @@ export default function HeaderTitle({ toggleSidebar, isInShareRoute }: HeaderTit
       >
         <Sidebar size={20} />
       </button>
-      )}
       <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
-          AI Assistant
-        </h1>
+        AI Assistant
+      </h1>
     </div>
   );
 }

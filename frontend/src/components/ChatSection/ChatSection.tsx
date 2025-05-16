@@ -3,7 +3,11 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
+import {
+  fetchMessages,
+  fetchMessagesByShareId,
+  useChatActions,
+} from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
@@ -21,6 +25,7 @@ const ChatSection = () => {
   const { chatId } = useParams();
   const { shareId } = useParams();
   const dispatch = useAppDispatch();
+
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
   );
@@ -29,6 +34,7 @@ const ChatSection = () => {
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
+
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
     },
@@ -46,7 +52,9 @@ const ChatSection = () => {
         } else {
           console.error(error);
           if (chatId !== generatedChatId) {
-            setError("Chat not found. This chat might have been deleted or doesn't exist.");
+            setError(
+              "Chat not found. This chat might have been deleted or doesn't exist."
+            );
             dispatch(setMessages([]));
           }
         }
@@ -58,6 +66,7 @@ const ChatSection = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!chatId) {
       const newChatId = generateChatId();
       setGeneratedChatId(newChatId);
@@ -88,7 +97,7 @@ const ChatSection = () => {
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
 
-    if (storedPrompt && chatId && messages.length === 0) {
+    if (storedPrompt && chatId) {
       const inputElement = document.createElement("input");
       inputElement.value = storedPrompt;
       const event = {
@@ -108,7 +117,6 @@ const ChatSection = () => {
   const generateChatId = () => {
     return uuidv4();
   };
-
   useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -130,10 +138,15 @@ const ChatSection = () => {
     return () => document.removeEventListener("click", handleCopyClick);
   }, [messages]);
 
+  const handleNewChat = () => {
+    setError(null);
+    navigate("/chat");
+  };
+
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {error && chatId !== generatedChatId ? (
-        <Error message={error} />
+        <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
           {messages.length > 0 && (
@@ -151,7 +164,9 @@ const ChatSection = () => {
           )}
 
           <section
-            className={`${messages.length > 0 ? "" : "pt-[200px]"} h-100vh transition-all duration-300`}
+            className={`${
+              messages.length > 0 ? "" : "pt-[200px]"
+            } h-100vh transition-all duration-300`}
           >
             <div className="container">
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">

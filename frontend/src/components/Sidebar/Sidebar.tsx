@@ -10,13 +10,13 @@ import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
+import SparkChats from "./SparkChats";
 
 const Sidebar = ({
   isLogoutModalOpen,
   setIsLogoutModalOpen,
   setIsSettingsOpen,
   chatList,
-  isInShareRoute,
   setIsRenameModalOpen,
   setIsDeleteModalOpen,
   setSelectedChat,
@@ -26,12 +26,13 @@ const Sidebar = ({
   const dispatch = useAppDispatch();
   const [activeDropdown, setActiveDropdown] = useState<{
     id: string | null;
-    section: "favorite" | "all" | null;
+    section: "favorite" | "all" | "spark" | null;
   }>({
     id: null,
     section: null,
   });
-  const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -49,7 +50,10 @@ const Sidebar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = (chatId: string, section: "favorite" | "all") => {
+  const toggleDropdown = (
+    chatId: string,
+    section: "favorite" | "spark" | "all"
+  ) => {
     setActiveDropdown((current) =>
       current.id === chatId && current.section === section
         ? { id: null, section: null }
@@ -84,105 +88,114 @@ const Sidebar = ({
     (chat) => chat.isFavorite && !chat.isArchived
   );
 
+  const sparkChats = filteredChatList.filter((chat) => chat.isShare);
+
   return (
     <>
-      {!isInShareRoute && (
-        <div className="flex flex-col h-screen md:h-full w-full bg-[var(--color-bg)] text-[color:var(--color-text)] p-3 overflow-hidden border-r border-[var(--color-border)]">
-          <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
-            <Link
-              to={"/chat"}
-              onClick={() => dispatch(resetChat())}
-              className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
-            >
-              <div className="flex items-center justify-center gap-2 p-2 w-full truncate cursor-pointer transition-all">
-                <PlusIcon className="flex-shrink-0" />
-                <span className="text-sm whitespace-nowrap text-white truncate">
-                  New Chat
-                </span>
-              </div>
-            </Link>
-          </span>
+      <div className="flex flex-col h-screen md:h-full w-full bg-[var(--color-bg)] text-[color:var(--color-text)] p-3 overflow-hidden border-r border-[var(--color-border)]">
+        <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
+          <Link
+            to={"/chat"}
+            onClick={() => dispatch(resetChat())}
+            className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
+          >
+            <div className="flex items-center justify-center gap-2 p-2 w-full truncate cursor-pointer transition-all">
+              <PlusIcon className="flex-shrink-0" />
+              <span className="text-sm whitespace-nowrap text-white truncate">
+                New Chat
+              </span>
+            </div>
+          </Link>
+        </span>
 
-          {chatList.filter((chat) => !chat.isArchived).length > 0 && (
-            <div className="relative mb-4 truncate">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search chats"
-                className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[color:var(--color-placeholder)] focus:outline-none focus:border-[var(--color-primary)] truncate"
+        {chatList.filter((chat) => !chat.isArchived).length > 0 && (
+          <div className="relative mb-4 truncate">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search chats"
+              className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[color:var(--color-placeholder)] focus:outline-none focus:border-[var(--color-primary)] truncate"
+            />
+            <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[color:var(--color-placeholder)] flex-shrink-0" />
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-primary)] scrollbar-track-transparent pb-4">
+          {chatList.length === 0 ? (
+            <div className="text-center text-[color:var(--color-disabled-text)]">
+              No Chats Available
+            </div>
+          ) : (
+            <>
+              <FavoriteChats
+                chats={favoriteChats}
+                chatId={chatId}
+                isFavoritesOpen={isFavoritesOpen}
+                setIsFavoritesOpen={setIsFavoritesOpen}
+                toggleDropdown={(id) => toggleDropdown(id, "favorite")}
+                activeDropdown={activeDropdown}
+                handleRename={handleRename}
+                handleDelete={handleDelete}
               />
-              <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[color:var(--color-placeholder)] flex-shrink-0" />
+
+              <SparkChats
+                chats={sparkChats}
+                chatId={chatId}
+                toggleDropdown={(id) => toggleDropdown(id, "spark")}
+                activeDropdown={activeDropdown}
+                handleRename={handleRename}
+                handleDelete={handleDelete}
+                setIsShareOpen={setIsShareOpen}
+                isShareOpen={isShareOpen}
+              />
+
+              <AllChats
+                chats={filteredChatList}
+                chatId={chatId}
+                toggleDropdown={(id) => toggleDropdown(id, "all")}
+                activeDropdown={activeDropdown}
+                handleRename={handleRename}
+                handleDelete={handleDelete}
+              />
+            </>
+          )}
+        </div>
+
+        <div className="border-t border-[var(--color-border)] pt-3 pb-2 text-sm sticky bottom-0 bg-[var(--color-bg)]">
+          {isUserMenuOpen && (
+            <div className="mt-2 space-y-2">
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(true);
+                  setIsUserMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors"
+              >
+                <Settings size={16} />
+                Settings
+              </button>
+
+              <button
+                onClick={() => {
+                  handleLogoutClick();
+                  setIsUserMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-primary)] scrollbar-track-transparent pb-4">
-            {chatList.length === 0 ? (
-              <div className="text-center text-[color:var(--color-disabled-text)]">
-                No Chats Available
-              </div>
-            ) : (
-              <>
-                <FavoriteChats
-                  chats={favoriteChats}
-                  chatId={chatId}
-                  isFavoritesOpen={isFavoritesOpen}
-                  setIsFavoritesOpen={setIsFavoritesOpen}
-                  toggleDropdown={(id) => toggleDropdown(id, "favorite")}
-                  activeDropdown={activeDropdown}
-                  handleRename={handleRename}
-                  handleDelete={handleDelete}
-                />
-
-                <AllChats
-                  chats={filteredChatList}
-                  chatId={chatId}
-                  toggleDropdown={(id) => toggleDropdown(id, "all")}
-                  activeDropdown={activeDropdown}
-                  handleRename={handleRename}
-                  handleDelete={handleDelete}
-                />
-              </>
-            )}
-          </div>
-
-          <div className="border-t border-[var(--color-border)] pt-3 pb-2 text-sm sticky bottom-0 bg-[var(--color-bg)]">
-            {isUserMenuOpen && (
-              <div className="mt-2 space-y-2">
-                <button
-                  onClick={() => {
-                    setIsSettingsOpen(true);
-                    setIsUserMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors"
-                >
-                  <Settings size={16} />
-                  Settings
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleLogoutClick();
-                    setIsUserMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </div>
-            )}
-
-            <UserDetail
-              onClick={() => setIsUserMenuOpen((prev) => !prev)}
-            />
-          </div>
-          <LogoutModal
-            isOpen={isLogoutModalOpen}
-            onClose={() => setIsLogoutModalOpen(false)}
-          />
+          <UserDetail onClick={() => setIsUserMenuOpen((prev) => !prev)} />
         </div>
-      )}
+        <LogoutModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+        />
+      </div>
     </>
   );
 };
