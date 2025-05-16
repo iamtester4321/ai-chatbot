@@ -2,6 +2,8 @@ import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { generateShareId } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
+import { setIsShare } from "../../store/features/chat/chatSlice";
+import { useDispatch } from "react-redux";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ export default function ShareModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
+  const dispatch = useDispatch();
 
   const shareUrl = shareId
     ? `${window.location.origin}/share/${shareId}`
@@ -34,6 +37,8 @@ export default function ShareModal({
         const result = await generateShareId(chatId);
         if (result.success && result.shareId) {
           setShareId(result.shareId);
+          dispatch(setIsShare(true));
+          window.dispatchEvent(new Event("chat-spark"));
         } else {
           showToast.error(result.message || "Failed to generate share link.");
         }
@@ -46,7 +51,7 @@ export default function ShareModal({
     setCopied(false);
     setShareId(null);
     fetchShareId();
-  }, [isOpen, chatId]);
+  }, [isOpen, chatId, dispatch]); // Added dispatch as dependency
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

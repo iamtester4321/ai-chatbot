@@ -48,7 +48,9 @@ export type ChatState = {
     name: string;
     isFavorite: boolean;
     isArchived: boolean;
+    isShare: boolean;
   }>;
   isArchived: boolean;
   isFavorite: boolean;
+  isShare: boolean;
 };

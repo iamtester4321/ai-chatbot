@@ -1,82 +1,60 @@
 import {
-  Archive,
-  ChevronDown,
-  ChevronRight,
-  MoreHorizontal,
-  Pencil,
-  Star,
-  Trash2,
+    Archive,
+    ChevronDown,
+    ChevronRight,
+    MoreHorizontal,
+    Pencil,
+    Share2,
+    Trash2
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toggleFavoriteChat } from "../../actions/chat.actions";
-import useToast from "../../hooks/useToast";
 import { ChatState } from "../../lib/types";
-import { setIsFavorite } from "../../store/features/chat/chatSlice";
-import { useAppDispatch } from "../../store/hooks";
 
-interface FavoriteChatsProps {
+interface ShareChatsProps {
   chats: ChatState["chatList"];
   chatId: string | undefined;
-  isFavoritesOpen: boolean;
-  setIsFavoritesOpen: (value: boolean) => void;
+  isShareOpen: boolean;
+  setIsShareOpen: (value: boolean) => void;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: { id: string | null; section: "favorite" | "all" | "spark" | null };
+  activeDropdown: { id: string | null; section: "favorite" | "spark" | "all" | null };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }
 
-const FavoriteChats = ({
+const SparkChats = ({
   chats,
   chatId,
-  isFavoritesOpen,
-  setIsFavoritesOpen,
+  isShareOpen,
+  setIsShareOpen,
   toggleDropdown,
   activeDropdown,
   handleRename,
   handleDelete,
-}: FavoriteChatsProps) => {
-  const showToast = useToast();
-  const dispatch = useAppDispatch();
-
-  const handleRemoveFromFavorites = async (chatId: string) => {
-    try {
-      const result = await toggleFavoriteChat(chatId);
-      dispatch(setIsFavorite(false));
-      if (result.success) {
-        toggleDropdown(chatId);
-      } else {
-        showToast.error(result.message || "Failed to remove from favorites");
-      }
-    } catch (error) {
-      showToast.error("An error occurred while removing from favorites");
-      console.error("Error removing from favorites:", error);
-    }
-  };
-
+}: ShareChatsProps) => {
   if (chats.length === 0) return null;
 
   return (
     <div className="mb-4">
       <button
-        onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
+        onClick={() => setIsShareOpen(!isShareOpen)}
         className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
       >
-        {isFavoritesOpen ? (
+        {isShareOpen ? (
           <ChevronDown size={16} className="text-[color:var(--color-text)]" />
         ) : (
           <ChevronRight size={16} className="text-[color:var(--color-text)]" />
         )}
-        <Star size={16} fill="gold" color="gold" />
-        <span>Favorites</span>
+        <Share2 size={16} />
+        <span>Spark Chats</span>
       </button>
-      {isFavoritesOpen &&
+      {isShareOpen &&
         chats.map((chat) => (
           <div key={chat.id} className="relative group">
             <Link
               to={`/chat/${chat.id}`}
               className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
                 chatId === chat.id
-                  ? "bg-[var(--color-muted)] text-yellow-600"
+                  ? "bg-[var(--color-muted)] text-blue-600"
                   : ""
               }`}
             >
@@ -109,7 +87,7 @@ const FavoriteChats = ({
             </Link>
 
             {activeDropdown.id === chat.id &&
-              activeDropdown.section === "favorite" && (
+              activeDropdown.section === "spark" && (
                 <div
                   data-dropdown-menu
                   className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)] z-50"
@@ -129,13 +107,6 @@ const FavoriteChats = ({
                       <Trash2 size={16} className="mr-2" />
                       Delete
                     </button>
-                    <button
-                      onClick={() => handleRemoveFromFavorites(chat.id)}
-                      className="px-4 py-2 text-sm text-yellow-600 hover:bg-[var(--color-muted)] w-full text-left flex items-center"
-                    >
-                      <Star size={16} className="mr-2" />
-                      Remove
-                    </button>
                   </div>
                 </div>
               )}
@@ -145,4 +116,4 @@ const FavoriteChats = ({
   );
 };
 
-export default FavoriteChats;
+export default SparkChats;

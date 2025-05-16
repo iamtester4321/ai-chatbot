@@ -10,6 +10,7 @@ import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
+import SparkChats from "./SparkChats";
 
 const Sidebar = ({
   isLogoutModalOpen,
@@ -26,12 +27,13 @@ const Sidebar = ({
   const dispatch = useAppDispatch();
   const [activeDropdown, setActiveDropdown] = useState<{
     id: string | null;
-    section: "favorite" | "all" | null;
+    section: "favorite" | "all" | "spark" | null;
   }>({
     id: null,
     section: null,
   });
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
+  const [isShareOpen, setIsShareOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -49,7 +51,7 @@ const Sidebar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = (chatId: string, section: "favorite" | "all") => {
+  const toggleDropdown = (chatId: string, section: "favorite" | "spark" | "all") => {
     setActiveDropdown((current) =>
       current.id === chatId && current.section === section
         ? { id: null, section: null }
@@ -84,6 +86,8 @@ const Sidebar = ({
     (chat) => chat.isFavorite && !chat.isArchived
   );
 
+  const sparkChats = filteredChatList.filter((chat) => chat.isShare);
+  console.log(sparkChats);
   return (
     <>
       {!isInShareRoute && (
@@ -134,6 +138,17 @@ const Sidebar = ({
                   handleDelete={handleDelete}
                 />
 
+                <SparkChats
+                  chats={sparkChats}
+                  chatId={chatId}
+                  toggleDropdown={(id) => toggleDropdown(id, "spark")}
+                  activeDropdown={activeDropdown}
+                  handleRename={handleRename}
+                  handleDelete={handleDelete}
+                  setIsShareOpen={setIsShareOpen}
+                  isShareOpen={isShareOpen}
+                />
+
                 <AllChats
                   chats={filteredChatList}
                   chatId={chatId}
@@ -173,9 +188,7 @@ const Sidebar = ({
               </div>
             )}
 
-            <UserDetail
-              onClick={() => setIsUserMenuOpen((prev) => !prev)}
-            />
+            <UserDetail onClick={() => setIsUserMenuOpen((prev) => !prev)} />
           </div>
           <LogoutModal
             isOpen={isLogoutModalOpen}
