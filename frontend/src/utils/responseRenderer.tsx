@@ -7,13 +7,15 @@ import { Copy, Check } from "lucide-react";
 import { RootState } from "../store/store";
 import { useSelector } from "react-redux";
 import "../styles/markdown.css";
-import DynamicChart from "../components/chart/DynamicCharts";
+import ChartCodeRenderer from "./ChartCodeRenderer";
+import React from "react";
 
 interface CodeProps {
   className?: string;
   children?: React.ReactNode;
   [key: string]: any;
 }
+
 
 
 // Function to replace opening ``` with ```bash when no language is specified
@@ -61,7 +63,7 @@ const fixUnclosedCodeBlock = (text: string) => {
 };
 
 // Code block component with copy functionality
-const CodeBlock = ({ language, children }: { language: string; children?: React.ReactNode }) => {
+export const CodeBlock = ({ language, children }: { language: string; children?: React.ReactNode }) => {
   const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const [copied, setCopied] = useState(false);
 
@@ -131,17 +133,10 @@ const MarkdownRenderer = ({ content, flag }: { content: string, flag?:boolean })
               </code>
             )} else {
               if (lang === "json" && flag && typeof children === "string") {
-                try {
-                  const parsed = JSON.parse(children.trim());
-                  return <DynamicChart data={parsed.data} name={parsed.name} />;
-                } catch (error) {
-                  console.error("Invalid JSON for DynamicChart:", error);
-                  return <CodeBlock language={lang}>{children}</CodeBlock>;
-                }
+                return <ChartCodeRenderer>{children}</ChartCodeRenderer>;
               }
-            } return(
+            } return( 
               <CodeBlock language={match?.[1] || "text"}>
-                
                 {children ? String(children).replace(/\n$/, "") : ""}
               </CodeBlock>
             );
@@ -181,4 +176,4 @@ const MarkdownRenderer = ({ content, flag }: { content: string, flag?:boolean })
   );
 };
 
-export default MarkdownRenderer;
+export default React.memo(MarkdownRenderer);
