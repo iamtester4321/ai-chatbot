@@ -24,33 +24,36 @@ model User {
 }
 
 model Chat {
-  id        String       @id
-  name      String
-  isFavorite Boolean     @default(false)
-  isArchived Boolean     @default(false)
-  type      ChatType  @default(text)
-  createdAt DateTime     @default(now())
-  user      User         @relation(fields: [userId], references: [id])
-  userId    String
-  messages  Message[]
-  files     FileUpload[]
+  id         String       @id
+  name       String
+  isFavorite Boolean      @default(false)
+  isArchived Boolean      @default(false)
+  isShare Boolean      @default(false)
+  type       ChatType     @default(text)
+  createdAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String
+  messages   Message[]
+  files      FileUpload[]
+  share      share?
 }
 
-model share{
-  id        String       @id 
-  createdAt DateTime     @default(now())
+model share {
+  id        String   @id
+  createdAt DateTime @default(now())
   userId    String
-  chatId    String @unique
+  chatId    String   @unique
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
 
 model Message {
-  id         String   @id @default(uuid())
+  id         String   @id
   content    String
-  role     String   
+  role       String
   createdAt  DateTime @default(now())
-  isLiked      Boolean  @default(false)
-  isDisliked   Boolean  @default(false)
-  chat       Chat     @relation(fields: [chatId], references: [id])
+  isLiked    Boolean  @default(false)
+  isDisliked Boolean  @default(false)
+  chat       Chat     @relation(fields: [chatId], references: [id],onDelete: Cascade)
   chatId     String
 }
 

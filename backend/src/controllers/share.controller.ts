@@ -1,13 +1,18 @@
+import { Request, Response } from "express";
 import { generateShareIdService } from "../services/share.service";
+import AsyncHandler from "express-async-handler";
 
-export const generateShareId = async (req: any, res: any) => {
-  const { id, chatId, userId } = req.body;
+export const generateShareId = AsyncHandler(
+  async (req: Request, res: Response) => {
+    const { id, chatId } = req.body;
+    const userId = (req.user as { id: string }).id;
+    try {
+      const shareId = await generateShareIdService(id, chatId, userId);
 
-  try {
-    const shareId = await generateShareIdService(id, chatId, userId);
-    return res.status(200).json({ shareId });
-  } catch (err) {
-    console.error("Error generating share ID:", err);
-    return res.status(500).json({ error: "Internal server error" });
+      res.status(200).json({ shareId });
+    } catch (err) {
+      console.error("Error generating share ID:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-};
+);

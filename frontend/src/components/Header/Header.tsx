@@ -1,100 +1,178 @@
-import { useState } from 'react';
-import { Share2, BarChart2, MessageSquare, Star, Moon, Sun, MoreHorizontal, Archive, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  archiveChat,
+  fetchMessages,
+  toggleFavoriteChat,
+} from "../../actions/chat.actions";
+import useToast from "../../hooks/useToast";
+import {
+  resetChat,
+  setIsArchived,
+  setIsFavorite,
+} from "../../store/features/chat/chatSlice";
+import { toggleTheme } from "../../store/features/themeSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { RootState } from "../../store/store";
+import DeleteModal from "../Modal/DeleteModal";
+import ShareModal from "../Modal/ShareModal";
 
-export default function Header() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isFavorite, setIsFavorite] = useState(false);
+import ThemeToggleButton from "../Common/ThemeToggleButton";
+import ChatActions from "./ChatActions";
+import DesktopMenu from "./DesktopMenu";
+import HeaderTitle from "./HeaderTitle";
+import MobileMenu from "./MobileMenu";
+
+interface HeaderProps {
+  toggleSidebar: () => void;
+  isLogoutModalOpen: boolean;
+}
+
+export default function Header({
+  toggleSidebar,
+  isLogoutModalOpen,
+}: HeaderProps) {
+  const { chatId } = useParams();
+  const dispatch = useAppDispatch();
+  const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
+  const isArchive = useAppSelector((state) => state.chat.isArchived);
+  const isFavorite = useSelector((state: RootState) => state.chat.isFavorite);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isChartMode, setIsChartMode] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isShareOpen, setShareOpen] = useState(false);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const showToast = useToast();
+  const navigate = useNavigate();
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      if (!chatId) {
+        dispatch(setIsFavorite(false));
+        dispatch(setIsArchived(false));
+        return;
+      }
+
+      const result = await fetchMessages(chatId);
+      if (result.success) {
+        dispatch(setIsFavorite(result.data.isFavorite || false));
+        dispatch(setIsArchived(result.data.isArchived || false));
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [chatId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+      if (
+        desktopMenuRef.current &&
+        !desktopMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  if (isLogoutModalOpen) return null;
+
+  const toggleFavorite = async () => {
+    if (!chatId) return;
+    const result = await toggleFavoriteChat(chatId);
+    if (result.success) {
+      const newStatus = !isFavorite;
+      dispatch(setIsFavorite(newStatus));
+    } else {
+      showToast.error(result.message || "Failed to update favorite status");
+    }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-  };
-
-  const toggleChartMode = () => {
-    setIsChartMode(!isChartMode);
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const archiveCurrentChat = async () => {
+    if (!chatId) return;
+    const result = await archiveChat(chatId);
+    if (result.success) {
+      dispatch(setIsArchived(!isArchive));
+      dispatch(resetChat());
+      navigate("/");
+      showToast.success(result.message || "Chat archived");
+      setIsMenuOpen(false);
+      setIsMobileMenuOpen(false);
+    } else {
+      showToast.error(result.message || "Failed to archive chat");
+    }
   };
 
   return (
-    <header className="sticky top-0 w-full bg-[#121212] dark:bg-[#121212] text-white z-[1000] py-3 px-4 border-b border-gray-800 flex items-center justify-between">
-      <div className="flex items-center">
-        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">AI Assistant</h1>
-      </div>
+    <header
+      className="sticky top-0 w-full z-[1000] py-3 px-4 border-b flex items-center justify-between"
+      style={{
+        backgroundColor: "var(--color-bg)",
+        color: "var(--color-text)",
+        borderColor: "var(--color-border)",
+      }}
+    >
+      <HeaderTitle toggleSidebar={toggleSidebar} />
+
       <div className="flex items-center space-x-1 sm:space-x-3">
-        <button className="p-2 rounded-full hover:bg-gray-700 transition duration-200" title="Share">
-          <Share2 size={20} />
-        </button>
+        <ThemeToggleButton
+          isDarkMode={isDarkMode}
+          mode={mode}
+          toggleTheme={() => dispatch(toggleTheme())}
+        />
 
-        <button 
-            className="p-1 sm:p-2 rounded-full hover:bg-gray-700 transition duration-200" 
-            title={isChartMode ? "Switch to Chat Mode" : "Switch to Chart Mode"}
-            onClick={toggleChartMode}
-          >
-            {isChartMode ? 
-              <MessageSquare size={18} className="sm:w-5 sm:h-5" /> : 
-              <BarChart2 size={18} className="sm:w-5 sm:h-5" />
-            }
-          </button>
-
-        <button 
-          className="p-2 rounded-full hover:bg-gray-700 transition duration-200" 
-          title="Favorite"
-          onClick={toggleFavorite}
-        >
-          <Star 
-            size={20} 
-            fill={isFavorite ? "gold" : "none"} 
-            color={isFavorite ? "gold" : "currentColor"} 
-          />
-        </button>
-
-        <button 
-          className="p-2 rounded-full hover:bg-gray-700 transition duration-200" 
-          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          onClick={toggleDarkMode}
-        >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-
-        <div className="relative">
-          <button 
-            className="p-2 rounded-full hover:bg-gray-700 transition duration-200" 
-            title="More Options"
-            onClick={toggleMenu}
-          >
-            <MoreHorizontal size={20} />
-          </button>
-
-          {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <button 
-                  className="px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 w-full text-left flex items-center"
-                  role="menuitem"
-                >
-                  <Archive size={16} className="mr-2" />
-                  Archive
-                </button>
-                <button 
-                  className="px-4 py-2 text-sm text-red-400 hover:bg-gray-700 w-full text-left flex items-center"
-                  role="menuitem"
-                >
-                  <Trash2 size={16} className="mr-2" />
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {chatId && (
+          <>
+            <ChatActions
+              chatId={chatId}
+              isFavorite={isFavorite}
+              isArchive={isArchive}
+              toggleFavorite={toggleFavorite}
+              setShareOpen={setShareOpen}
+            />
+            <MobileMenu
+              isOpen={isMobileMenuOpen}
+              ref={mobileMenuRef}
+              toggleMenu={() => setIsMobileMenuOpen((prev) => !prev)}
+              toggleFavorite={toggleFavorite}
+              isFavorite={isFavorite}
+              isArchive={isArchive}
+              archiveChat={archiveCurrentChat}
+              openDeleteModal={() => setIsDeleteModalOpen(true)}
+              setShareOpen={setShareOpen}
+            />
+            <DesktopMenu
+              isOpen={isMenuOpen}
+              ref={desktopMenuRef}
+              toggleMenu={() => setIsMenuOpen((prev) => !prev)}
+              archiveChat={archiveCurrentChat}
+              openDeleteModal={() => setIsDeleteModalOpen(true)}
+              isArchive={isArchive}
+            />
+          </>
+        )}
       </div>
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        chatId={chatId || ""}
+      />
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setShareOpen(false)}
+        chatId={chatId || ""}
+      />
     </header>
   );
 }

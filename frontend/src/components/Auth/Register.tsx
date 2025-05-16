@@ -63,7 +63,6 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
       setIsLoading(true);
       RegisterSchema.parse(form);
@@ -102,25 +101,21 @@ const Register = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center">
+    <section className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text)]">
       <div className="container">
         <div className="max-w-[350px] w-full flex flex-col items-center mx-auto">
-          <h2 className="text-center text-4xl text-[#e8e8e6] font-medium mb-6">
-            Register
-          </h2>
+          <h2 className="text-center text-4xl font-medium mb-6">Register</h2>
 
           <button
             onClick={handleGoogleAuth}
-            className="w-full bg-[#e8e8e6] flex flex-row gap-[5px] justify-center items-center py-4 px-5 cursor-pointer rounded-lg mb-3"
+            className="w-full flex flex-row gap-[5px] justify-center items-center py-4 px-5 rounded-lg mb-3 transition-colors bg-[var(--color-google-bg)] text-[var(--color-text)] hover:bg-[var(--color-google-hover)]"
           >
             <Google className="w-[22px] h-6" />
-            <span className="text-base text-[#13343b] font-medium">
-              Continue with Google
-            </span>
+            <span className="text-base font-medium">Continue with Google</span>
           </button>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col">
-            <label htmlFor="email" className="text-sm text-[#e8e8e6] mb-1">
+            <label htmlFor="email" className="text-sm mb-1">
               Email
             </label>
             <input
@@ -130,13 +125,15 @@ const Register = () => {
               value={form.email}
               onChange={handleChange}
               onBlur={() => handleBlur("email")}
-              className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
+              className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mb-2">{errors.email}</p>
+              <p className="text-[var(--color-error)] text-sm mb-2">
+                {errors.email}
+              </p>
             )}
 
-            <label htmlFor="password" className="text-sm text-[#e8e8e6] mb-1">
+            <label htmlFor="password" className="text-sm mb-1">
               Password
             </label>
             <input
@@ -146,16 +143,15 @@ const Register = () => {
               value={form.password}
               onChange={handleChange}
               onBlur={() => handleBlur("password")}
-              className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
+              className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mb-2">{errors.password}</p>
+              <p className="text-[var(--color-error)] text-sm mb-2">
+                {errors.password}
+              </p>
             )}
 
-            <label
-              htmlFor="confirmPassword"
-              className="text-sm text-[#e8e8e6] mb-1"
-            >
+            <label htmlFor="confirmPassword" className="text-sm mb-1">
               Confirm Password
             </label>
             <input
@@ -165,10 +161,10 @@ const Register = () => {
               value={form.confirmPassword}
               onChange={handleChange}
               onBlur={() => handleBlur("confirmPassword")}
-              className="w-full bg-[#151616] rounded-lg outline-none border-none py-3 px-4 text-base text-gray-400 font-normal mb-1"
+              className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
             />
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mb-2">
+              <p className="text-[var(--color-error)] text-sm mb-2">
                 {errors.confirmPassword}
               </p>
             )}
@@ -176,10 +172,10 @@ const Register = () => {
             <button
               type="submit"
               disabled={!isValid || isLoading}
-              className={`w-full py-3 px-4 rounded-lg cursor-pointer mt-2 flex items-center justify-center ${
+              className={`w-full py-3 px-4 rounded-lg mt-2 flex items-center justify-center transition-colors ${
                 isValid && !isLoading
-                  ? "bg-white text-black"
-                  : "bg-gray-500 text-gray-300"
+                  ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white"
+                  : "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
               }`}
             >
               {isLoading ? (
@@ -193,9 +189,9 @@ const Register = () => {
             </button>
           </form>
 
-          <p className="text-base text-[#ffffffd4] font-medium mt-4">
+          <p className="text-base font-medium mt-4">
             Already a user?{" "}
-            <Link to="/login" className="underline text-white">
+            <Link to="/login" className="underline text-[var(--color-primary)]">
               Login
             </Link>
           </p>

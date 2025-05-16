@@ -8,6 +8,7 @@ import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
 import userRoutes from "./routes/user.route";
+import shareRoutes from "./routes/share.routes";
 import messageRoutes from "./routes/message.routes";
 import { redisClient } from "./config/redis";
 
@@ -36,9 +37,10 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/chat", ensureAuthenticated, chatRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/message", ensureAuthenticated, messageRoutes);
-app.use("/api/myprofile", ensureAuthenticated, userRoutes);
+app.use("/api/user", ensureAuthenticated, userRoutes);
+app.use("/api/share", shareRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

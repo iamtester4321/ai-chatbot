@@ -42,3 +42,18 @@ export const ensureAuthenticated: RequestHandler = (req, res, next) => {
     return;
   }
 };
+
+export const exEnsureAuthenticated: RequestHandler = (req, res, next) => {
+  const token = req.cookies?.authToken as string | undefined;
+
+  try {
+    let payload;
+    if (token) payload = verifyToken(token!);
+
+    req.user = { id: (payload as any).userId };
+
+    next();
+  } catch (err) {
+    next();
+  }
+};

@@ -2,7 +2,7 @@ import { prisma } from "../config/db";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
-  messages: { role: string; content: string }[],
+  messages: { id: string; role: string; content: string }[],
   chatId: string
 ) {
   const existingChat = await prisma.chat.findUnique({
@@ -12,6 +12,7 @@ export async function createChatWithMessagesOrApendMesages(
   if (existingChat) {
     await prisma.message.createMany({
       data: messages.map((m) => ({
+        id: m.id,
         role: m.role,
         content: m.content,
         chatId: chatId,
@@ -34,6 +35,7 @@ export async function createChatWithMessagesOrApendMesages(
         name: trimmedName,
         messages: {
           create: messages.map((m) => ({
+            id: m.id,
             role: m.role,
             content: m.content,
           })),
@@ -48,6 +50,20 @@ export function getChatsByUser(userId: string) {
   return prisma.chat.findMany({
     where: { userId },
     include: { messages: false },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export function getChatNamesByUser(userId: string) {
+  return prisma.chat.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      name: true,
+      isFavorite: true,
+      isArchived: true,
+      isShare:true,
+    },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -81,8 +97,17 @@ export const toggleArchiveStatus = async (
   });
 };
 
+export const renameChat = async (chatId: string, newName: string) => {
+  return prisma.chat.update({
+    where: { id: chatId },
+    data: { name: newName },
+  });
+};
+
 export const deleteChatById = async (chatId: string) => {
   return prisma.chat.delete({
-    where: { id: chatId },
+    where: {
+      id: chatId,
+    },
   });
 };

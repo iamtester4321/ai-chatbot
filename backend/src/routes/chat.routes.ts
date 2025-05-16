@@ -2,23 +2,39 @@ import { Router } from "express";
 import {
   addOrRemoveArchive,
   addOrRemoveFavorite,
-  findChatById,
-  findChatsByUsrerId,
-  streamChat,
   deleteChat,
+  findChatById,
+  findChatNamesByUserId,
+  findChatsForUser,
+  renameChat,
+  streamChat,
 } from "../controllers/chat.controller";
 import { generateShareId } from "../controllers/share.controller";
+import {
+  ensureAuthenticated,
+  exEnsureAuthenticated,
+} from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/", findChatsByUsrerId);
-router.get("/:chatId", findChatById);
-router.post("/stream", streamChat);
-router.delete("/:chatId", deleteChat);
+router.get("/", ensureAuthenticated, findChatsForUser);
+router.get("/names", ensureAuthenticated, findChatNamesByUserId);
+router.get("/:chatId", ensureAuthenticated, findChatById);
+router.post("/stream", exEnsureAuthenticated, streamChat);
+router.delete("/:chatId", ensureAuthenticated, deleteChat);
 
-router.patch("/addOrRemoveFavrate/:chatId", addOrRemoveFavorite);
-router.patch("/addOrRemoveArchive/:chatId", addOrRemoveArchive);
+router.patch(
+  "/addOrRemoveFavrate/:chatId",
+  ensureAuthenticated,
+  addOrRemoveFavorite
+);
+router.patch(
+  "/addOrRemoveArchive/:chatId",
+  ensureAuthenticated,
+  addOrRemoveArchive
+);
+router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
 
-router.post("/generate-share-id", generateShareId);
+router.post("/generate-share-id/", ensureAuthenticated, generateShareId);
 
 export default router;

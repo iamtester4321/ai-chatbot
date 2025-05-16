@@ -1,27 +1,44 @@
 import { Request, Response } from "express";
-import { updateMessageReactionService } from "../services/message.service";
+import {
+  updateMessageReactionLikeService,
+  updateMessageReactionDislikeService,
+} from "../services/message.service";
+import asyncHandler from "express-async-handler";
 
-export const updateMessageReaction = async (req: any, res: any) => {
-  const { messageId } = req.params;
-  const likedParam = req.query.liked;
+export const updateMessageReactionLike = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { messageId } = req.params;
+    const { liked } = req.body;
 
-  if (typeof likedParam !== "string") {
-    return res
-      .status(400)
-      .json({ error: "Missing or invalid 'liked' parameter" });
+    try {
+      const updatedMessage = await updateMessageReactionLikeService(messageId);
+      res.status(200).json({
+        message: "Message reaction updated successfully",
+        data: updatedMessage,
+      });
+    } catch (error: any) {
+      console.error("Error updating message reaction:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
+);
 
-  const liked = likedParam === "true";
+export const updateMessageReactionDislike = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { messageId } = req.params;
+    const { disliked } = req.body;
 
-  try {
-    const updatedMessage = await updateMessageReactionService(messageId, liked);
-
-    return res.status(200).json({
-      message: "Message reaction updated successfully",
-      data: updatedMessage,
-    });
-  } catch (err) {
-    console.error("Error updating message reaction:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    try {
+      const updatedMessage = await updateMessageReactionDislikeService(
+        messageId
+      );
+      res.status(200).json({
+        message: "Message reaction updated successfully",
+        data: updatedMessage,
+      });
+    } catch (error: any) {
+      console.error("Error updating message reaction:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
-};
+);

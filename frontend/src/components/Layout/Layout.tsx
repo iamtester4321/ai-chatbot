@@ -1,20 +1,162 @@
-import ChatInputField from "../ChatInputField/ChatInputField";
-import Sidebar from "../Sidebar/Sidebar";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchChatNames } from "../../actions/chat.actions";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
+import DeleteModal from "../Modal/DeleteModal";
+import RenameModal from "../Modal/RenameModal";
+import SettingsModal from "../Modal/SettingsModal";
+import Sidebar from "../Sidebar/Sidebar";
 
 function Layout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const dispatch = useAppDispatch();
+  const chatList = useAppSelector((state) => state.chat.chatList);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { chatId } = useParams();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const getChatNames = async () => {
+      try {
+        const { success } = await fetchChatNames(dispatch);
+        if (!success) {
+          console.error("Failed to fetch chat names");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getChatNames();
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const handleChatUpdates = () => {
+      // Refresh chat list
+      fetchChatNames(dispatch);
+    };
+
+    // Add event listeners for all chat-related events
+    window.addEventListener("chat-deleted", handleChatUpdates);
+    window.addEventListener("chat-favorite-toggled", handleChatUpdates);
+    window.addEventListener("chat-renamed", handleChatUpdates);
+    window.addEventListener("chat-names-updated", handleChatUpdates);
+    window.addEventListener("chat-archived", handleChatUpdates);
+    window.addEventListener("chat-spark", handleChatUpdates);
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener("chat-deleted", handleChatUpdates);
+      window.removeEventListener("chat-favorite-toggled", handleChatUpdates);
+      window.removeEventListener("chat-renamed", handleChatUpdates);
+      window.removeEventListener("chat-names-updated", handleChatUpdates);
+      window.removeEventListener("chat-archived", handleChatUpdates);
+      window.removeEventListener("chat-spark", handleChatUpdates);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMobile && chatId) {
+      setIsSidebarOpen(false);
+    }
+  }, [chatId, isMobile]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="flex max-h-screen bg-[#121212]">
-      <div className="fixed top-0 left-0 w-[72px] h-full bg-[#2c3e50] text-white z-[1000]">
-        <Sidebar />
+    <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
+      {/* Sidebar */}
+      <div
+        className={`${
+          isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
+        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[var(--color-bg)] z-20 top-0`}
+      >
+        <Sidebar
+          isLogoutModalOpen={isLogoutModalOpen}
+          setIsLogoutModalOpen={setIsLogoutModalOpen}
+          setIsSettingsOpen={setIsSettingsOpen}
+          chatList={chatList}
+          setIsRenameModalOpen={setIsRenameModalOpen}
+          setIsDeleteModalOpen={setIsDeleteModalOpen}
+          setSelectedChat={setSelectedChat}
+          setSelectedChatId={setSelectedChatId}
+        />
       </div>
-      <div className="ml-[72px] flex-1 flex flex-col">
-        <Header />
+
+      {/* Overlay for mobile */}
+      {isMobile && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-[var(--color-bg)] bg-opacity-50 z-10"
+          onClick={toggleSidebar}
+        ></div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col transition-all duration-300 w-full">
+        <Header
+          toggleSidebar={toggleSidebar}
+          isLogoutModalOpen={isLogoutModalOpen}
+        />
         <div className="flex-1 overflow-y-auto">
-          <ChatInputField />
+          <ChatSection />
         </div>
-        <div className="sticky bottom-0 w-full bg-[#121212] z-[1000] px-4 pt-2"></div>
       </div>
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        chatList={chatList}
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedChatId(null);
+        }}
+        chatId={selectedChatId || ""}
+      />
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => {
+          setIsRenameModalOpen(false);
+          setSelectedChat(null);
+        }}
+        chatId={selectedChat?.id || ""}
+        currentName={selectedChat?.name || ""}
+      />
     </div>
   );
 }
