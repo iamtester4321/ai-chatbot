@@ -1,5 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+"use client";
+import {
+  AreaChart as AreaIcon,
+  BarChart3,
+  ChartLine,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  PieChart as PieIcon,
+  ScatterChart as ScatterIcon,
+} from "lucide-react";
+import React, { JSX, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -21,34 +31,19 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { RootState } from "../../store/store";
-import React from "react";
 import StreamLoader from "../StreamLoader/StreamLoader";
+import { chartOptions, COLORS } from "../../lib/constants";
+import { ChartType } from "../../lib/types";
 
-const COLORS = [
-  "#4F46E5",
-  "#0D9488",
-  "#E11D48",
-  "#D97706",
-  "#0284C7",
-  "#7C3AED",
-  "#65A30D",
-  "#DB2777",
-  "#059669",
-  "#EA580C",
-  "#0891B2",
-  "#C026D3",
-  "#CA8A04",
-  "#2563EB",
-  "#DC2626",
-  "#16A34A",
-  "#9333EA",
-  "#475569",
-  "#57534E",
-  "#8B5CF6",
-];
 
-type ChartType = "line" | "area" | "bar" | "composed" | "scatter" | "pie";
+const chartIcons: Record<ChartType, JSX.Element> = {
+  line: <ChartLine size={16} className="mr-2" />,
+  area: <AreaIcon size={16} className="mr-2" />,
+  bar: <BarChart3 size={16} className="mr-2" />,
+  composed: <LayoutGrid size={16} className="mr-2" />,
+  scatter: <ScatterIcon size={16} className="mr-2" />,
+  pie: <PieIcon size={16} className="mr-2" />,
+};
 
 interface DynamicChartProps {
   data: Record<string, any> | Array<Record<string, any>>;
@@ -56,9 +51,9 @@ interface DynamicChartProps {
 }
 
 function DynamicChartComponent({ data, name }: DynamicChartProps) {
-  const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const [chartType, setChartType] = useState<ChartType>("line");
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
+  const [open, setOpen] = useState(false);
 
   // Transform object-of-arrays into array-of-objects
   useEffect(() => {
@@ -221,27 +216,55 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
 
   return (
     <div className="p-6">
-      <h2
-        className={`text-2xl font-semibold mb-4 ${
-          isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"
-        }`}
-      >
+      <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
         {name}
-      </h2>
-      <select
-        className={`border p-2 rounded mb-4  ${
-          isDarkMode ? "text-[#e5e7eb]" : "text-[#111827]"
-        }`}
-        value={chartType}
-        onChange={(e) => setChartType(e.target.value as ChartType)}
-      >
-        <option value="line">Line</option>
-        <option value="area">Area</option>
-        <option value="bar">Bar</option>
-        <option value="composed">Composed</option>
-        <option value="scatter">Scatter</option>
-        <option value="pie">Pie</option>
-      </select>
+      </p>
+      <div className="relative inline-block text-left mb-4">
+        <button
+          onClick={() => setOpen((prev) => !prev)}
+          className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
+        >
+          <span className="flex items-center">
+            {chartIcons[chartType]}
+            {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
+          </span>
+          <span>
+            {open ? (
+              <ChevronUp size={16} className="text-[color:var(--color-text)]" />
+            ) : (
+              <ChevronDown
+                size={16}
+                className="text-[color:var(--color-text)]"
+              />
+            )}
+          </span>
+        </button>
+
+        {open && (
+          <div
+            data-dropdown-menu
+            className="absolute z-5 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+          >
+            <div className="py-1">
+              {chartOptions.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    setChartType(option);
+                    setOpen(false);
+                  }}
+                  className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
+                    option === chartType ? "font-semibold" : ""
+                  }`}
+                >
+                  {chartIcons[option]}
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           {chartElement || <StreamLoader />}

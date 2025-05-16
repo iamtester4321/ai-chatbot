@@ -97,7 +97,7 @@ const ChatSection = () => {
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
 
-    if (storedPrompt && chatId && messages.length === 0) {
+    if (storedPrompt && chatId) {
       const inputElement = document.createElement("input");
       inputElement.value = storedPrompt;
       const event = {

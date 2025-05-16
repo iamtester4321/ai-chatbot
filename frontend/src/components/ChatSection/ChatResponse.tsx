@@ -351,14 +351,14 @@ const ChatResponse = ({
           </div>
         ) : (
           <>
-            {!shareId && (
+           
               <PromptInput
                 input={input}
                 isLoading={isLoading}
                 handleInputChange={handleInputChange}
                 handleFormSubmit={handleFormSubmit}
               />
-            )}
+           
           </>
         )}
       </div>
