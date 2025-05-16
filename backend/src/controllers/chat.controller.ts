@@ -12,13 +12,14 @@ import {
   renameChatService,
   saveChat,
 } from "../services/chat.service";
+import asyncHandler from "express-async-handler";
 
 interface ChatRequestByshareIdParams {
   shareId: string;
   user: { id: string };
 }
 
-export const streamChat = async (req: any, res: any) => {
+export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.user as { id: string })?.id;
   const chatId = req.body.chatId;
   const messages = req.body.messages || [];
@@ -33,25 +34,16 @@ export const streamChat = async (req: any, res: any) => {
     "user forget to put prompt || if chat type is chart show return some rutin data ";
 
   if (mode === "chart") {
-    tempPrompt =
-      `
-You are a data analysis assistant. Your response must include detailed observations or explanations alongside one or more valid JSON objects. Each JSON object must be parseable by JSON.parse() and clearly labeled with a name indicating its purpose or type (e.g., "MonthlyRevenue", "UserGrowth", etc.).
+    tempPrompt = `
+     SYSTEM:
+You are a data analysis assistant. When given a query, you must respond only with one or more raw JSON objects or arrays—no markdown, no backticks, no extra text. Each top-level object must include:
+- "name": a descriptive string
+- "data": an object whose values are arrays of equal length suitable for plotting (e.g., ["Jan","Feb"] and [10,20]).
+-you should only return one object as an json and that one object must have name property wich is what that data about and data propery wich is object and it should be able to show on charts
+Everything you output must be directly parseable by JSON.parse().
 
-✅ JSON must:
-- Be suitable for visualizing with charts (line, bar, pie, stacked, scatter, area, composed)
-- Include arrays of data (e.g., labels and corresponding values)
-- Be named when multiple datasets are returned (e.g., {"name": "MonthlyRevenue", "data": {...}})
-- Be parseable and not wrapped in backticks or markdown
-- Be accompanied by text that describes or analyzes the data
-s
-Your response format:
-1. Explanatory text describing the data, trends, insights, and relationships.
-2. One named JSON objects, each on its own line.
-3. Give all data in data filed of json.
-4. Don't add any other data field in data field of json.
-
-Now return the data and explanation for the following request:
-` + req.body.prompt.trim();
+USER:${req.body.prompt}
+`.trim();
   } else tempPrompt = tempPrompt;
 
   const model = google("gemini-2.0-flash");
@@ -88,9 +80,9 @@ Now return the data and explanation for the following request:
     console.error(err);
     res.status(500).json({ error: "Internal error" });
   }
-};
+});
 
-export const findChatById: RequestHandler = async (req, res) => {
+export const findChatById: RequestHandler = asyncHandler(async (req, res) => {
   try {
     const { chatId } = req.params;
     const chat = await findChatByIdService(chatId);
@@ -100,115 +92,126 @@ export const findChatById: RequestHandler = async (req, res) => {
       error instanceof Error ? error.message : "Failed to fetch chat";
     res.status(404).json({ message: errorMessage });
   }
-};
+});
 
-export async function findChatByshareId(
-  req: Request<ChatRequestByshareIdParams>,
-  res: Response
-) {
-  try {
-    const { shareId } = req.params;
-    const chat = await findShareById(shareId);
-    res.status(200).json(chat);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to fetch chat";
-    res.status(404).json({ message: errorMessage });
-  }
-}
-
-export const findChatsForUser: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req.user as { id: string }).id;
-    const chats = await findChatsByService(userId);
-    res.status(200).json(chats);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to fetch chats";
-    res.status(404).json({ message: errorMessage });
-  }
-};
-
-export const findChatNamesByUserId: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req.user as { id: string }).id;
-    const chatNames = await findChatNamesByService(userId);
-    res.status(200).json(chatNames);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to fetch chat names";
-    res.status(404).json({ message: errorMessage });
-  }
-};
-
-export const addOrRemoveFavorite = async (req: any, res: any) => {
-  const { chatId } = req.params;
-
-  try {
-    const updatedChat = await addOrRemoveFavoriteService(chatId);
-    return res
-      .status(200)
-      .json({ message: "Favorite status updated", chat: updatedChat });
-  } catch (err: any) {
-    if (err.message === "Chat not found") {
-      return res.status(404).json({ error: err.message });
+export const findChatByshareId = asyncHandler(
+  async (req: Request<ChatRequestByshareIdParams>, res: Response) => {
+    try {
+      const { shareId } = req.params;
+      const chat = await findShareById(shareId);
+      res.status(200).json(chat);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch chat";
+      res.status(404).json({ message: errorMessage });
     }
-    console.error("Error updating favorite:", err);
-    return res.status(500).json({ error: "Internal server error" });
   }
-};
+);
 
-export const addOrRemoveArchive = async (req: any, res: any) => {
-  const { chatId } = req.params;
-
-  try {
-    const updatedChat = await addOrRemoveArchiveService(chatId);
-    return res
-      .status(200)
-      .json({ message: "Archive status updated", chat: updatedChat });
-  } catch (err: any) {
-    if (err.message === "Chat not found") {
-      return res.status(404).json({ error: err.message });
+export const findChatsForUser: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const chats = await findChatsByService(userId);
+      res.status(200).json(chats);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch chats";
+      res.status(404).json({ message: errorMessage });
     }
-    console.error("Error updating archive:", err);
-    return res.status(500).json({ error: "Internal server error" });
   }
-};
+);
 
-export const deleteChat = async (req: any, res: any) => {
+export const findChatNamesByUserId: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const chatNames = await findChatNamesByService(userId);
+      res.status(200).json(chatNames);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch chat names";
+      res.status(404).json({ message: errorMessage });
+    }
+  }
+);
+
+export const addOrRemoveFavorite = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { chatId } = req.params;
+
+    try {
+      const updatedChat = await addOrRemoveFavoriteService(chatId);
+      res
+        .status(200)
+        .json({ message: "Favorite status updated", chat: updatedChat });
+    } catch (err: any) {
+      if (err.message === "Chat not found") {
+        res.status(404).json({ error: err.message });
+      }
+      console.error("Error updating favorite:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+export const addOrRemoveArchive = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { chatId } = req.params;
+
+    try {
+      const updatedChat = await addOrRemoveArchiveService(chatId);
+      res
+        .status(200)
+        .json({ message: "Archive status updated", chat: updatedChat });
+    } catch (err: any) {
+      if (err.message === "Chat not found") {
+        res.status(404).json({ error: err.message });
+      } else {
+        console.error("Error updating archive:", err);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
+  }
+);
+
+export const deleteChat = asyncHandler(async (req: Request, res: Response) => {
   const { chatId } = req.params;
   const userId = (req.user as { id: string }).id;
 
   try {
     await deleteChatService(chatId, userId);
-    return res.status(200).json({ message: "Chat deleted successfully" });
+    res.status(200).json({ message: "Chat deleted successfully" });
   } catch (err: any) {
     console.error("Error deleting chat:", err);
     if (err.message === "Chat not found") {
-      return res.status(404).json({ error: "Chat not found" });
+      res.status(404).json({ error: "Chat not found" });
+      return;
     }
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
-};
+});
 
-export const renameChat = async (req: any, res: any) => {
+export const renameChat = asyncHandler(async (req: Request, res: Response) => {
   const { chatId } = req.params;
   const { newName } = req.body;
 
   if (!newName || typeof newName !== "string") {
-    return res.status(400).json({ error: "New name is required" });
+    res.status(400).json({ error: "New name is required" });
+    return;
   }
 
   try {
     const updatedChat = await renameChatService(chatId, newName.trim());
-    return res
+    res
       .status(200)
       .json({ message: "Chat renamed successfully", chat: updatedChat });
   } catch (err: any) {
     if (err.message === "Chat not found") {
-      return res.status(404).json({ error: err.message });
+      res.status(404).json({ error: err.message });
+      return;
     }
     console.error("Error renaming chat:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
-};
+});
