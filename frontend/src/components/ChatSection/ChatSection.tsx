@@ -126,11 +126,12 @@ const ChatSection = () => {
     return () => document.removeEventListener("click", handleCopyClick);
   }, [messages]);
 
+  console.log(input)
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
-      {error ? (
+      {/* {error ? (
         <Error message={error} />
-      ) : (
+      ) : ( */}
         <>
           {messages.length > 0 && (
             <ChatResponse
@@ -176,7 +177,7 @@ const ChatSection = () => {
             </div>
           </section>
         </>
-      )}
+      {/* )} */}
     </div>
   );
 };

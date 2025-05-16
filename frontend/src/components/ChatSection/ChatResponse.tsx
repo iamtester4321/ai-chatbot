@@ -12,6 +12,16 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import StreamLoader from "../StreamLoader/StreamLoader";
 import PromptInput from "./PromptInput";
 import MarkdownRenderer from "../../utils/responseRenderer";
+import { decryptMessage } from "../../utils/encryption.utils";
+
+interface Message {
+  id: string;
+  role: string;
+  content: string;
+  createdAt: string;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+}
 
 const ChatResponse = ({
   messages,
@@ -30,20 +40,69 @@ const ChatResponse = ({
   const isArchived = useAppSelector((state) => state.chat.isArchived);
   const showToast = useToast();
   const dispatch = useAppDispatch();
+  const [decryptedMessages, setDecryptedMessages] = useState<Message[]>([]);
+  const [decryptedResponse, setDecryptedResponse] = useState("");
+
+  // Decrypt all messages when they change
+  useEffect(() => {
+    const decryptAllMessages = async () => {
+      try {
+        const decrypted = await Promise.all(
+          messages.map(async (msg: Message) => {
+            try {
+              const decryptedContent = await decryptMessage(msg.content);
+              return {
+                ...msg,
+                content: decryptedContent,
+              };
+            } catch (error) {
+              console.error("Failed to decrypt message:", msg.content, error);
+              return msg; // Return original message if decryption fails
+            }
+          })
+        );
+        setDecryptedMessages(decrypted);
+      } catch (error) {
+        console.error("Error decrypting messages:", error);
+        setDecryptedMessages(messages); // Fallback to original messages
+      }
+    };
+
+    decryptAllMessages();
+  }, [messages]);
+
+  // Decrypt the streaming response
+  useEffect(() => {
+    const decryptStreamingResponse = async () => {
+      if (chatResponse) {
+        try {
+          const decrypted = await decryptMessage(chatResponse);
+          setDecryptedResponse(decrypted);
+        } catch (error) {
+          console.error("Failed to decrypt response:", chatResponse, error);
+          setDecryptedResponse(chatResponse); 
+        }
+      } else {
+        setDecryptedResponse("");
+      }
+    };
+
+    decryptStreamingResponse();
+  }, [chatResponse]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, chatResponse]);
+  }, [decryptedMessages, decryptedResponse]);
 
   useEffect(() => {
-    if (!isLoading && chatResponse) {
+    if (!isLoading && decryptedResponse) {
       setShowResponseActions(true);
     } else {
       setShowResponseActions(false);
     }
-  }, [isLoading, chatResponse]);
+  }, [isLoading, decryptedResponse]);
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard
@@ -54,6 +113,7 @@ const ChatResponse = ({
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);
+        showToast.error("Failed to copy text");
       });
   };
 
@@ -100,6 +160,7 @@ const ChatResponse = ({
       }
     } catch (error) {
       console.error("Error updating like status:", error);
+      showToast.error("Failed to update like status");
     }
   };
 
@@ -123,6 +184,7 @@ const ChatResponse = ({
       }
     } catch (error) {
       console.error("Error updating dislike status:", error);
+      showToast.error("Failed to update dislike status");
     }
   };
 
@@ -130,7 +192,7 @@ const ChatResponse = ({
     const newLikedMessages: { [key: string]: boolean } = {};
     const newDislikedMessages: { [key: string]: boolean } = {};
 
-    messages.forEach((msg) => {
+    decryptedMessages.forEach((msg) => {
       if (msg.id) {
         newLikedMessages[msg.id] = msg.isLiked || false;
         newDislikedMessages[msg.id] = msg.isDisliked || false;
@@ -139,7 +201,7 @@ const ChatResponse = ({
 
     setLikedMessages(newLikedMessages);
     setDislikedMessages(newDislikedMessages);
-  }, [messages]);
+  }, [decryptedMessages]);
 
   return (
     <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
@@ -152,8 +214,8 @@ const ChatResponse = ({
           )}
 
           <div className="space-y-8">
-            {/* All messages */}
-            {messages.map((msg, index) => {
+            {/* All decrypted messages */}
+            {decryptedMessages.map((msg, index) => {
               const isUser = msg.role === "user";
 
               if (isUser) {
@@ -169,7 +231,6 @@ const ChatResponse = ({
               return (
                 <div key={index} className="space-y-2">
                   <div className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2">
-                    {/* Use MarkdownRenderer here */}
                     <MarkdownRenderer content={msg.content} />
                   </div>
                   <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
@@ -193,11 +254,6 @@ const ChatResponse = ({
                               fill={
                                 likedMessages[msg.id] ? "currentColor" : "none"
                               }
-                              color={
-                                likedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
                             />
                           </button>
                         )}
@@ -215,11 +271,6 @@ const ChatResponse = ({
                                   ? "currentColor"
                                   : "none"
                               }
-                              color={
-                                dislikedMessages[msg.id]
-                                  ? "currentColor"
-                                  : "currentColor"
-                              }
                             />
                           </button>
                         )}
@@ -230,12 +281,11 @@ const ChatResponse = ({
               );
             })}
 
-            {/* Current AI response */}
-            {chatResponse && (
+            {/* Current decrypted AI response */}
+            {decryptedResponse && (
               <div className="space-y-2">
                 <div className="prose prose-invert max-w-none">
-                  {/* Use MarkdownRenderer for AI response */}
-                  <MarkdownRenderer content={chatResponse} />
+                  <MarkdownRenderer content={decryptedResponse} />
                 </div>
 
                 {/* Action buttons */}
@@ -244,7 +294,7 @@ const ChatResponse = ({
                     <button
                       className="p-1 hover:text-[var(--color-text)]"
                       aria-label="Copy to clipboard"
-                      onClick={() => copyToClipboard(chatResponse, -1)}
+                      onClick={() => copyToClipboard(decryptedResponse, -1)}
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
@@ -257,14 +307,9 @@ const ChatResponse = ({
                           <ThumbsUp
                             size={20}
                             fill={
-                              likedMessages[chatResponse]
+                              likedMessages[decryptedResponse]
                                 ? "currentColor"
                                 : "none"
-                            }
-                            color={
-                              likedMessages[chatResponse]
-                                ? "currentColor"
-                                : "currentColor"
                             }
                           />
                         </button>
@@ -275,14 +320,9 @@ const ChatResponse = ({
                           <ThumbsDown
                             size={20}
                             fill={
-                              dislikedMessages[chatResponse]
+                              dislikedMessages[decryptedResponse]
                                 ? "currentColor"
                                 : "none"
-                            }
-                            color={
-                              dislikedMessages[chatResponse]
-                                ? "currentColor"
-                                : "currentColor"
                             }
                           />
                         </button>
@@ -309,7 +349,7 @@ const ChatResponse = ({
             </p>
             <button
               onClick={() => {
-                handleRestoreChat(chatId);
+                if (chatId) handleRestoreChat(chatId);
               }}
               className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
@@ -322,12 +362,12 @@ const ChatResponse = ({
         ) : (
           <>
             {!shareId && (
-      <PromptInput
-        input={input}
+              <PromptInput
+                input={input}
                 isLoading={isLoading}
-        handleInputChange={handleInputChange}
-        handleFormSubmit={handleFormSubmit}
-      />
+                handleInputChange={handleInputChange}
+                handleFormSubmit={handleFormSubmit}
+              />
             )}
           </>
         )}
