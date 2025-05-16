@@ -34,7 +34,6 @@ interface DynamicChartProps {
 export default function DynamicChart({ data, name }: DynamicChartProps) {
   const [chartType, setChartType] = useState<ChartType>("line");
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
-  console.log("jsonData::", jsonData);
 
   // Transform object-of-arrays into array-of-objects
   useEffect(() => {

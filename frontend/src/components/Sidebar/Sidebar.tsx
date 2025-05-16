@@ -51,7 +51,10 @@ const Sidebar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = (chatId: string, section: "favorite" | "spark" | "all") => {
+  const toggleDropdown = (
+    chatId: string,
+    section: "favorite" | "spark" | "all"
+  ) => {
     setActiveDropdown((current) =>
       current.id === chatId && current.section === section
         ? { id: null, section: null }
@@ -87,7 +90,7 @@ const Sidebar = ({
   );
 
   const sparkChats = filteredChatList.filter((chat) => chat.isShare);
-  console.log(sparkChats);
+
   return (
     <>
       {!isInShareRoute && (

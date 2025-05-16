@@ -13,10 +13,6 @@ import {
   saveChat,
 } from "../services/chat.service";
 
-interface ChatRequestParams {
-  chatId: string;
-}
-
 interface ChatRequestByshareIdParams {
   shareId: string;
   user: { id: string };
@@ -54,7 +50,9 @@ You are a data analysis assistant. Your response must include detailed observati
 
 Your response format:
 1. Explanatory text describing the data, trends, insights, and relationships.
-2. One or more named JSON objects, each on its own line.
+2. One named JSON objects, each on its own line.
+3. Give all data in data filed of json.
+4. Don't add any other data field in data field of json.
 
 Now return the data and explanation for the following request:
 ` + req.body.prompt.trim();

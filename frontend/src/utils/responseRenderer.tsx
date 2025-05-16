@@ -109,7 +109,7 @@ const CodeBlock = ({ language, children }: { language: string; children?: React.
   );
 };
 
-const MarkdownRenderer = ({ content }: { content: string }) => {
+const MarkdownRenderer = ({ content, flag }: { content: string, flag?:boolean }) => {
   const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const safeContent = fixUnclosedCodeBlock(content);
   const processedContent = setDefaultBashLanguage(safeContent);

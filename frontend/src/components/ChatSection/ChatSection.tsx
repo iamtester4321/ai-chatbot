@@ -67,6 +67,7 @@ const ChatSection = () => {
 
     if (!chatId) {
       const newChatId = generateChatId();
+      setGeneratedChatId(newChatId);
       sessionStorage.setItem("initialPrompt", input);
       navigate(`/chat/${newChatId}`, { replace: true });
       return;

@@ -1,4 +1,4 @@
-import { RequestHandler, Router } from "express";
+import { Router } from "express";
 import {
   addOrRemoveArchive,
   addOrRemoveFavorite,
@@ -35,6 +35,6 @@ router.patch(
 );
 router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
 
-router.post("/generate-share-id/", generateShareId);
+router.post("/generate-share-id/", ensureAuthenticated, generateShareId);
 
 export default router;

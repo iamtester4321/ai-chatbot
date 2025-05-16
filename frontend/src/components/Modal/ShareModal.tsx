@@ -1,9 +1,9 @@
 import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { generateShareId } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { setIsShare } from "../../store/features/chat/chatSlice";
-import { useDispatch } from "react-redux";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -51,11 +51,14 @@ export default function ShareModal({
     setCopied(false);
     setShareId(null);
     fetchShareId();
-  }, [isOpen, chatId, dispatch]); // Added dispatch as dependency
+  }, [isOpen, chatId, dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -86,7 +89,10 @@ export default function ShareModal({
     <>
       <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-[1001]" />
       <div className="fixed inset-0 z-[1002] flex items-center justify-center">
-        <div ref={modalRef} className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-6 max-w-sm w-full mx-4">
+        <div
+          ref={modalRef}
+          className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-6 max-w-sm w-full mx-4"
+        >
           <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">
             Share Chat
           </h2>

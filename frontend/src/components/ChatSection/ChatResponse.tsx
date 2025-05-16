@@ -9,9 +9,9 @@ import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import MarkdownRenderer from "../../utils/responseRenderer";
 import StreamLoader from "../StreamLoader/StreamLoader";
 import PromptInput from "./PromptInput";
-import MarkdownRenderer from "../../utils/responseRenderer";
 
 const ChatResponse = ({
   messages,
@@ -30,26 +30,6 @@ const ChatResponse = ({
   const isArchived = useAppSelector((state) => state.chat.isArchived);
   const showToast = useToast();
   const dispatch = useAppDispatch();
-
-  //
-
-  function extractJsonObjects(text: string) {
-    const jsonObjects = [];
-    const jsonRegex = /```json\s*({[\s\S]*?})\s*```/g;
-
-    let match;
-    while ((match = jsonRegex.exec(text)) !== null) {
-      try {
-        const parsed = JSON.parse(match[1]);
-        jsonObjects.push(parsed);
-      } catch (err) {
-        console.warn("Invalid JSON block skipped:", err);
-      }
-    }
-
-    return jsonObjects;
-  }
-
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView();
@@ -205,9 +185,9 @@ const ChatResponse = ({
                         flag={mode === "chart" ? true : false}
                       />
                     </div>
-                    <div className="flex items-center space-x-3 text-gray-400">
+                    <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
                       <button
-                        className="p-1 hover:text-white cursor-pointer"
+                        className="p-1 hover:text-[var(--color-text)] cursor-pointer"
                         aria-label="Copy to clipboard"
                         onClick={() => copyToClipboard(msg.content, index)}
                       >
@@ -217,9 +197,20 @@ const ChatResponse = ({
                         <>
                           {msg?.id && (
                             <button
-                              className="p-1 hover:text-white transition-colors"
+                              className={`p-1 transition-colors ${
+                                !(
+                                  likedMessages[msg.id] ||
+                                  dislikedMessages[msg.id]
+                                )
+                                  ? "hover:text-[var(--color-text)]"
+                                  : ""
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
                               aria-label="Like"
                               onClick={() => handleLike(msg.id)}
+                              disabled={
+                                likedMessages[msg.id] ||
+                                dislikedMessages[msg.id]
+                              }
                             >
                               <ThumbsUp
                                 size={20}
@@ -228,20 +219,27 @@ const ChatResponse = ({
                                     ? "currentColor"
                                     : "none"
                                 }
-                                color={
-                                  likedMessages[msg.id]
-                                    ? "currentColor"
-                                    : "currentColor"
-                                }
+                                color="currentColor"
                               />
                             </button>
                           )}
 
                           {msg?.id && (
                             <button
-                              className="p-1 hover:text-white transition-colors"
+                              className={`p-1 transition-colors ${
+                                !(
+                                  likedMessages[msg.id] ||
+                                  dislikedMessages[msg.id]
+                                )
+                                  ? "hover:text-[var(--color-text)]"
+                                  : ""
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
                               aria-label="Dislike"
                               onClick={() => handleDislike(msg.id)}
+                              disabled={
+                                likedMessages[msg.id] ||
+                                dislikedMessages[msg.id]
+                              }
                             >
                               <ThumbsDown
                                 size={20}
@@ -250,11 +248,7 @@ const ChatResponse = ({
                                     ? "currentColor"
                                     : "none"
                                 }
-                                color={
-                                  dislikedMessages[msg.id]
-                                    ? "currentColor"
-                                    : "currentColor"
-                                }
+                                color="currentColor"
                               />
                             </button>
                           )}
