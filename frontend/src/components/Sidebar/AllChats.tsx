@@ -1,4 +1,4 @@
-import { Archive, MoreHorizontal, Pencil, Share2, Star, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Share2, Star, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ChatState } from "../../lib/types";
 
@@ -6,7 +6,10 @@ interface AllChatsProps {
   chats: ChatState["chatList"];
   chatId: string | undefined;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: { id: string | null; section: "favorite" | "spark" | "all" | null };
+  activeDropdown: {
+    id: string | null;
+    section: "favorite" | "spark" | "all" | null;
+  };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }
@@ -53,12 +56,6 @@ const AllChats = ({
             <div className="flex items-center gap-2">
               {chat.isFavorite && (
                 <Star size={16} fill={"gold"} color={"gold"} />
-              )}
-              {chat.isArchived && (
-                <Archive
-                  size={16}
-                  className="text-[color:var(--color-disabled-text)]"
-                />
               )}
               {chat.isShare && (
                 <Share2

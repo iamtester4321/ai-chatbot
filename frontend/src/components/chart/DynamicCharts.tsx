@@ -1,30 +1,58 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import {
-  LineChart,
-  Line,
-  AreaChart,
   Area,
-  BarChart,
+  AreaChart,
   Bar,
-  ComposedChart,
-  ScatterChart,
-  Scatter,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  ComposedChart,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
   ZAxis,
 } from "recharts";
+
+import {
+  AreaChart as AreaIcon,
+  BarChart3,
+  ChartLine,
+  ChevronDown,
+  ChevronUp,
+  LayoutGrid,
+  PieChart as PieIcon,
+  ScatterChart as ScatterIcon,
+} from "lucide-react";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#00C49F"];
 
 type ChartType = "line" | "area" | "bar" | "composed" | "scatter" | "pie";
+const chartOptions: ChartType[] = [
+  "line",
+  "area",
+  "bar",
+  "composed",
+  "scatter",
+  "pie",
+];
+
+const chartIcons: Record<ChartType, JSX.Element> = {
+  line: <ChartLine size={16} className="mr-2" />,
+  area: <AreaIcon size={16} className="mr-2" />,
+  bar: <BarChart3 size={16} className="mr-2" />,
+  composed: <LayoutGrid size={16} className="mr-2" />,
+  scatter: <ScatterIcon size={16} className="mr-2" />,
+  pie: <PieIcon size={16} className="mr-2" />,
+};
 
 interface DynamicChartProps {
   data: Record<string, any> | Array<Record<string, any>>;
@@ -34,6 +62,7 @@ interface DynamicChartProps {
 export default function DynamicChart({ data, name }: DynamicChartProps) {
   const [chartType, setChartType] = useState<ChartType>("line");
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
+  const [open, setOpen] = useState(false);
 
   // Transform object-of-arrays into array-of-objects
   useEffect(() => {
@@ -190,18 +219,53 @@ export default function DynamicChart({ data, name }: DynamicChartProps) {
 
   return (
     <div className="p-6">
-      <select
-        className="border p-2 rounded mb-4"
-        value={chartType}
-        onChange={(e) => setChartType(e.target.value as ChartType)}
-      >
-        <option value="line">Line</option>
-        <option value="area">Area</option>
-        <option value="bar">Bar</option>
-        <option value="composed">Composed</option>
-        <option value="scatter">Scatter</option>
-        <option value="pie">Pie</option>
-      </select>
+      <h2 className="text-[var(--color-text)] text-2xl font-semibold mb-4">{name}</h2>
+      <div className="relative inline-block text-left mb-4">
+        <button
+          onClick={() => setOpen((prev) => !prev)}
+          className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
+        >
+          <span className="flex items-center">
+            {chartIcons[chartType]}
+            {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
+          </span>
+          <span>
+            {open ? (
+              <ChevronUp size={16} className="text-[color:var(--color-text)]" />
+            ) : (
+              <ChevronDown
+                size={16}
+                className="text-[color:var(--color-text)]"
+              />
+            )}
+          </span>
+        </button>
+
+        {open && (
+          <div
+            data-dropdown-menu
+            className="absolute z-5 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+          >
+            <div className="py-1">
+              {chartOptions.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    setChartType(option);
+                    setOpen(false);
+                  }}
+                  className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
+                    option === chartType ? "font-semibold" : ""
+                  }`}
+                >
+                  {chartIcons[option]}
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           {renderChart() || <div />}

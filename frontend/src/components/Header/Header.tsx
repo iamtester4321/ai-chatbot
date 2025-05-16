@@ -27,13 +27,11 @@ import MobileMenu from "./MobileMenu";
 interface HeaderProps {
   toggleSidebar: () => void;
   isLogoutModalOpen: boolean;
-  isInShareRoute: boolean;
 }
 
 export default function Header({
   toggleSidebar,
   isLogoutModalOpen,
-  isInShareRoute,
 }: HeaderProps) {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -48,7 +46,6 @@ export default function Header({
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const showToast = useToast();
   const navigate = useNavigate();
-  
 
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
@@ -106,7 +103,7 @@ export default function Header({
     const result = await archiveChat(chatId);
     if (result.success) {
       dispatch(setIsArchived(!isArchive));
-      dispatch(resetChat())
+      dispatch(resetChat());
       navigate("/");
       showToast.success(result.message || "Chat archived");
       setIsMenuOpen(false);
@@ -125,10 +122,7 @@ export default function Header({
         borderColor: "var(--color-border)",
       }}
     >
-      <HeaderTitle
-        toggleSidebar={toggleSidebar}
-        isInShareRoute={isInShareRoute}
-      />
+      <HeaderTitle toggleSidebar={toggleSidebar} />
 
       <div className="flex items-center space-x-1 sm:space-x-3">
         <ThemeToggleButton

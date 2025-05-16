@@ -22,7 +22,6 @@ export type SidebarProps = {
   setIsLogoutModalOpen: (isOpen: boolean) => void;
   setIsSettingsOpen: (open: boolean) => void;
   chatList: ChatState["chatList"];
-  isInShareRoute: boolean;
   setIsRenameModalOpen: (isOpen: boolean) => void;
   setIsDeleteModalOpen: (isOpen: boolean) => void;
   setSelectedChatId: (id: string | null) => void;

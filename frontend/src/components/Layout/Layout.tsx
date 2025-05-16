@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { fetchChatNames } from "../../actions/chat.actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatSection from "../ChatSection/ChatSection";
@@ -26,16 +26,6 @@ function Layout() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { chatId } = useParams();
-  const location = useLocation();
-  const isInShareRoute = location.pathname.startsWith("/share/");
-
-  useEffect(() => {
-    if (isInShareRoute) {
-      setIsSidebarOpen(false);
-    } else {
-      setIsSidebarOpen(true);
-    }
-  }, [isInShareRoute]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -120,7 +110,6 @@ function Layout() {
           setIsLogoutModalOpen={setIsLogoutModalOpen}
           setIsSettingsOpen={setIsSettingsOpen}
           chatList={chatList}
-          isInShareRoute={isInShareRoute}
           setIsRenameModalOpen={setIsRenameModalOpen}
           setIsDeleteModalOpen={setIsDeleteModalOpen}
           setSelectedChat={setSelectedChat}
@@ -141,7 +130,6 @@ function Layout() {
         <Header
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}
-          isInShareRoute={isInShareRoute}
         />
         <div className="flex-1 overflow-y-auto">
           <ChatSection />
