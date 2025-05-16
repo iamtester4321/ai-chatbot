@@ -2,6 +2,7 @@ import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PromptInputProps } from "../../lib/types";
+import { textToMarkdown } from "../../utils/textToMarkdownConverter";
 
 const PromptInput = ({
   input,
@@ -65,6 +66,8 @@ const PromptInput = ({
   const handleFormSubmitWithFocus = async (e: React.FormEvent) => {
     await handleFormSubmit(e);
     if (textareaRef.current) {
+      textareaRef.current.style.height = "48px";
+      textareaRef.current.style.overflowY = "hidden";
       textareaRef.current.focus();
     }
   };
@@ -83,13 +86,13 @@ const PromptInput = ({
         } mode...`}
         value={input}
         onChange={(e) => {
-          handleInputChange(e);
+          const markdownText = textToMarkdown(e.target.value);
+          handleInputChange({ ...e, target: { ...e.target, value: markdownText } });
           adjustTextareaHeight();
         }}
         onKeyDown={handleKeyDown}
         rows={1}
       />
-
       {/* Bottom Buttons */}
       <div className="flex items-center justify-between">
         {/* Mode Toggle */}
