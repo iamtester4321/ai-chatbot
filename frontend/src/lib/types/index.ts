@@ -2,7 +2,7 @@ export type ChatResponseProps = {
   messages: Message[];
   chatResponse: string;
   isLoading: boolean;
-  chatName: any;
+  chatName: string;
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
