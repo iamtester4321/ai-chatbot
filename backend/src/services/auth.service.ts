@@ -3,6 +3,7 @@ import passport from "passport";
 import * as userRepo from "../repositories/user.repository";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { signToken } from "../utils/token.util";
+import { env } from "../config/env";
 
 interface RegisterDTO {
   email: string;
@@ -76,7 +77,7 @@ export const googleCallback = (
 ) => {
   passport.authenticate("google", async (err: any, googleUser: any) => {
     if (err) return next(err);
-    if (!googleUser) return res.redirect("http://localhost:5173/login");
+    if (!googleUser) return res.redirect(`${env.CLIENT_ORIGIN}/login`);
 
     try {
       let user = await userRepo.findByEmail(googleUser.email);
@@ -90,10 +91,10 @@ export const googleCallback = (
         sameSite: "none",
       });
 
-      res.redirect("http://localhost:5173/");
+      res.redirect(`${env.CLIENT_ORIGIN}`);
     } catch (err) {
       console.error("OAuth callback error:", err);
-      res.redirect("http://localhost:5173/login?error=oauth_failed");
+      res.redirect(`${env.CLIENT_ORIGIN}/login?error=oauth_failed`);
     }
   })(req, res, next);
 };
