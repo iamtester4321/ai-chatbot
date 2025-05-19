@@ -11,7 +11,11 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    res.cookie("authToken", result?.token, { httpOnly: true });
+    res.cookie("authToken", result?.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.status(201).json({ success: true, user: result.data });
   } catch (err) {
     res.status(500).json({
@@ -31,7 +35,11 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    res.cookie("authToken", result.data?.token, { httpOnly: true });
+    res.cookie("authToken", result.data?.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.json({ success: true, user: result.data?.user });
   } catch (err) {
     res.status(500).json({

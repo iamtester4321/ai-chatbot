@@ -86,6 +86,8 @@ export const googleCallback = (
 
       res.cookie("authToken", token, {
         httpOnly: true,
+        secure: true,
+        sameSite: "none",
       });
 
       res.redirect("http://localhost:5173/");
