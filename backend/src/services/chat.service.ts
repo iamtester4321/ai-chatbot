@@ -1,43 +1,12 @@
-import * as chatRepo from "../repositories/chat.repository";
-import * as shareRepo from "../repositories/share.repository";
 import { redisClient } from "../config/redis";
-
-const CHAT_CACHE_PREFIX = "chat:";
-const USER_CHATS_PREFIX = "user:";
-const SHARE_CACHE_PREFIX = "share:";
-const CHAT_VERSION_PREFIX = "chat_version:";
-const USER_VERSION_PREFIX = "user_version:";
-const SHARE_VERSION_PREFIX = "share_version:";
-
-async function updateChatVersion(chatId: string) {
-  const version = Date.now().toString();
-  await redisClient.set(`${CHAT_VERSION_PREFIX}${chatId}`, version);
-  return version;
-}
-
-async function updateShareVersion(shareId: string) {
-  const version = Date.now().toString();
-  await redisClient.set(`${SHARE_VERSION_PREFIX}${shareId}`, version);
-  return version;
-}
-
-async function updateUserVersion(userId: string) {
-  const version = Date.now().toString();
-  await redisClient.set(`${USER_VERSION_PREFIX}${userId}`, version);
-  return version;
-}
-
-async function getChatVersion(chatId: string) {
-  return await redisClient.get(`${CHAT_VERSION_PREFIX}${chatId}`);
-}
-
-async function getShareVersion(shareId: string) {
-  return await redisClient.get(`${SHARE_VERSION_PREFIX}${shareId}`);
-}
-
-async function getUserVersion(userId: string) {
-  return await redisClient.get(`${USER_VERSION_PREFIX}${userId}`);
-}
+import {
+  CHAT_CACHE_PREFIX,
+  CHAT_VERSION_PREFIX,
+  USER_CHATS_PREFIX,
+  USER_VERSION_PREFIX,
+} from "../constants/redisKeys";
+import * as chatRepo from "../repositories/chat.repository";
+import { updateChatVersion, updateUserVersion } from "../utils/cache.utils";
 
 export async function saveChat(
   userId: string,
@@ -50,7 +19,6 @@ export async function saveChat(
     chatId
   );
 
-  // Update versions and clear caches
   await Promise.all([
     updateChatVersion(chatId),
     updateUserVersion(userId),
@@ -62,102 +30,86 @@ export async function saveChat(
 
 export async function findChatById(chatId: string) {
   const key = `${CHAT_CACHE_PREFIX}${chatId}`;
-  const cached = await redisClient.get(key);
-  const currentVersion = await getChatVersion(chatId);
-  
-  // Always fetch fresh data from DB
-  const dbChat = await chatRepo.findById(chatId);
-  
+  const versionKey = `${CHAT_VERSION_PREFIX}${chatId}`;
+
+  const [cached, currentVersion] = await Promise.all([
+    redisClient.get(key),
+    redisClient.get(versionKey),
+  ]);
+
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChat)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
+  const dbChat = await chatRepo.findById(chatId);
   if (dbChat) {
-    const version = await updateChatVersion(chatId);
-    await redisClient.set(key, JSON.stringify({
-      _version: version,
-      data: dbChat
-    }));
+    const version = Date.now().toString();
+    await Promise.all([
+      redisClient.set(versionKey, version),
+      redisClient.set(key, JSON.stringify({ _version: version, data: dbChat })),
+    ]);
   }
+
   return dbChat;
 }
 
-export async function findShareById(shareId: string) {
-  const key = `${SHARE_CACHE_PREFIX}${shareId}`;
-  const cached = await redisClient.get(key);
-  const currentVersion = await getShareVersion(shareId);
-  
-  // Always fetch fresh data from DB
-  const dbShare = await shareRepo.findById(shareId);
-  
-  if (cached && currentVersion) {
-    const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbShare)) {
-      return cachedData.data;
-    }
-  }
-
-  if (dbShare) {
-    const version = await updateShareVersion(shareId);
-    await redisClient.set(key, JSON.stringify({
-      _version: version,
-      data: dbShare
-    }));
-  }
-  return dbShare;
-}
-
-
 export async function findChatsByService(userId: string) {
   const key = `${USER_CHATS_PREFIX}${userId}:chats`;
-  const cached = await redisClient.get(key);
-  const currentVersion = await getUserVersion(userId);
-  
-  // Always fetch fresh data from DB
-  const dbChats = await chatRepo.getChatsByUser(userId);
-  
+  const versionKey = `${USER_VERSION_PREFIX}${userId}`;
+
+  const [cached, currentVersion] = await Promise.all([
+    redisClient.get(key),
+    redisClient.get(versionKey),
+  ]);
+
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChats)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
-  const version = await updateUserVersion(userId);
-  await redisClient.set(key, JSON.stringify({
-    _version: version,
-    data: dbChats
-  }));
+  const dbChats = await chatRepo.getChatsByUser(userId);
+  const version = Date.now().toString();
+
+  await Promise.all([
+    redisClient.set(versionKey, version),
+    redisClient.set(key, JSON.stringify({ _version: version, data: dbChats })),
+  ]);
+
   return dbChats;
 }
 
 export async function findChatNamesByService(userId: string) {
   const key = `${USER_CHATS_PREFIX}${userId}:chat-names`;
-  const cached = await redisClient.get(key);
-  const currentVersion = await getUserVersion(userId);
-  
-  // Always fetch fresh data from DB
-  const dbChatNames = await chatRepo.getChatNamesByUser(userId);
-  
+  const versionKey = `${USER_VERSION_PREFIX}${userId}`;
+
+  const [cached, currentVersion] = await Promise.all([
+    redisClient.get(key),
+    redisClient.get(versionKey),
+  ]);
+
   if (cached && currentVersion) {
     const cachedData = JSON.parse(cached);
-    // Compare cached data with DB data
-    if (cachedData._version === currentVersion && JSON.stringify(cachedData.data) === JSON.stringify(dbChatNames)) {
+    if (cachedData._version === currentVersion) {
       return cachedData.data;
     }
   }
 
-  const version = await updateUserVersion(userId);
-  await redisClient.set(key, JSON.stringify({
-    _version: version,
-    data: dbChatNames
-  }));
+  const dbChatNames = await chatRepo.getChatNamesByUser(userId);
+  const version = Date.now().toString();
+
+  await Promise.all([
+    redisClient.set(versionKey, version),
+    redisClient.set(
+      key,
+      JSON.stringify({ _version: version, data: dbChatNames })
+    ),
+  ]);
+
   return dbChatNames;
 }
 
@@ -169,6 +121,8 @@ export const addOrRemoveFavoriteService = async (chatId: string) => {
   await Promise.all([
     redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
     redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chats`),
+    redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chat-names`),
+    updateUserVersion(chat.userId),
   ]);
   return updated;
 };
@@ -181,6 +135,8 @@ export const addOrRemoveArchiveService = async (chatId: string) => {
   await Promise.all([
     redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
     redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chats}`),
+    redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chat-names`),
+    updateUserVersion(chat.userId),
   ]);
   return updated;
 };
@@ -197,10 +153,12 @@ export const deleteChatService = async (chatId: string, userId: string) => {
   }
 
   await chatRepo.deleteChatById(chatId);
-  
+
   await Promise.all([
     redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
     redisClient.del(`${USER_CHATS_PREFIX}${userId}:chats`),
+    redisClient.del(`${USER_CHATS_PREFIX}${userId}:chat-names`),
+    updateUserVersion(userId),
   ]);
 };
 
@@ -213,6 +171,7 @@ export const renameChatService = async (chatId: string, newName: string) => {
     redisClient.del(`${CHAT_CACHE_PREFIX}${chatId}`),
     redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chats`),
     redisClient.del(`${USER_CHATS_PREFIX}${chat.userId}:chat-names`),
+    updateUserVersion(chat.userId),
   ]);
   return updated;
 };

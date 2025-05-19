@@ -6,7 +6,6 @@ const ChartCodeRenderer = ({ children }: { children: string }) => {
   const content = useMemo(() => {
     try {
       const parsed = JSON.parse(children.trim());
-      console.log("Chart rendered");
       return <DynamicChart data={parsed.data} name={parsed.name} />;
     } catch (error) {
       console.error("Invalid JSON for DynamicChart:", error);

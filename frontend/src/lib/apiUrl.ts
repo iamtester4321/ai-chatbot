@@ -23,7 +23,7 @@ export const RENAME_CHAT = (chatId: string) =>
   `${BASE_API}/api/chat/rename/${chatId}`;
 export const ARCHIVE_CHAT = (chatId: string) =>
   `${BASE_API}/api/chat/addOrRemoveArchive/${chatId}`;
-export const SHARE_CHAT = `${BASE_API}/api/chat/generate-share-id`;
+export const SHARE_CHAT = `${BASE_API}/api/share/generate-share-id`;
 
 // message API
 export const LIKE_MESSAGE = (messageId: string) =>

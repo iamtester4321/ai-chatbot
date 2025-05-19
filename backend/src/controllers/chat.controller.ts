@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { Request, RequestHandler, Response } from "express";
+import asyncHandler from "express-async-handler";
 import {
   addOrRemoveArchiveService,
   addOrRemoveFavoriteService,
@@ -8,11 +9,10 @@ import {
   findChatById as findChatByIdService,
   findChatNamesByService,
   findChatsByService,
-  findShareById,
   renameChatService,
   saveChat,
 } from "../services/chat.service";
-import asyncHandler from "express-async-handler";
+import { findShareById } from "../services/share.service";
 
 interface ChatRequestByshareIdParams {
   shareId: string;

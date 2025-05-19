@@ -35,6 +35,4 @@ router.patch(
 );
 router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
 
-router.post("/generate-share-id/", ensureAuthenticated, generateShareId);
-
 export default router;
