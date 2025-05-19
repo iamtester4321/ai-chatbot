@@ -11,7 +11,7 @@ import userRoutes from "./routes/user.route";
 import shareRoutes from "./routes/share.routes";
 import messageRoutes from "./routes/message.routes";
 import { redisClient } from "./config/redis";
-
+import { env } from "./config/env";
 dotenv.config();
 
 const app = express();
@@ -19,7 +19,7 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: env.CLIENT_ORIGIN || "http://localhost:5173",
     credentials: true,
   })
 );
