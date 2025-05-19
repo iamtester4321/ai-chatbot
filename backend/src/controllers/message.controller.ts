@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import {
-  updateMessageReactionLikeService,
-  updateMessageReactionDislikeService,
-} from "../services/message.service";
 import asyncHandler from "express-async-handler";
+import {
+  updateMessageReactionDislikeService,
+  updateMessageReactionLikeService,
+} from "../services/message.service";
 
 export const updateMessageReactionLike = asyncHandler(
   async (req: Request, res: Response) => {

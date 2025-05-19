@@ -9,7 +9,6 @@ import {
   renameChat,
   streamChat,
 } from "../controllers/chat.controller";
-import { generateShareId } from "../controllers/share.controller";
 import {
   ensureAuthenticated,
   exEnsureAuthenticated,

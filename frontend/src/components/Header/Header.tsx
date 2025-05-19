@@ -12,7 +12,7 @@ import {
   setIsArchived,
   setIsFavorite,
 } from "../../store/features/chat/chatSlice";
-import { toggleTheme } from "../../store/features/themeSlice";
+import { toggleTheme } from "../../store/features/theme/themeSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { RootState } from "../../store/store";
 import DeleteModal from "../Modal/DeleteModal";

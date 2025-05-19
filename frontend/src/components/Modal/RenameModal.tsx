@@ -1,9 +1,9 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import useToast from "../../hooks/useToast";
 import { fetchChatNames, renameChat } from "../../actions/chat.actions";
-import { useAppDispatch } from "../../store/hooks";
+import useToast from "../../hooks/useToast";
 import { setChatName } from "../../store/features/chat/chatSlice";
+import { useAppDispatch } from "../../store/hooks";
 
 interface RenameModalProps {
   isOpen: boolean;
@@ -34,7 +34,10 @@ export default function RenameModal({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };

@@ -351,14 +351,12 @@ const ChatResponse = ({
           </div>
         ) : (
           <>
-           
-              <PromptInput
-                input={input}
-                isLoading={isLoading}
-                handleInputChange={handleInputChange}
-                handleFormSubmit={handleFormSubmit}
-              />
-           
+            <PromptInput
+              input={input}
+              isLoading={isLoading}
+              handleInputChange={handleInputChange}
+              handleFormSubmit={handleFormSubmit}
+            />
           </>
         )}
       </div>

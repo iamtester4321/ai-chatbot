@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { getUserByIdService } from "../services/user.service";
 import asyncHandler from "express-async-handler";
+import { getUserByIdService } from "../services/user.service";
 
 export const getMyProfile = asyncHandler(
   async (req: Request, res: Response) => {

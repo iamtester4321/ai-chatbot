@@ -12,8 +12,11 @@ interface DeleteModalProps {
   chatId: string;
 }
 
-
-export default function DeleteModal({ isOpen, onClose, chatId }: DeleteModalProps) {
+export default function DeleteModal({
+  isOpen,
+  onClose,
+  chatId,
+}: DeleteModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
@@ -72,14 +75,18 @@ export default function DeleteModal({ isOpen, onClose, chatId }: DeleteModalProp
             borderColor: "var(--color-border)",
           }}
         >
-          <h2 className="text-xl font-semibold mb-4" style={{ color: "var(--color-text)" }}>
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--color-text)" }}
+          >
             Delete Chat
           </h2>
           <p className="mb-6" style={{ color: "var(--color-text)" }}>
-            Are you sure you want to delete this chat? This action cannot be undone.
+            Are you sure you want to delete this chat? This action cannot be
+            undone.
           </p>
           <div className="flex justify-end space-x-3">
-          <button
+            <button
               onClick={onClose}
               disabled={isLoading}
               className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"

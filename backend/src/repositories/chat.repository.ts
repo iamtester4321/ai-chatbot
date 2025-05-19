@@ -62,7 +62,7 @@ export function getChatNamesByUser(userId: string) {
       name: true,
       isFavorite: true,
       isArchived: true,
-      isShare:true,
+      isShare: true,
     },
     orderBy: { createdAt: "desc" },
   });

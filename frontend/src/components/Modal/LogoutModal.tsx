@@ -37,7 +37,10 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -64,7 +67,10 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             borderColor: "var(--color-border)",
           }}
         >
-          <h2 className="text-xl font-semibold mb-4" style={{ color: "var(--color-text)" }}>
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--color-text)" }}
+          >
             Logout
           </h2>
           <p className="mb-6" style={{ color: "var(--color-text-muted)" }}>
@@ -80,7 +86,8 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
                 backgroundColor: "transparent",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--color-muted-hover)";
+                e.currentTarget.style.backgroundColor =
+                  "var(--color-muted-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent";

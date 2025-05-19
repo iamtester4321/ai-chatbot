@@ -1,5 +1,5 @@
+import { Archive, MoreHorizontal, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
-import { Archive, Trash2, MoreHorizontal } from "lucide-react";
 
 interface DesktopMenuProps {
   isOpen: boolean;

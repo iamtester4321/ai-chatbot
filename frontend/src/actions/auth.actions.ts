@@ -8,22 +8,28 @@ import {
 
 export const registerUser = async (email: string, password: string) => {
   try {
-    const response = await axios.post(REGISTER_API, {
-      email,
-      password,
-    }, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      REGISTER_API,
+      {
+        email,
+        password,
       },
-    });
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return {
       success: response.status === 201,
       data: response.data.user,
     };
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
-      const errorMessage = error.response?.data?.message || "Network error. Please try again later.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Network error. Please try again later.";
 
       if (error.response?.data?.message === "User already exists") {
         return {
@@ -44,19 +50,21 @@ export const registerUser = async (email: string, password: string) => {
   }
 };
 
-
-
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await axios.post(LOGIN_API, {
-      email,
-      password,
-    }, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      LOGIN_API,
+      {
+        email,
+        password,
       },
-    });
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.data.success) {
       return {
@@ -73,7 +81,9 @@ export const loginUser = async (email: string, password: string) => {
     if (axios.isAxiosError(error) && error.response) {
       return {
         success: false,
-        message: error.response?.data?.message || "Network error. Please try again later.",
+        message:
+          error.response?.data?.message ||
+          "Network error. Please try again later.",
       };
     } else {
       return {
@@ -84,11 +94,11 @@ export const loginUser = async (email: string, password: string) => {
   }
 };
 
-
 export const googleAuth = () => {
   try {
     window.location.href = GOOGLE_AUTH_API;
   } catch (error) {
+    console.error(error);
     return {
       success: false,
       message: "Failed to initiate Google authentication",
@@ -98,9 +108,13 @@ export const googleAuth = () => {
 
 export const logoutUser = async () => {
   try {
-    const response = await axios.post(LOGOUT_API, {}, {
-      withCredentials: true,
-    });
+    const response = await axios.post(
+      LOGOUT_API,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
     if (!response.data.success) {
       return {
         success: false,
@@ -116,7 +130,9 @@ export const logoutUser = async () => {
     if (axios.isAxiosError(error) && error.response) {
       return {
         success: false,
-        message: error.response?.data?.message || "Network error. Please try again later.",
+        message:
+          error.response?.data?.message ||
+          "Network error. Please try again later.",
       };
     } else {
       return {

@@ -10,6 +10,7 @@ import {
   ScatterChart as ScatterIcon,
 } from "lucide-react";
 import React, { JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Area,
   AreaChart,
@@ -31,11 +32,10 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import StreamLoader from "../StreamLoader/StreamLoader";
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
-import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import StreamLoader from "../StreamLoader/StreamLoader";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,

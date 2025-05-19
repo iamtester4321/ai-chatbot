@@ -40,7 +40,6 @@ export default function ShareModal({
           dispatch(setIsShare(true));
           const updatedChats = await fetchChatNames(dispatch);
           dispatch(setChatList(updatedChats.data));
-
         } else {
           showToast.error(result.message || "Failed to generate share link.");
         }
