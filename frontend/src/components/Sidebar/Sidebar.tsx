@@ -88,7 +88,9 @@ const Sidebar = ({
     (chat) => chat.isFavorite && !chat.isArchived
   );
 
-  const sparkChats = filteredChatList.filter((chat) => chat.isShare);
+  const sparkChats = filteredChatList.filter(
+    (chat) => chat.isShare && !chat.isArchived
+  );
 
   return (
     <>
