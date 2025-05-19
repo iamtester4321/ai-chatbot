@@ -3,13 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchChatNames, generateShareId } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
+import { ShareModalProps } from "../../lib/types";
 import { setChatList, setIsShare } from "../../store/features/chat/chatSlice";
-
-interface ShareModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatId: string;
-}
 
 export default function ShareModal({
   isOpen,

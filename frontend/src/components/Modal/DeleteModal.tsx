@@ -4,13 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { deleteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
+import { DeleteModalProps } from "../../lib/types";
 import { resetChat } from "../../store/features/chat/chatSlice";
-
-interface DeleteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatId: string;
-}
 
 export default function DeleteModal({
   isOpen,

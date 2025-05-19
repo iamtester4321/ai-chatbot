@@ -1,18 +1,6 @@
 import { MoreHorizontal, Pencil, Share2, Star, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ChatState } from "../../lib/types";
-
-interface AllChatsProps {
-  chats: ChatState["chatList"];
-  chatId: string | undefined;
-  toggleDropdown: (chatId: string) => void;
-  activeDropdown: {
-    id: string | null;
-    section: "favorite" | "spark" | "all" | null;
-  };
-  handleRename: (chatId: string) => void;
-  handleDelete: (chatId: string) => void;
-}
+import { AllChatsProps } from "../../lib/types";
 
 const AllChats = ({
   chats,
@@ -21,6 +9,8 @@ const AllChats = ({
   activeDropdown,
   handleRename,
   handleDelete,
+  isMobile,
+  setIsSidebarOpen
 }: AllChatsProps) => {
   if (chats.length === 0) return null;
   const nonArchivedChats = chats.filter((chat) => !chat.isArchived);
@@ -36,6 +26,9 @@ const AllChats = ({
         <div key={chat.id} className="relative group">
           <Link
             to={`/chat/${chat.id}`}
+            onClick={() => {
+              if (isMobile) setIsSidebarOpen(false);
+            }}
             className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
               chatId === chat.id
                 ? "bg-[var(--color-muted)] text-[color:var(--color-text)]"

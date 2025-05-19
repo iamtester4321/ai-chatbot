@@ -8,21 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ChatState } from "../../lib/types";
-
-interface ShareChatsProps {
-  chats: ChatState["chatList"];
-  chatId: string | undefined;
-  isShareOpen: boolean;
-  setIsShareOpen: (value: boolean) => void;
-  toggleDropdown: (chatId: string) => void;
-  activeDropdown: {
-    id: string | null;
-    section: "favorite" | "spark" | "all" | null;
-  };
-  handleRename: (chatId: string) => void;
-  handleDelete: (chatId: string) => void;
-}
+import { ShareChatsProps } from "../../lib/types";
 
 const SparkChats = ({
   chats,
@@ -33,6 +19,8 @@ const SparkChats = ({
   activeDropdown,
   handleRename,
   handleDelete,
+  isMobile,
+  setIsSidebarOpen,
 }: ShareChatsProps) => {
   if (chats.length === 0) return null;
 
@@ -55,6 +43,9 @@ const SparkChats = ({
           <div key={chat.id} className="relative group">
             <Link
               to={`/chat/${chat.id}`}
+              onClick={() => {
+                if (isMobile) setIsSidebarOpen(false);
+              }}
               className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
                 chatId === chat.id
                   ? "bg-[var(--color-muted)] text-blue-600"

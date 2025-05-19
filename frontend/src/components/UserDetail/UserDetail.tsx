@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchUserProfile } from "../../actions/user.actions";
-
-interface UserDetailProps {
-  onClick: () => void;
-}
+import { UserDetailProps } from "../../lib/types";
 
 export const UserDetail = ({ onClick }: UserDetailProps) => {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);

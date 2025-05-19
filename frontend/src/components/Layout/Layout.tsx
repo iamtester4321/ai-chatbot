@@ -89,6 +89,8 @@ function Layout() {
           setIsDeleteModalOpen={setIsDeleteModalOpen}
           setSelectedChat={setSelectedChat}
           setSelectedChatId={setSelectedChatId}
+          isMobile={isMobile}
+          setIsSidebarOpen={setIsSidebarOpen}
         />
       </div>
 

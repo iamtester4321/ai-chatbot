@@ -21,6 +21,8 @@ const Sidebar = ({
   setIsDeleteModalOpen,
   setSelectedChat,
   setSelectedChatId,
+  isMobile,
+  setIsSidebarOpen,
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -98,7 +100,10 @@ const Sidebar = ({
         <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
           <Link
             to={"/chat"}
-            onClick={() => dispatch(resetChat())}
+            onClick={() => {
+              dispatch(resetChat());
+              if (isMobile) setIsSidebarOpen(false);
+            }}
             className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
           >
             <div className="flex items-center justify-center gap-2 p-2 w-full truncate cursor-pointer transition-all">
@@ -139,6 +144,8 @@ const Sidebar = ({
                 activeDropdown={activeDropdown}
                 handleRename={handleRename}
                 handleDelete={handleDelete}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
 
               <SparkChats
@@ -150,6 +157,8 @@ const Sidebar = ({
                 handleDelete={handleDelete}
                 setIsShareOpen={setIsShareOpen}
                 isShareOpen={isShareOpen}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
 
               <AllChats
@@ -159,6 +168,8 @@ const Sidebar = ({
                 activeDropdown={activeDropdown}
                 handleRename={handleRename}
                 handleDelete={handleDelete}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
             </>
           )}

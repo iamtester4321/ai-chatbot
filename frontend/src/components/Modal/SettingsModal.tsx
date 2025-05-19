@@ -1,15 +1,9 @@
 import { Archive, Settings, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ChatState } from "../../lib/types";
+import { SettingsModalProps } from "../../lib/types";
 import ArchivedChats from "../Settings/ArchivedChats";
 import FavoriteChats from "../Settings/FavoriteChats";
 import GeneralSettings from "../Settings/GeneralSettings";
-
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatList: ChatState["chatList"];
-}
 
 const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState("general");

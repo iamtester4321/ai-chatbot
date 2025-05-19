@@ -3,11 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../actions/auth.actions";
 import useToast from "../../hooks/useToast";
-
-interface LogoutModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { LogoutModalProps } from "../../lib/types";
 
 export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   const navigate = useNavigate();

@@ -1,9 +1,5 @@
 import { AlertCircle } from "lucide-react";
-
-interface ErrorProps {
-  message: string;
-  onNewChat: () => void;
-}
+import { ErrorProps } from "../../lib/types";
 
 const Error = ({ message, onNewChat }: ErrorProps) => {
   return (

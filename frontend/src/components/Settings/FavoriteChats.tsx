@@ -3,15 +3,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { ChatState } from "../../lib/types";
+import { FavoriteChatsProps } from "../../lib/types";
 import { setIsFavorite } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
-
-interface FavoriteChatsProps {
-  favoriteChats: ChatState["chatList"];
-  onClose: () => void;
-}
 
 const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

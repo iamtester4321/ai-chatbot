@@ -1,8 +1,5 @@
 import { Sidebar } from "lucide-react";
-
-interface HeaderTitleProps {
-  toggleSidebar: () => void;
-}
+import { HeaderTitleProps } from "../../lib/types";
 
 export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
   return (

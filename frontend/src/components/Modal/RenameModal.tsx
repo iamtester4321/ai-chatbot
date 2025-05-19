@@ -2,15 +2,9 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { fetchChatNames, renameChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
+import { RenameModalProps } from "../../lib/types";
 import { setChatName } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
-
-interface RenameModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatId: string;
-  currentName: string;
-}
 
 export default function RenameModal({
   isOpen,

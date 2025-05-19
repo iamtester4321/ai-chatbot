@@ -10,23 +10,9 @@ import {
 import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { ChatState } from "../../lib/types";
 import { setIsFavorite } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
-
-interface FavoriteChatsProps {
-  chats: ChatState["chatList"];
-  chatId: string | undefined;
-  isFavoritesOpen: boolean;
-  setIsFavoritesOpen: (value: boolean) => void;
-  toggleDropdown: (chatId: string) => void;
-  activeDropdown: {
-    id: string | null;
-    section: "favorite" | "all" | "spark" | null;
-  };
-  handleRename: (chatId: string) => void;
-  handleDelete: (chatId: string) => void;
-}
+import { FavoriteChatsProps } from "../../lib/types";
 
 const FavoriteChats = ({
   chats,
@@ -37,6 +23,8 @@ const FavoriteChats = ({
   activeDropdown,
   handleRename,
   handleDelete,
+  isMobile,
+  setIsSidebarOpen,
 }: FavoriteChatsProps) => {
   const showToast = useToast();
   const dispatch = useAppDispatch();
@@ -77,6 +65,9 @@ const FavoriteChats = ({
           <div key={chat.id} className="relative group">
             <Link
               to={`/chat/${chat.id}`}
+              onClick={() => {
+                if (isMobile) setIsSidebarOpen(false);
+              }}
               className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
                 chatId === chat.id
                   ? "bg-[var(--color-muted)] text-yellow-600"
