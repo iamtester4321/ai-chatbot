@@ -14,6 +14,7 @@ import {
   STREAM_CHAT_RESPONSE,
   TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
+import { ChatHookProps, DeleteChatResponse } from "../lib/types";
 import {
   addMessage,
   resetChat,
@@ -22,12 +23,7 @@ import {
   setCurrentResponse,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { AppDispatch } from "../store/store";
-
-interface ChatHookProps {
-  chatId?: string;
-  onResponseUpdate?: (text: string) => void;
-}
+import { AppDispatch, store } from "../store/store";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
@@ -197,11 +193,6 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
   }
 };
 
-interface DeleteChatResponse {
-  success: boolean;
-  message?: string;
-}
-
 export const deleteChat = async (
   chatId: string
 ): Promise<DeleteChatResponse> => {
@@ -218,7 +209,8 @@ export const deleteChat = async (
       };
     }
 
-    window.dispatchEvent(new Event("chat-deleted"));
+    const updatedChats = await fetchChatNames(store.dispatch);
+    store.dispatch(setChatList(updatedChats.data));
 
     return {
       success: true,
@@ -258,7 +250,8 @@ export const toggleFavoriteChat = async (
       };
     }
 
-    window.dispatchEvent(new Event("chat-favorite-toggled"));
+    const updatedChats = await fetchChatNames(store.dispatch);
+    store.dispatch(setChatList(updatedChats.data));
 
     return {
       success: true,
@@ -296,7 +289,8 @@ export const renameChat = async (
       };
     }
 
-    window.dispatchEvent(new Event("chat-renamed"));
+    const updatedChats = await fetchChatNames(store.dispatch);
+    store.dispatch(setChatList(updatedChats.data));
 
     return {
       success: true,
@@ -330,7 +324,8 @@ export const archiveChat = async (
       };
     }
 
-    window.dispatchEvent(new Event("chat-archived"));
+    const updatedChats = await fetchChatNames(store.dispatch);
+    store.dispatch(setChatList(updatedChats.data));
 
     return {
       success: true,

@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { updateMessageReactionLike, updateMessageReactionDislike } from "../controllers/message.controller";
+import {
+  updateMessageReactionDislike,
+  updateMessageReactionLike,
+} from "../controllers/message.controller";
 
 const router = Router();
 

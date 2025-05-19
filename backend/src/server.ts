@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import "./config/passport";
+import { redisClient } from "./config/redis";
 import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
-import userRoutes from "./routes/user.route";
-import shareRoutes from "./routes/share.routes";
 import messageRoutes from "./routes/message.routes";
-import { redisClient } from "./config/redis";
+import shareRoutes from "./routes/share.routes";
+import userRoutes from "./routes/user.route";
 
 dotenv.config();
 

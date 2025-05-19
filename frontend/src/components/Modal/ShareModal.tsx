@@ -1,9 +1,9 @@
 import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { generateShareId } from "../../actions/chat.actions";
+import { fetchChatNames, generateShareId } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { setIsShare } from "../../store/features/chat/chatSlice";
+import { setChatList, setIsShare } from "../../store/features/chat/chatSlice";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -38,7 +38,8 @@ export default function ShareModal({
         if (result.success && result.shareId) {
           setShareId(result.shareId);
           dispatch(setIsShare(true));
-          window.dispatchEvent(new Event("chat-spark"));
+          const updatedChats = await fetchChatNames(dispatch);
+          dispatch(setChatList(updatedChats.data));
         } else {
           showToast.error(result.message || "Failed to generate share link.");
         }

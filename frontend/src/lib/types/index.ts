@@ -62,3 +62,13 @@ export type ChartType =
   | "composed"
   | "scatter"
   | "pie";
+
+export interface ChatHookProps {
+  chatId?: string;
+  onResponseUpdate?: (text: string) => void;
+}
+
+export interface DeleteChatResponse {
+  success: boolean;
+  message?: string;
+}

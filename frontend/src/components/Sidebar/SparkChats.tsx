@@ -1,11 +1,11 @@
 import {
-    Archive,
-    ChevronDown,
-    ChevronRight,
-    MoreHorizontal,
-    Pencil,
-    Share2,
-    Trash2
+  Archive,
+  ChevronDown,
+  ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Share2,
+  Trash2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ChatState } from "../../lib/types";
@@ -16,7 +16,10 @@ interface ShareChatsProps {
   isShareOpen: boolean;
   setIsShareOpen: (value: boolean) => void;
   toggleDropdown: (chatId: string) => void;
-  activeDropdown: { id: string | null; section: "favorite" | "spark" | "all" | null };
+  activeDropdown: {
+    id: string | null;
+    section: "favorite" | "spark" | "all" | null;
+  };
   handleRename: (chatId: string) => void;
   handleDelete: (chatId: string) => void;
 }

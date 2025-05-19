@@ -1,5 +1,5 @@
+import { User } from "@prisma/client";
 import { prisma } from "../config/db";
-import { Prisma, User } from "@prisma/client";
 
 interface CreateUserDTO {
   email: string;

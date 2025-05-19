@@ -22,7 +22,7 @@ export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
         <Sidebar size={20} />
       </button>
       <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
-        AI Assistant
+        Aivora
       </h1>
     </div>
   );

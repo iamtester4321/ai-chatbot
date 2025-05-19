@@ -94,14 +94,17 @@ body {
 
 /* Success toast */
 .success-toast {
-  border-left: 4px solid var(--color-success, #22c55e); /* fallback green */
+  border-left: 4px solid var(--color-success, #22c55e);
+  /* fallback green */
 }
 
 /* Error toast */
 .error-toast {
-  border-left: 4px solid var(--color-error, #ef4444); /* fallback red */
+  border-left: 4px solid var(--color-error, #ef4444);
+  /* fallback red */
 }
 
 .warning-toast {
-  border-left: 4px solid var(--color-warning, #f59e0b); /* fallback red */
+  border-left: 4px solid var(--color-warning, #f59e0b);
+  /* fallback red */
 }

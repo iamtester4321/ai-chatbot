@@ -105,11 +105,7 @@ const ChatSection = () => {
       } as React.ChangeEvent<HTMLInputElement>;
 
       handleInputChange(event);
-
-      setTimeout(() => {
-        handleSubmit(new Event("submit") as any);
-      }, 0);
-
+      handleSubmit(new Event("submit") as any);
       sessionStorage.removeItem("initialPrompt");
     }
   }, [chatId, messages.length, handleInputChange, handleSubmit]);
@@ -172,7 +168,7 @@ const ChatSection = () => {
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
                 {messages.length === 0 && !shareId && (
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
-                    Ai-chatbot
+                    Aivora
                   </h3>
                 )}
                 <h3
@@ -180,7 +176,7 @@ const ChatSection = () => {
                     messages.length > 0 ? "hidden" : "block md:hidden"
                   }`}
                 >
-                  What do you want to know?
+                  Aivora
                 </h3>
 
                 {!chatId && !shareId && (

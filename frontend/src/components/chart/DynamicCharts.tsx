@@ -9,7 +9,15 @@ import {
   PieChart as PieIcon,
   ScatterChart as ScatterIcon,
 } from "lucide-react";
-import React, { JSX, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  JSX,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSelector } from "react-redux";
 import {
   Area,
   AreaChart,
@@ -31,11 +39,10 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import StreamLoader from "../StreamLoader/StreamLoader";
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
-import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import StreamLoader from "../StreamLoader/StreamLoader";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,
@@ -56,6 +63,26 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const [jsonData, setJsonData] = useState<Array<Record<string, any>>>([]);
   const [open, setOpen] = useState(false);
   const { isDarkMode } = useSelector((state: RootState) => state.theme);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Transform object-of-arrays into array-of-objects
   useEffect(() => {
@@ -288,6 +315,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
       </p>
       <div className="relative inline-block text-left mb-4">
         <button
+          ref={buttonRef}
           onClick={() => setOpen((prev) => !prev)}
           className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
         >
@@ -309,6 +337,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
 
         {open && (
           <div
+            ref={dropdownRef}
             data-dropdown-menu
             className="absolute z-5 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
           >

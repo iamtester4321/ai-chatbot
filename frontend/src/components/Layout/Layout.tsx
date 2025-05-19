@@ -63,31 +63,6 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const handleChatUpdates = () => {
-      // Refresh chat list
-      fetchChatNames(dispatch);
-    };
-
-    // Add event listeners for all chat-related events
-    window.addEventListener("chat-deleted", handleChatUpdates);
-    window.addEventListener("chat-favorite-toggled", handleChatUpdates);
-    window.addEventListener("chat-renamed", handleChatUpdates);
-    window.addEventListener("chat-names-updated", handleChatUpdates);
-    window.addEventListener("chat-archived", handleChatUpdates);
-    window.addEventListener("chat-spark", handleChatUpdates);
-
-    return () => {
-      // Clean up event listeners
-      window.removeEventListener("chat-deleted", handleChatUpdates);
-      window.removeEventListener("chat-favorite-toggled", handleChatUpdates);
-      window.removeEventListener("chat-renamed", handleChatUpdates);
-      window.removeEventListener("chat-names-updated", handleChatUpdates);
-      window.removeEventListener("chat-archived", handleChatUpdates);
-      window.removeEventListener("chat-spark", handleChatUpdates);
-    };
-  }, []);
-
-  useEffect(() => {
     if (isMobile && chatId) {
       setIsSidebarOpen(false);
     }

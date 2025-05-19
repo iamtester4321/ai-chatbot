@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { generateShareIdService } from "../services/share.service";
 import AsyncHandler from "express-async-handler";
+import { generateShareIdService } from "../services/share.service";
 
 export const generateShareId = AsyncHandler(
   async (req: Request, res: Response) => {

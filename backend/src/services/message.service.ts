@@ -1,13 +1,14 @@
-import { updateMessageReactionLikeRepository, updateMessageReactionDislikeRepository } from "../repositories/message.repository";
+import {
+  updateMessageReactionDislikeRepository,
+  updateMessageReactionLikeRepository,
+} from "../repositories/message.repository";
 
-export const updateMessageReactionLikeService = async (
-  messageId: string,
-) => {
+export const updateMessageReactionLikeService = async (messageId: string) => {
   return updateMessageReactionLikeRepository(messageId);
 };
 
 export const updateMessageReactionDislikeService = async (
-  messageId: string,
+  messageId: string
 ) => {
   return updateMessageReactionDislikeRepository(messageId);
 };
