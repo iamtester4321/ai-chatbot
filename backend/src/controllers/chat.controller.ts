@@ -214,4 +214,4 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     console.error("Error renaming chat:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-});
+}); 

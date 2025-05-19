@@ -30,3 +30,7 @@ export const LIKE_MESSAGE = (messageId: string) =>
   `${BASE_API}/api/message/${messageId}/reaction/like`;
 export const DISLIKE_MESSAGE = (messageId: string) =>
   `${BASE_API}/api/message/${messageId}/reaction/dislike`;
+
+// prompt suggestion API
+export const PROMPT_SUGGESTION = (query: string) =>
+  `${BASE_API}/api/suggestions?text=${encodeURIComponent(query)}`;

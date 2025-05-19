@@ -9,6 +9,7 @@ import {
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
   GET_SHARE_CHAT_MESSAGES,
+  PROMPT_SUGGESTION,
   RENAME_CHAT,
   SHARE_CHAT,
   STREAM_CHAT_RESPONSE,
@@ -400,5 +401,25 @@ export const moderationCheck = async (input: string) => {
   } catch (error) {
     console.error("Moderation API error:", error);
     return { flagged: false, categories: {}, categoryScores: {} };
+  }
+};
+
+export const fetchSuggestions = async (
+  query: string
+): Promise<{ success: boolean; suggestions: string[] }> => {
+  try {
+    const response = await axios.get(PROMPT_SUGGESTION(query));
+
+    if (response.data.success) {
+      return {
+        success: true,
+        suggestions: response.data.suggestions,
+      };
+    }
+
+    return { success: false, suggestions: [] };
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+    return { success: false, suggestions: [] };
   }
 };
