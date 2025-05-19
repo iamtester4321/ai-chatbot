@@ -11,6 +11,7 @@ import chatRoutes from "./routes/chat.routes";
 import messageRoutes from "./routes/message.routes";
 import shareRoutes from "./routes/share.routes";
 import userRoutes from "./routes/user.route";
+import suggestionsRoutes from "./routes/suggestions.routes";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/suggestions", suggestionsRoutes);
 app.use("/api/message", ensureAuthenticated, messageRoutes);
 app.use("/api/user", ensureAuthenticated, userRoutes);
 app.use("/api/share", shareRoutes);
