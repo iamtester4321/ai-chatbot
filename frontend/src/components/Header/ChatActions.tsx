@@ -1,12 +1,5 @@
 import { Share2, Star } from "lucide-react";
-
-interface ChatActionsProps {
-  chatId: string;
-  isFavorite: boolean;
-  isArchive: boolean;
-  toggleFavorite: () => void;
-  setShareOpen: (state: boolean) => void;
-}
+import { ChatActionsProps } from "../../lib/types";
 
 export default function ChatActions({
   isFavorite,

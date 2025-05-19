@@ -1,16 +1,6 @@
 import { Archive, MoreHorizontal, Share2, Star, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
-
-interface MobileMenuProps {
-  isOpen: boolean;
-  toggleMenu: () => void;
-  toggleFavorite: () => void;
-  isFavorite: boolean;
-  isArchive: boolean;
-  archiveChat: () => void;
-  openDeleteModal: () => void;
-  setShareOpen: (state: boolean) => void;
-}
+import { MobileMenuProps } from "../../lib/types";
 
 const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
   (

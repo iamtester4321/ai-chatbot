@@ -1,13 +1,6 @@
 import { Archive, MoreHorizontal, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
-
-interface DesktopMenuProps {
-  isOpen: boolean;
-  toggleMenu: () => void;
-  archiveChat: () => void;
-  openDeleteModal: () => void;
-  isArchive: boolean;
-}
+import { DesktopMenuProps } from "../../lib/types";
 
 const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
   ({ isOpen, toggleMenu, archiveChat, openDeleteModal, isArchive }, ref) => {

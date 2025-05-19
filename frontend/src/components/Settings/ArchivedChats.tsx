@@ -3,15 +3,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { archiveChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { ChatState } from "../../lib/types";
+import { ArchivedChatsProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
-
-interface ArchivedChatsProps {
-  archivedChats: ChatState["chatList"];
-  onClose: () => void;
-}
 
 const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

@@ -18,16 +18,12 @@ import { RootState } from "../../store/store";
 import DeleteModal from "../Modal/DeleteModal";
 import ShareModal from "../Modal/ShareModal";
 
+import { HeaderProps } from "../../lib/types";
 import ThemeToggleButton from "../Common/ThemeToggleButton";
 import ChatActions from "./ChatActions";
 import DesktopMenu from "./DesktopMenu";
 import HeaderTitle from "./HeaderTitle";
 import MobileMenu from "./MobileMenu";
-
-interface HeaderProps {
-  toggleSidebar: () => void;
-  isLogoutModalOpen: boolean;
-}
 
 export default function Header({
   toggleSidebar,

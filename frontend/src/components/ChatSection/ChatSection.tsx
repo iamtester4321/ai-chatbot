@@ -166,11 +166,13 @@ const ChatSection = () => {
           >
             <div className="container">
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-                {messages.length === 0 && !shareId && (
+                {messages.length === 0 && !shareId && !chatId &&(
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
                     Aivora
                   </h3>
                 )}
+                {messages.length === 0 && !shareId && !chatId &&(
+
                 <h3
                   className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
                     messages.length > 0 ? "hidden" : "block md:hidden"
@@ -178,7 +180,8 @@ const ChatSection = () => {
                 >
                   Aivora
                 </h3>
-
+                )}
+                
                 {!chatId && !shareId && (
                   <PromptInput
                     input={input}

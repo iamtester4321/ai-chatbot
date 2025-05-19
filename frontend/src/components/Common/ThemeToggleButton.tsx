@@ -1,10 +1,5 @@
 import { Monitor, Moon, Sun } from "lucide-react";
-
-interface ThemeToggleButtonProps {
-  isDarkMode: boolean;
-  mode: "light" | "dark" | "system";
-  toggleTheme: () => void;
-}
+import { ThemeToggleButtonProps } from "../../lib/types";
 
 export default function ThemeToggleButton({
   isDarkMode,
