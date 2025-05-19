@@ -12,6 +12,7 @@ import {
   renameChatService,
   saveChat,
 } from "../services/chat.service";
+import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
 interface ChatRequestParams {
   chatId: string;
@@ -28,28 +29,39 @@ export const streamChat = async (req: any, res: any) => {
     return res.status(400).json({ error: "User ID is required" });
   }
   const chatId = req.body.chatId;
-  const messages = req.body.messages || [];
+  const encryptedMessages = req.body.messages || [];
   const userMessageId = req.body.userMessageId;
   const assistantMessageId = req.body.assistantMessageId;
+  const encryptedPrompt = req.body.prompt;
   let assistantReply = "";
 
   const model = google("gemini-2.0-flash");
+  const decryptedMessages = await Promise.all(
+    encryptedMessages.map(async (m: { content: string }) => ({
+      ...m,
+      content: await decryptMessage(m.content),
+    }))
+  );
 
+  // Decrypt prompt also
+  const decryptedPrompt = await decryptMessage(encryptedPrompt);
   try {
     const result = streamText({
       model,
-      messages: [...messages, { role: "user", content: req.body.prompt }],
+      messages: [...decryptedMessages, { role: "user", content: decryptedPrompt }],
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
       onFinish: async () => {
+        const encryptedUserMsg = await encryptMessage(decryptedPrompt);
+        const encryptedAssistantMsg = await encryptMessage(assistantReply);
         await saveChat(
           userId,
           [
-            { id: userMessageId, role: "user", content: req.body.prompt },
-            { id: assistantMessageId, role: "assistant", content: assistantReply },
+            { id: userMessageId, role: "user", content: encryptedUserMsg },
+            { id: assistantMessageId, role: "assistant", content: encryptedAssistantMsg },
           ],
           chatId
         );

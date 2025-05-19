@@ -36,6 +36,7 @@ export type Message = {
   createdAt: string;
   isLiked?: boolean;
   isDisliked?: boolean;
+  encryptedContent?: string;
 };
 
 export type ChatState = {

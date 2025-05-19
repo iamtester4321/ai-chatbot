@@ -43,17 +43,11 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         addMessage({
           id: userMessageId,
           role: "user",
-          content: encryptedUser,
+          content: input,
           createdAt: new Date().toISOString(),
         })
       );
       const decryptedMessages = await Promise.all(
-        messages.map(async (m) => ({
-          ...m,
-          content: await decryptMessage(m.content),
-        }))
-      );
-      const botMessages = await Promise.all(
         messages.map(async (m) => ({
           ...m,
           content: await decryptMessage(m.content),
@@ -68,9 +62,8 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         body: JSON.stringify({
           userMessageId,
           assistantMessageId,
-          prompt: input,
-          botMessages,  
-          messages,
+          prompt: encryptedUser, 
+          decryptedMessages,
           chatId: chatId || "",
         }),
       });
@@ -96,12 +89,11 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           dispatch(setCurrentResponse(accumulatedText));
           onResponseUpdate?.(accumulatedText);
         }
-        const encryptedAssist = await encryptMessage(accumulatedText);
         dispatch(
           addMessage({
             id: assistantMessageId,
             role: "assistant",
-            content: encryptedAssist,
+            content: accumulatedText,
             createdAt: new Date().toISOString(),
           })
         );
@@ -138,8 +130,7 @@ export const fetchMessages = async (chatId: string) => {
     const raw = response.data;
     // decrypt messages
     const messages: Message[] = await Promise.all(
-      raw.messages.map(async (m: Message) => ({
-        ...m,
+      raw.messages.map(async (m: Message) => ({ 
         content: await decryptMessage(m.content),
       }))
     );
@@ -208,8 +199,18 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
     });
 
     if (response.status === 200) {
-      dispatch(setChatList(response.data));
-      return { success: true, data: response.data };
+      const decryptedChatList = [];
+
+      for (const chat of response.data) {
+        const decryptedName = await decryptMessage(chat.name);
+        decryptedChatList.push({
+          ...chat,
+          name: decryptedName,
+        });
+      }
+
+      dispatch(setChatList(decryptedChatList));
+      return { success: true, data: decryptedChatList };
     } else {
       console.error("Failed to fetch chat names");
       return { success: false, error: "Failed to fetch chat names" };

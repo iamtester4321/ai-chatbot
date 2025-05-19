@@ -3,7 +3,11 @@ import "highlight.js/styles/github-dark.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { fetchMessages, fetchMessagesByShareId, useChatActions } from "../../actions/chat.actions";
+import {
+  fetchMessages,
+  fetchMessagesByShareId,
+  useChatActions,
+} from "../../actions/chat.actions";
 import {
   setChatName,
   setCurrentResponse,
@@ -15,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
 import Error from "../Common/Error";
+import { decryptMessage } from "../../utils/encryption.utils";
 
 const ChatSection = () => {
   const navigate = useNavigate();
@@ -39,12 +44,15 @@ const ChatSection = () => {
         const { success, data, error } = await fetchMessages(chatId);
         if (success && data) {
           dispatch(setMessages(data.messages));
-          dispatch(setChatName(data.name));
+          const decryptedName = await decryptMessage(data.name);
+          dispatch(setChatName(decryptedName));
           dispatch(setIsArchived(data.isArchived));
           setError(null);
         } else {
           console.error(error);
-          setError("Chat not found. This chat might have been deleted or doesn't exist.");
+          setError(
+            "Chat not found. This chat might have been deleted or doesn't exist."
+          );
           dispatch(setMessages([]));
         }
       };
@@ -126,57 +134,58 @@ const ChatSection = () => {
     return () => document.removeEventListener("click", handleCopyClick);
   }, [messages]);
 
-  console.log(input)
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {/* {error ? (
         <Error message={error} />
       ) : ( */}
-        <>
-          {messages.length > 0 && (
-            <ChatResponse
-              messages={messages}
-              chatResponse={currentResponse}
-              isLoading={isLoading}
-              chatName={chatName}
-              input={input}
-              handleInputChange={handleInputChange}
-              handleFormSubmit={handleFormSubmit}
-              chatId={chatId || ""}
-              shareId={shareId || ""}
-            />
-          )}
+      <>
+        {messages.length > 0 && (
+          <ChatResponse
+            messages={messages}
+            chatResponse={currentResponse}
+            isLoading={isLoading}
+            chatName={chatName}
+            input={input}
+            handleInputChange={handleInputChange}
+            handleFormSubmit={handleFormSubmit}
+            chatId={chatId || ""}
+            shareId={shareId || ""}
+          />
+        )}
 
-          <section
-            className={`${messages.length > 0 ? "" : "pt-[200px]"} h-100vh transition-all duration-300`}
-          >
-            <div className="container">
-              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
-                {messages.length === 0 && !shareId && (
-                  <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
-                    Ai-chatbot
-                  </h3>
-                )}
-                <h3
-                  className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
-                    messages.length > 0 ? "hidden" : "block md:hidden"
-                  }`}
-                >
-                  What do you want to know?
+        <section
+          className={`${
+            messages.length > 0 ? "" : "pt-[200px]"
+          } h-100vh transition-all duration-300`}
+        >
+          <div className="container">
+            <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-24 sm:gap-6">
+              {messages.length === 0 && !shareId && (
+                <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
+                  Ai-chatbot
                 </h3>
+              )}
+              <h3
+                className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
+                  messages.length > 0 ? "hidden" : "block md:hidden"
+                }`}
+              >
+                What do you want to know?
+              </h3>
 
-                {!chatId && !shareId && (
-                  <PromptInput
-                    input={input}
-                    isLoading={isLoading}
-                    handleInputChange={handleInputChange}
-                    handleFormSubmit={handleFormSubmit}
-                  />
-                )}
-              </div>
+              {!chatId && !shareId && (
+                <PromptInput
+                  input={input}
+                  isLoading={isLoading}
+                  handleInputChange={handleInputChange}
+                  handleFormSubmit={handleFormSubmit}
+                />
+              )}
             </div>
-          </section>
-        </>
+          </div>
+        </section>
+      </>
       {/* )} */}
     </div>
   );
