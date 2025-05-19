@@ -105,11 +105,7 @@ const ChatSection = () => {
       } as React.ChangeEvent<HTMLInputElement>;
 
       handleInputChange(event);
-
-      setTimeout(() => {
-        handleSubmit(new Event("submit") as any);
-      }, 0);
-
+      handleSubmit(new Event("submit") as any);
       sessionStorage.removeItem("initialPrompt");
     }
   }, [chatId, messages.length, handleInputChange, handleSubmit]);
