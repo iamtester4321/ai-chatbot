@@ -75,10 +75,13 @@ const Sidebar = ({
   const handleLogoutClick = () => {
     setIsLogoutModalOpen(true);
   };
-
-  const filteredChatList = chatList.filter((chat) =>
+  console.log(chatList);
+  const filteredChatList = chatList.filter(
+  (chat) =>
+    typeof chat.name === "string" &&
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+);
+
 
   const favoriteChats = filteredChatList.filter(
     (chat) => chat.isFavorite && !chat.isArchived
@@ -173,9 +176,7 @@ const Sidebar = ({
               </div>
             )}
 
-            <UserDetail
-              onClick={() => setIsUserMenuOpen((prev) => !prev)}
-            />
+            <UserDetail onClick={() => setIsUserMenuOpen((prev) => !prev)} />
           </div>
           <LogoutModal
             isOpen={isLogoutModalOpen}

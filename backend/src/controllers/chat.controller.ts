@@ -48,7 +48,10 @@ export const streamChat = async (req: any, res: any) => {
   try {
     const result = streamText({
       model,
-      messages: [...decryptedMessages, { role: "user", content: decryptedPrompt }],
+      messages: [
+        ...decryptedMessages,
+        { role: "user", content: decryptedPrompt },
+      ],
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
@@ -61,10 +64,24 @@ export const streamChat = async (req: any, res: any) => {
           userId,
           [
             { id: userMessageId, role: "user", content: encryptedUserMsg },
-            { id: assistantMessageId, role: "assistant", content: encryptedAssistantMsg },
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              content: encryptedAssistantMsg,
+            },
           ],
           chatId
         );
+        res.status(200).json({
+          messages: [
+            { id: userMessageId, role: "user", content: encryptedUserMsg },
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              content: encryptedAssistantMsg,
+            },
+          ],
+        });
       },
       onError: (err) => console.error("Stream error:", err),
     });

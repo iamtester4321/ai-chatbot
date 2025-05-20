@@ -21,7 +21,6 @@ import {
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
-import { Message } from "../lib/types";
 
 interface ChatHookProps {
   chatId?: string;
@@ -47,12 +46,6 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           createdAt: new Date().toISOString(),
         })
       );
-      const decryptedMessages = await Promise.all(
-        messages.map(async (m) => ({
-          ...m,
-          content: await decryptMessage(m.content),
-        }))
-      );
       const response = await fetch(STREAM_CHAT_RESPONSE, {
         method: "POST",
         credentials: "include",
@@ -62,8 +55,8 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         body: JSON.stringify({
           userMessageId,
           assistantMessageId,
-          prompt: encryptedUser, 
-          decryptedMessages,
+          prompt: encryptedUser,
+          messages,
           chatId: chatId || "",
         }),
       });
@@ -89,11 +82,12 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           dispatch(setCurrentResponse(accumulatedText));
           onResponseUpdate?.(accumulatedText);
         }
+        const decryptedAssistantMessage = await decryptMessage(accumulatedText);
         dispatch(
           addMessage({
             id: assistantMessageId,
             role: "assistant",
-            content: accumulatedText,
+            content: decryptedAssistantMessage,
             createdAt: new Date().toISOString(),
           })
         );
@@ -127,22 +121,19 @@ export const fetchMessages = async (chatId: string) => {
       withCredentials: true,
     });
 
-    const raw = response.data;
-    // decrypt messages
-    const messages: Message[] = await Promise.all(
-      raw.messages.map(async (m: Message) => ({ 
-        content: await decryptMessage(m.content),
+    const decryptedMessages = await Promise.all(
+      response.data.messages.map(async (msg: any) => ({
+        ...msg,
+        content: await decryptMessage(msg.content),
       }))
     );
-    // decrypt chat name
-    const name = await decryptMessage(raw.name);
 
     return {
       success: true,
       data: {
-        ...raw,
-        messages,
-        name,
+        ...response.data,
+        messages: decryptedMessages,
+        name: response.data.name,
       },
     };
   } catch (error: unknown) {
@@ -164,20 +155,10 @@ export const fetchMessagesByShareId = async (shareId: string) => {
       withCredentials: true,
     });
 
-    const raw = response.data;
-    const messages: Message[] = await Promise.all(
-      raw.messages.map(async (m: Message) => ({
-        ...m,
-        content: await decryptMessage(m.content),
-      }))
-    );
-
+    // No decryption
     return {
       success: true,
-      data: {
-        ...raw,
-        messages,
-      },
+      data: response.data,
     };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -197,33 +178,25 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
     const response = await axios.get(GET_CHAT_NAMES, {
       withCredentials: true,
     });
-
-    if (response.status === 200) {
-      const decryptedChatList = [];
-
-      for (const chat of response.data) {
-        const decryptedName = await decryptMessage(chat.name);
-        decryptedChatList.push({
-          ...chat,
-          name: decryptedName,
-        });
-      }
-
-      dispatch(setChatList(decryptedChatList));
-      return { success: true, data: decryptedChatList };
-    } else {
+    if (response.status !== 200) {
       console.error("Failed to fetch chat names");
       return { success: false, error: "Failed to fetch chat names" };
     }
+
+    const decryptedList = await Promise.all(
+      response.data.map(async (chat: any) => ({
+        ...chat,
+        name: await decryptMessage(chat.name),
+      }))
+    );
+    dispatch(setChatList(decryptedList));
+
+    return { success: true, data: response.data };
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error fetching chat names:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("An unknown error occurred:", error);
-    }
+    console.error(
+      "Error fetching chat names:",
+      axios.isAxiosError(error) ? error.response?.data || error.message : error
+    );
     return { success: false, error: "Error fetching chat names" };
   }
 };
@@ -309,9 +282,12 @@ export const renameChat = async (
   newName: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    // Always encrypt the new name before sending
+    const encryptedName = await encryptMessage(newName);
+
     const response = await axios.patch(
       RENAME_CHAT(chatId),
-      { newName },
+      { newName: encryptedName },
       {
         withCredentials: true,
         headers: {

@@ -8,7 +8,6 @@ import DeleteModal from "../Modal/DeleteModal";
 import RenameModal from "../Modal/RenameModal";
 import SettingsModal from "../Modal/SettingsModal";
 import Sidebar from "../Sidebar/Sidebar";
-import { decryptMessage } from "../../utils/encryption.utils";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -22,31 +21,6 @@ function Layout() {
     id: string;
     name: string;
   } | null>(null);
-  const [decryptedChatList, setDecryptedChatList] = useState(chatList);
-
-
-  console.log("before:",chatList)
-useEffect(() => {
-  const decryptChats = async () => {
-    try {
-      const decrypted = await Promise.all(
-        chatList.map(async (chat) => ({
-          ...chat,
-          name: await decryptMessage(chat.name),
-        }))
-      );
-      setDecryptedChatList(decrypted);
-    } catch (error) {
-      console.error("Failed to decrypt chat names", error);
-    }
-  };
-
-  if (chatList.length > 0) {
-    decryptChats();
-  }
-}, [chatList]);
-
-console.log(decryptedChatList)
 
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -73,18 +47,12 @@ console.log(decryptedChatList)
   }, []);
 
   useEffect(() => {
-    const getChatNames = async () => {
-      try {
-        const { success } = await fetchChatNames(dispatch);
-        if (!success) {
-          console.error("Failed to fetch chat names");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getChatNames();
-  }, []);
+  const loadChats = async () => {
+    const { success } = await fetchChatNames(dispatch);
+    if (!success) console.error("Failed to load chats");
+  };
+  loadChats();
+}, [dispatch]);
 
   useEffect(() => {
     const checkMobile = () => {
