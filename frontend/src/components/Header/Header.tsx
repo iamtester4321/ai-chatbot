@@ -11,23 +11,20 @@ import {
   resetChat,
   setIsArchived,
   setIsFavorite,
+  setActionLoadingId,
 } from "../../store/features/chat/chatSlice";
-import { toggleTheme } from "../../store/features/themeSlice";
+import { toggleTheme } from "../../store/features/theme/themeSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { RootState } from "../../store/store";
 import DeleteModal from "../Modal/DeleteModal";
 import ShareModal from "../Modal/ShareModal";
 
+import { HeaderProps } from "../../lib/types";
 import ThemeToggleButton from "../Common/ThemeToggleButton";
 import ChatActions from "./ChatActions";
 import DesktopMenu from "./DesktopMenu";
 import HeaderTitle from "./HeaderTitle";
 import MobileMenu from "./MobileMenu";
-
-interface HeaderProps {
-  toggleSidebar: () => void;
-  isLogoutModalOpen: boolean;
-}
 
 export default function Header({
   toggleSidebar,
@@ -36,6 +33,7 @@ export default function Header({
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
   const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
+  const user = useAppSelector((state) => state.user.user);
   const isArchive = useAppSelector((state) => state.chat.isArchived);
   const isFavorite = useSelector((state: RootState) => state.chat.isFavorite);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -89,27 +87,37 @@ export default function Header({
 
   const toggleFavorite = async () => {
     if (!chatId) return;
-    const result = await toggleFavoriteChat(chatId);
-    if (result.success) {
-      const newStatus = !isFavorite;
-      dispatch(setIsFavorite(newStatus));
-    } else {
-      showToast.error(result.message || "Failed to update favorite status");
+    try {
+      dispatch(setActionLoadingId(chatId));
+      const result = await toggleFavoriteChat(chatId);
+      if (result.success) {
+        const newStatus = !isFavorite;
+        dispatch(setIsFavorite(newStatus));
+      } else {
+        showToast.error(result.message || "Failed to update favorite status");
+      }
+    } finally {
+      dispatch(setActionLoadingId(null));
     }
   };
 
   const archiveCurrentChat = async () => {
     if (!chatId) return;
-    const result = await archiveChat(chatId);
-    if (result.success) {
-      dispatch(setIsArchived(!isArchive));
-      dispatch(resetChat());
-      navigate("/");
-      showToast.success(result.message || "Chat archived");
-      setIsMenuOpen(false);
-      setIsMobileMenuOpen(false);
-    } else {
-      showToast.error(result.message || "Failed to archive chat");
+    try {
+      dispatch(setActionLoadingId(chatId));
+      const result = await archiveChat(chatId);
+      if (result.success) {
+        dispatch(setIsArchived(!isArchive));
+        dispatch(resetChat());
+        navigate("/");
+        showToast.success(result.message || "Chat archived");
+        setIsMenuOpen(false);
+        setIsMobileMenuOpen(false);
+      } else {
+        showToast.error(result.message || "Failed to archive chat");
+      }
+    } finally {
+      dispatch(setActionLoadingId(null));
     }
   };
 
@@ -133,13 +141,16 @@ export default function Header({
 
         {chatId && (
           <>
-            <ChatActions
-              chatId={chatId}
-              isFavorite={isFavorite}
-              isArchive={isArchive}
-              toggleFavorite={toggleFavorite}
-              setShareOpen={setShareOpen}
-            />
+            {user && (
+              <ChatActions
+                chatId={chatId}
+                isFavorite={isFavorite}
+                isArchive={isArchive}
+                toggleFavorite={toggleFavorite}
+                setShareOpen={setShareOpen}
+              />
+            )}
+
             <MobileMenu
               isOpen={isMobileMenuOpen}
               ref={mobileMenuRef}
@@ -150,6 +161,7 @@ export default function Header({
               archiveChat={archiveCurrentChat}
               openDeleteModal={() => setIsDeleteModalOpen(true)}
               setShareOpen={setShareOpen}
+              chatId={chatId}
             />
             <DesktopMenu
               isOpen={isMenuOpen}
@@ -158,6 +170,7 @@ export default function Header({
               archiveChat={archiveCurrentChat}
               openDeleteModal={() => setIsDeleteModalOpen(true)}
               isArchive={isArchive}
+              chatId={chatId}
             />
           </>
         )}

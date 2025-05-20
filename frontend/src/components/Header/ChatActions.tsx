@@ -1,19 +1,17 @@
 import { Share2, Star } from "lucide-react";
-
-interface ChatActionsProps {
-  chatId: string;
-  isFavorite: boolean;
-  isArchive: boolean;
-  toggleFavorite: () => void;
-  setShareOpen: (state: boolean) => void;
-}
+import { ChatActionsProps } from "../../lib/types";
+import { useAppSelector } from "../../store/hooks";
 
 export default function ChatActions({
+  chatId,
   isFavorite,
   isArchive,
   toggleFavorite,
   setShareOpen,
 }: ChatActionsProps) {
+  const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
+  const isLoading = actionLoadingId === chatId;
+
   return (
     <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
       <button
@@ -27,8 +25,9 @@ export default function ChatActions({
         }}
         title="Share"
         onClick={() => setShareOpen(true)}
+        disabled={isLoading}
       >
-        <Share2 size={20} />
+        <Share2 size={20} className={isLoading ? "opacity-50" : ""} />
       </button>
 
       {!isArchive && (
@@ -43,11 +42,13 @@ export default function ChatActions({
           }}
           title="Favorite"
           onClick={toggleFavorite}
+          disabled={isLoading}
         >
           <Star
             size={20}
             fill={isFavorite ? "gold" : "none"}
             color={isFavorite ? "gold" : "currentColor"}
+            className={isLoading ? "opacity-50" : ""}
           />
         </button>
       )}

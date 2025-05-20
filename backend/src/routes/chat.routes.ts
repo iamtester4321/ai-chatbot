@@ -9,7 +9,6 @@ import {
   renameChat,
   streamChat,
 } from "../controllers/chat.controller";
-import { generateShareId } from "../controllers/share.controller";
 import {
   ensureAuthenticated,
   exEnsureAuthenticated,
@@ -34,7 +33,5 @@ router.patch(
   addOrRemoveArchive
 );
 router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
-
-router.post("/generate-share-id/", ensureAuthenticated, generateShareId);
 
 export default router;

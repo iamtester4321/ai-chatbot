@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { verifyToken } from "../utils/token.util";
 
 declare global {
   namespace Express {
@@ -10,7 +11,6 @@ declare global {
     }
   }
 }
-import { verifyToken } from "../utils/token.util";
 
 export const ensureAuthenticated: RequestHandler = (req, res, next) => {
   const token = req.cookies?.authToken as string | undefined;

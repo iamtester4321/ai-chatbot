@@ -7,16 +7,23 @@
 }
 
 /* Base styles (Light mode) */
-.markdown-content { color: #111827; }
-.markdown-content p { 
+.markdown-content {
+  color: #111827;
+}
+
+.markdown-content p {
   color: #111827;
   margin: 0.5rem 0;
   line-height: 1.5;
   font-size: 1rem;
   letter-spacing: 0.01em;
 }
+
 /* Dark mode overrides */
-.dark .markdown-content { color: #e5e7eb; }
+.dark .markdown-content {
+  color: #e5e7eb;
+}
+
 .dark .markdown-content p {
   color: #e5e7eb;
   margin: 0.5rem 0;
@@ -24,92 +31,136 @@
   font-size: 1rem;
   letter-spacing: 0.01em;
 }
+
 .markdown-content pre {
   background: transparent !important;
   margin: 0 !important;
   padding: 0 !important;
 }
+
 .markdown-content .syntax-highlighter-wrapper {
   background-color: transparent;
 }
+
 /* Ensure the overflow container doesn't add extra space or borders */
 .markdown-content .overflow-x-auto {
   width: 100% !important;
   overflow-x: auto !important;
-  margin: 1.5rem 0 !important; /* my-6 */
+  margin: 1.5rem 0 !important;
+  /* my-6 */
   padding: 0 !important;
-  border: none !important; /* Remove any inherited border */
-  outline: none !important; /* Remove any outline */
-  box-shadow: none !important; /* Remove any shadow */
+  border: none !important;
+  /* Remove any inherited border */
+  outline: none !important;
+  /* Remove any outline */
+  box-shadow: none !important;
+  /* Remove any shadow */
 }
+
 /* Override table styles with high specificity */
 .markdown-content .overflow-x-auto table {
-  width: 100% !important; /* Force full width */
+  width: 100% !important;
+  /* Force full width */
   min-width: 100% !important;
-  border: 1px solid #d1d5db !important; /* border-gray-300 */
-  border-radius: 0.5rem !important; /* rounded-lg */
+  border: 1px solid #d1d5db !important;
+  /* border-gray-300 */
+  border-radius: 0.5rem !important;
+  /* rounded-lg */
   box-shadow: none !important;
   background: #f3f4f6 !important;
   margin: 0 !important;
   padding: 0 !important;
   border-collapse: collapse !important;
-  outline: none !important; /* Remove any outline */
-  table-layout: fixed !important; /* Ensure columns stretch evenly */
+  outline: none !important;
+  /* Remove any outline */
+  table-layout: fixed !important;
+  /* Ensure columns stretch evenly */
 }
+
 .markdown-content .overflow-x-auto table thead {
-  background: #d0d4db !important; /* bg-gray-100 */
+  background: #d0d4db !important;
+  /* bg-gray-100 */
 }
+
 .markdown-content .overflow-x-auto table tbody {
   background: transparent !important;
 }
+
 .markdown-content .overflow-x-auto table tr {
   border: none !important;
   background: transparent !important;
 }
+
 .markdown-content .overflow-x-auto table tr:hover {
-  background: #f9fafb !important; /* hover:bg-gray-50 */
+  background: #f9fafb !important;
+  /* hover:bg-gray-50 */
 }
+
 .markdown-content .overflow-x-auto table th,
 .markdown-content .overflow-x-auto table td {
-  padding: 0.75rem 1rem !important; /* px-4 py-3 */
-  border: 1px solid #d1d5db !important; /* border-gray-300 for grid */
+  padding: 0.75rem 1rem !important;
+  /* px-4 py-3 */
+  border: 1px solid #d1d5db !important;
+  /* border-gray-300 for grid */
   text-align: left !important;
-  font-size: 0.875rem !important; /* text-sm */
-  width: auto !important; /* Allow columns to stretch */
-  overflow-wrap: break-word !important; /* Ensure content wraps */
+  font-size: 0.875rem !important;
+  /* text-sm */
+  width: auto !important;
+  /* Allow columns to stretch */
+  overflow-wrap: break-word !important;
+  /* Ensure content wraps */
 }
+
 .markdown-content .overflow-x-auto table th {
-  font-weight: 600 !important; /* font-semibold */
-  color: #111827 !important; /* text-gray-900 */
+  font-weight: 600 !important;
+  /* font-semibold */
+  color: #111827 !important;
+  /* text-gray-900 */
 }
+
 .markdown-content .overflow-x-auto table td {
-  color: #1f2937 !important; /* text-gray-800 */
+  color: #1f2937 !important;
+  /* text-gray-800 */
 }
+
 /* Dark mode overrides */
 .dark .markdown-content .overflow-x-auto table {
-  border: 1px solid #374151 !important; /* dark:border-gray-700 */
+  border: 1px solid #374151 !important;
+  /* dark:border-gray-700 */
 }
+
 .dark .markdown-content .overflow-x-auto table thead {
-  background: #1f2937 !important; /* dark:bg-gray-800 */
+  background: #1f2937 !important;
+  /* dark:bg-gray-800 */
 }
+
 .dark .markdown-content .overflow-x-auto table tr:hover {
-  background: rgba(31, 41, 55, 0.6) !important; /* dark:hover:bg-gray-800/60 */
+  background: rgba(31, 41, 55, 0.6) !important;
+  /* dark:hover:bg-gray-800/60 */
 }
+
 .dark .markdown-content .overflow-x-auto table th,
 .dark .markdown-content .overflow-x-auto table td {
-  border: 1px solid #374151 !important; /* dark:border-gray-700 for grid */
+  border: 1px solid #374151 !important;
+  /* dark:border-gray-700 for grid */
 }
+
 .dark .markdown-content .overflow-x-auto table th {
-  color: #f3f4f6 !important; /* dark:text-gray-100 */
+  color: #f3f4f6 !important;
+  /* dark:text-gray-100 */
 }
+
 .dark .markdown-content .overflow-x-auto table td {
-  color: #e5e7eb !important; /* dark:text-gray-200 */
+  color: #e5e7eb !important;
+  /* dark:text-gray-200 */
 }
+
 /* Reset any inherited prose table styles */
 .markdown-content .overflow-x-auto table * {
   border-collapse: collapse !important;
   box-shadow: none !important;
 }
+
 /* Table styles */
 .markdown-content table {
   width: 100%;
@@ -117,7 +168,7 @@
   margin: 1.5rem 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .markdown-content table thead {

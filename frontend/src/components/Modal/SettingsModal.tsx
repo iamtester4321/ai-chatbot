@@ -1,15 +1,9 @@
 import { Archive, Settings, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { SettingsModalProps } from "../../lib/types";
 import ArchivedChats from "../Settings/ArchivedChats";
 import FavoriteChats from "../Settings/FavoriteChats";
 import GeneralSettings from "../Settings/GeneralSettings";
-import { ChatState } from "../../lib/types";
-
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chatList: ChatState["chatList"];
-}
 
 const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState("general");
@@ -17,7 +11,10 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -125,10 +122,16 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
             <div style={{ color: "var(--color-text)" }}>
               {activeTab === "general" && <GeneralSettings />}
               {activeTab === "archive" && (
-                <ArchivedChats onClose={onClose} archivedChats={archivedChats} />
+                <ArchivedChats
+                  onClose={onClose}
+                  archivedChats={archivedChats}
+                />
               )}
               {activeTab === "favorite" && (
-                <FavoriteChats onClose={onClose} favoriteChats={favoriteChats} />
+                <FavoriteChats
+                  onClose={onClose}
+                  favoriteChats={favoriteChats}
+                />
               )}
             </div>
           </div>

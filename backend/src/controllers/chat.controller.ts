@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { Request, RequestHandler, Response } from "express";
+import asyncHandler from "express-async-handler";
 import {
   addOrRemoveArchiveService,
   addOrRemoveFavoriteService,
@@ -8,11 +9,16 @@ import {
   findChatById as findChatByIdService,
   findChatNamesByService,
   findChatsByService,
-  findShareById,
   renameChatService,
   saveChat,
 } from "../services/chat.service";
-import asyncHandler from "express-async-handler";
+import { findShareById } from "../services/share.service";
+import {
+  createAesGcmEncryptStream,
+  decryptAesPayload,
+  encryptWithAesGcm,
+} from "../utils/encryptStream";
+import { Readable } from "stream";
 
 interface ChatRequestByshareIdParams {
   shareId: string;
@@ -21,65 +27,71 @@ interface ChatRequestByshareIdParams {
 
 export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.user as { id: string })?.id;
-  const chatId = req.body.chatId;
-  const messages = req.body.messages || [];
-  const userMessageId = req.body.userMessageId;
-  const assistantMessageId = req.body.assistantMessageId;
-  let assistantReply = "";
+  const { chatId, messages = [], userMessageId, assistantMessageId } = req.body;
+
+  const aesKey = req.session.aesKey;
+
+  if (!aesKey) {
+    res.status(401).send("No encryption key");
+    return;
+  }
+  const aesKeyBuffer = Buffer.from(aesKey, "base64");
+
+  const enPrompt = req.body.prompt;
+
+  const prompt = await decryptAesPayload(enPrompt, aesKeyBuffer);
 
   const { mode } = req.query;
 
-  let tempPrompt =
-    req.body.prompt ||
-    "user forget to put prompt || if chat type is chart show return some rutin data ";
-
+  let assistantReply = "";
+  let tempPrompt = prompt || "user forget to put prompt ...";
   if (mode === "chart") {
-    tempPrompt = `
-     SYSTEM:
-You are a data analysis assistant. When given a query, you must respond only with one or more raw JSON objects or arrays—no markdown, no backticks, no extra text. Each top-level object must include:
-- "name": a descriptive string
-- "data": an object whose values are arrays of equal length suitable for plotting (e.g., ["Jan","Feb"] and [10,20]).
--you should only return one object as an json and that one object must have name property wich is what that data about and data propery wich is object and it should be able to show on charts
-Everything you output must be directly parseable by JSON.parse().
-
-USER:${req.body.prompt}
-`.trim();
-  } else tempPrompt = tempPrompt;
+    tempPrompt = `SYSTEM: ...\n\nUSER:${prompt}`.trim();
+  }
 
   const model = google("gemini-2.0-flash");
+  const result = await streamText({
+    model,
+    messages: [...messages, { role: "user", content: tempPrompt }],
+    onChunk: ({ chunk }) => {
+      if (chunk.type === "text-delta") {
+        assistantReply += chunk.textDelta;
+      }
+    },
+    onFinish: async () => {
+      if (userId) {
+        // Import the AES key as CryptoKey
 
-  try {
-    const result = streamText({
-      model,
-      messages: [...messages, { role: "user", content: tempPrompt }],
-      onChunk: ({ chunk }) => {
-        if (chunk.type === "text-delta") {
-          assistantReply += chunk.textDelta;
-        }
-      },
-      onFinish: async () => {
-        if (userId) {
-          await saveChat(
-            userId,
-            [
-              { id: userMessageId, role: "user", content: req.body.prompt },
-              {
-                id: assistantMessageId,
-                role: "assistant",
-                content: assistantReply,
-              },
-            ],
-            chatId
-          );
-        }
-      },
-      onError: (err) => console.error("Stream error:", err),
-    });
-    result.pipeTextStreamToResponse(res);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal error" });
-  }
+        const encryptedPrompt = encryptWithAesGcm(prompt, aesKeyBuffer);
+        const encryptedReply = encryptWithAesGcm(assistantReply, aesKeyBuffer);
+
+        await saveChat(
+          userId,
+          [
+            { id: userMessageId, role: "user", content: encryptedPrompt },
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              content: encryptedReply,
+            },
+          ],
+          chatId,
+          aesKey
+        );
+      }
+    },
+    onError: (err) => console.error("Stream error:", err),
+  });
+
+  // Convert AsyncIterable to Node Readable
+  const readable = Readable.from(result.textStream);
+  const encryptStream = createAesGcmEncryptStream(aesKeyBuffer);
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  readable.pipe(encryptStream).pipe(res);
 });
 
 export const findChatById: RequestHandler = asyncHandler(async (req, res) => {
@@ -127,6 +139,7 @@ export const findChatNamesByUserId: RequestHandler = asyncHandler(
     try {
       const userId = (req.user as { id: string }).id;
       const chatNames = await findChatNamesByService(userId);
+
       res.status(200).json(chatNames);
     } catch (error) {
       const errorMessage =
@@ -214,4 +227,4 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     console.error("Error renaming chat:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-});
+}); 

@@ -1,7 +1,7 @@
 import { ChevronDown, LogOut, Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { setTheme } from "../../store/features/themeSlice";
+import { setTheme } from "../../store/features/theme/themeSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import LogoutModal from "../Modal/LogoutModal";
 
 const GeneralSettings = () => {
@@ -104,7 +104,7 @@ const GeneralSettings = () => {
           style={{
             backgroundColor: "var(--color-muted-hover)",
             borderRadius: "8px",
-            color: "var(--color-error)"
+            color: "var(--color-error)",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "var(--color-muted)";

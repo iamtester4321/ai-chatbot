@@ -4,13 +4,14 @@ import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
 import { SidebarProps } from "../../lib/types";
-import { resetChat } from "../../store/features/chat/chatSlice";
+import { resetChat, setActionLoadingId, setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
 import SparkChats from "./SparkChats";
+import { ChatSectionLoader } from "../Loaders";
 
 const Sidebar = ({
   isLogoutModalOpen,
@@ -21,6 +22,9 @@ const Sidebar = ({
   setIsDeleteModalOpen,
   setSelectedChat,
   setSelectedChatId,
+  isMobile,
+  setIsSidebarOpen,
+  isLoading
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -61,23 +65,38 @@ const Sidebar = ({
     );
   };
 
-  const handleRename = (chatId: string) => {
-    const chat = chatList.find((c) => c.id === chatId);
-    if (chat) {
-      setSelectedChat({ id: chat.id, name: chat.name });
-      setIsRenameModalOpen(true);
-      setActiveDropdown({ id: null, section: null });
+  const handleRename = async (chatId: string) => {
+    dispatch(setActionLoadingId(chatId));
+    try {
+      const chat = chatList.find((c) => c.id === chatId);
+      if (chat) {
+        setSelectedChat({ id: chat.id, name: chat.name });
+        setIsRenameModalOpen(true);
+        setActiveDropdown({ id: null, section: null });
+      }
+    } finally {
+      dispatch(setActionLoadingId(null));
     }
   };
 
-  const handleDelete = (chatId: string) => {
-    setSelectedChatId(chatId);
-    setIsDeleteModalOpen(true);
-    setActiveDropdown({ id: null, section: null });
+  const handleDelete = async (chatId: string) => {
+    dispatch(setActionLoadingId(chatId));
+    try {
+      setSelectedChatId(chatId);
+      setIsDeleteModalOpen(true);
+      setActiveDropdown({ id: null, section: null });
+    } finally {
+      dispatch(setActionLoadingId(null));
+    }
   };
 
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true);
+  const handleLogoutClick = async () => {
+    dispatch(setActionLoadingId('logout'));
+    try {
+      setIsLogoutModalOpen(true);
+    } finally {
+      dispatch(setActionLoadingId(null));
+    }
   };
 
   const filteredChatList = chatList.filter((chat) =>
@@ -88,7 +107,9 @@ const Sidebar = ({
     (chat) => chat.isFavorite && !chat.isArchived
   );
 
-  const sparkChats = filteredChatList.filter((chat) => chat.isShare);
+  const sparkChats = filteredChatList.filter(
+    (chat) => chat.isShare && !chat.isArchived
+  );
 
   return (
     <>
@@ -96,7 +117,11 @@ const Sidebar = ({
         <span className="flex items-center justify-center md:justify-start gap-2 pt-16 md:p-0 rounded-lg w-full truncate">
           <Link
             to={"/chat"}
-            onClick={() => dispatch(resetChat())}
+            onClick={() => {
+              dispatch(resetChat());
+              dispatch(setMode("chat"));
+              if (isMobile) setIsSidebarOpen(false);
+            }}
             className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
           >
             <div className="flex items-center justify-center gap-2 p-2 w-full truncate cursor-pointer transition-all">
@@ -122,7 +147,13 @@ const Sidebar = ({
         )}
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-primary)] scrollbar-track-transparent pb-4">
-          {chatList.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-4">
+              <ChatSectionLoader title="Favorites" count={2} />
+              <ChatSectionLoader title="Spark Chats" count={1} />
+              <ChatSectionLoader title="All Chats" count={3} />
+            </div>
+          ) : chatList.length === 0 ? (
             <div className="text-center text-[color:var(--color-disabled-text)]">
               No Chats Available
             </div>
@@ -137,6 +168,8 @@ const Sidebar = ({
                 activeDropdown={activeDropdown}
                 handleRename={handleRename}
                 handleDelete={handleDelete}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
 
               <SparkChats
@@ -148,6 +181,8 @@ const Sidebar = ({
                 handleDelete={handleDelete}
                 setIsShareOpen={setIsShareOpen}
                 isShareOpen={isShareOpen}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
 
               <AllChats
@@ -157,6 +192,8 @@ const Sidebar = ({
                 activeDropdown={activeDropdown}
                 handleRename={handleRename}
                 handleDelete={handleDelete}
+                isMobile={isMobile}
+                setIsSidebarOpen={setIsSidebarOpen}
               />
             </>
           )}
@@ -181,7 +218,7 @@ const Sidebar = ({
                   handleLogoutClick();
                   setIsUserMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
               >
                 <LogOut size={16} />
                 Logout

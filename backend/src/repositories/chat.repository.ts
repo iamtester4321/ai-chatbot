@@ -1,9 +1,11 @@
 import { prisma } from "../config/db";
+import { encryptWithAesGcm } from "../utils/encryptStream";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
   messages: { id: string; role: string; content: string }[],
-  chatId: string
+  chatId: string,
+  aesKey: string
 ) {
   const existingChat = await prisma.chat.findUnique({
     where: { id: chatId },
@@ -33,6 +35,7 @@ export async function createChatWithMessagesOrApendMesages(
         id: chatId,
         userId,
         name: trimmedName,
+        encryptedAesKey: aesKey,
         messages: {
           create: messages.map((m) => ({
             id: m.id,
@@ -55,17 +58,20 @@ export function getChatsByUser(userId: string) {
 }
 
 export function getChatNamesByUser(userId: string) {
-  return prisma.chat.findMany({
+  const data = prisma.chat.findMany({
     where: { userId },
     select: {
       id: true,
       name: true,
       isFavorite: true,
       isArchived: true,
-      isShare:true,
+      isShare: true,
+      encryptedAesKey: true,
     },
     orderBy: { createdAt: "desc" },
   });
+
+  return data;
 }
 
 export async function findById(chatId: string) {
@@ -98,9 +104,15 @@ export const toggleArchiveStatus = async (
 };
 
 export const renameChat = async (chatId: string, newName: string) => {
+  const dbData = await prisma.chat.findUnique({
+    where: { id: chatId },
+  });
+  const aesKey = dbData?.encryptedAesKey;
+  const aesKeyBuffer = Buffer.from(aesKey!, "base64");
+
   return prisma.chat.update({
     where: { id: chatId },
-    data: { name: newName },
+    data: { name: encryptWithAesGcm(newName, aesKeyBuffer) },
   });
 };
 

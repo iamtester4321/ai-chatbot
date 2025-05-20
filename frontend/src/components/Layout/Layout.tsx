@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchChatNames } from "../../actions/chat.actions";
+import { setChatNameLoading, } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatSection from "../ChatSection/ChatSection";
 import Header from "../Header/Header";
@@ -13,6 +14,7 @@ function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const dispatch = useAppDispatch();
   const chatList = useAppSelector((state) => state.chat.chatList);
+  const chatNameLoading = useAppSelector((state) => state.chat.chatNameLoading);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -39,12 +41,15 @@ function Layout() {
   useEffect(() => {
     const getChatNames = async () => {
       try {
+        dispatch(setChatNameLoading(true));
         const { success } = await fetchChatNames(dispatch);
         if (!success) {
           console.error("Failed to fetch chat names");
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        dispatch(setChatNameLoading(false));
       }
     };
     getChatNames();
@@ -63,31 +68,6 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const handleChatUpdates = () => {
-      // Refresh chat list
-      fetchChatNames(dispatch);
-    };
-
-    // Add event listeners for all chat-related events
-    window.addEventListener("chat-deleted", handleChatUpdates);
-    window.addEventListener("chat-favorite-toggled", handleChatUpdates);
-    window.addEventListener("chat-renamed", handleChatUpdates);
-    window.addEventListener("chat-names-updated", handleChatUpdates);
-    window.addEventListener("chat-archived", handleChatUpdates);
-    window.addEventListener("chat-spark", handleChatUpdates);
-
-    return () => {
-      // Clean up event listeners
-      window.removeEventListener("chat-deleted", handleChatUpdates);
-      window.removeEventListener("chat-favorite-toggled", handleChatUpdates);
-      window.removeEventListener("chat-renamed", handleChatUpdates);
-      window.removeEventListener("chat-names-updated", handleChatUpdates);
-      window.removeEventListener("chat-archived", handleChatUpdates);
-      window.removeEventListener("chat-spark", handleChatUpdates);
-    };
-  }, []);
-
-  useEffect(() => {
     if (isMobile && chatId) {
       setIsSidebarOpen(false);
     }
@@ -99,12 +79,9 @@ function Layout() {
 
   return (
     <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
-      {/* Sidebar */}
-      <div
-        className={`${
-          isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[var(--color-bg)] z-20 top-0`}
-      >
+      <div className={`${isSidebarOpen ? "w-[250px]" : "w-0"} 
+        fixed md:relative transition-all duration-300 overflow-hidden h-screen 
+        md:h-screen bg-[var(--color-bg)] z-20 top-0`}>
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
           setIsLogoutModalOpen={setIsLogoutModalOpen}
@@ -114,6 +91,9 @@ function Layout() {
           setIsDeleteModalOpen={setIsDeleteModalOpen}
           setSelectedChat={setSelectedChat}
           setSelectedChatId={setSelectedChatId}
+          isMobile={isMobile}
+          setIsSidebarOpen={setIsSidebarOpen}
+          isLoading={chatNameLoading}
         />
       </div>
 
@@ -126,13 +106,13 @@ function Layout() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col transition-all duration-300 w-full">
+      <div className="flex-1 flex flex-col transition-all duration-300 w-full md:ml-0">
         <Header
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}
         />
         <div className="flex-1 overflow-y-auto">
-          <ChatSection />
+          <ChatSection isMobile={isMobile}/>
         </div>
       </div>
       <SettingsModal

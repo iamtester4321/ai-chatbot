@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
-import Login from "./components/Auth/Login";
-import Register from "./components/Auth/Register";
 import Layout from "./components/Layout/Layout";
-import { applyStoredTheme } from "./store/features/themeSlice";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import { applyStoredTheme } from "./store/features/theme/themeSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -18,12 +18,11 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          <Route path="/" element={<Navigate to={"/chat"} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/share/:shareId" element={<Layout />} />
           <Route element={<Layout />}>
-            <Route path="/" />
             <Route path="/chat" />
             <Route path="/chat/:chatId" />
             <Route path="/share/:shareId" />
