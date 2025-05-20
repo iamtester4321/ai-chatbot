@@ -18,26 +18,34 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
     },
     ref
   ) => {
-    const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
+    const actionLoadingId = useAppSelector(
+      (state) => state.chat.actionLoadingId
+    );
+    const user = useAppSelector((state) => state.user.user);
     const isLoading = actionLoadingId === chatId;
 
     return (
       <div className="relative sm:hidden" ref={ref}>
-        <button
-          className="p-2 rounded-full transition duration-200"
-          style={{ backgroundColor: "transparent" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          title="More Options"
-          onClick={toggleMenu}
-          disabled={isLoading}
-        >
-          <MoreHorizontal size={20} className={isLoading ? "opacity-50" : ""} />
-        </button>
+        {user && (
+          <button
+            className="p-2 rounded-full transition duration-200"
+            style={{ backgroundColor: "transparent" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            title="More Options"
+            onClick={toggleMenu}
+            disabled={isLoading}
+          >
+            <MoreHorizontal
+              size={20}
+              className={isLoading ? "opacity-50" : ""}
+            />
+          </button>
+        )}
 
         {isOpen && (
           <div
@@ -55,7 +63,10 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 onClick={() => setShareOpen(true)}
                 disabled={isLoading}
               >
-                <Share2 size={18} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
+                <Share2
+                  size={18}
+                  className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
+                />
                 Share
               </button>
 
@@ -82,7 +93,10 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 style={{ color: "var(--color-text)" }}
                 disabled={isLoading}
               >
-                <Archive size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
+                <Archive
+                  size={16}
+                  className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
+                />
                 {isArchive ? "Un-archive" : "Archive"}
               </button>
               <button
@@ -91,7 +105,10 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 style={{ color: "var(--color-error)" }}
                 disabled={isLoading}
               >
-                <Trash2 size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
+                <Trash2
+                  size={16}
+                  className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
+                />
                 Delete
               </button>
             </div>

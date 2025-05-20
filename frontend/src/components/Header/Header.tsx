@@ -33,6 +33,7 @@ export default function Header({
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
   const { isDarkMode, mode } = useSelector((state: RootState) => state.theme);
+  const user = useAppSelector((state) => state.user.user);
   const isArchive = useAppSelector((state) => state.chat.isArchived);
   const isFavorite = useSelector((state: RootState) => state.chat.isFavorite);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -140,13 +141,16 @@ export default function Header({
 
         {chatId && (
           <>
-            <ChatActions
-              chatId={chatId}
-              isFavorite={isFavorite}
-              isArchive={isArchive}
-              toggleFavorite={toggleFavorite}
-              setShareOpen={setShareOpen}
-            />
+            {user && (
+              <ChatActions
+                chatId={chatId}
+                isFavorite={isFavorite}
+                isArchive={isArchive}
+                toggleFavorite={toggleFavorite}
+                setShareOpen={setShareOpen}
+              />
+            )}
+
             <MobileMenu
               isOpen={isMobileMenuOpen}
               ref={mobileMenuRef}
