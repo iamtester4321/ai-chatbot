@@ -47,6 +47,12 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         );
         navigate("/");
         dispatch(resetChat());
+      } else if (moderationResult.xssDetected) {
+        showToast.error(
+          "Potential security risk detected in your input (XSS). Please remove any unsafe code and try again."
+        );
+        navigate("/");
+        dispatch(resetChat());
       } else {
         const userMessageId = uuidv4();
         const assistantMessageId = uuidv4();
@@ -370,6 +376,10 @@ export async function generateShareId(chatId: string) {
 
 export const moderationCheck = async (input: string) => {
   try {
+    const xssPattern = /<script[\s\S]*?>[\s\S]*?<\/script\s*>|on\w+\s*=\s*["'][\s\S]*?["']|javascript:|<.*?\s+on\w+\s*=\s*["'][^"']*["'].*?>|<iframe[\s\S]*?>|<img[\s\S]*?on\w+[\s\S]*?>/gi;
+
+    const xssDetected = xssPattern.test(input);
+
     const response = await axios.post(
       "https://api.openai.com/v1/moderations",
       { input },
@@ -393,16 +403,18 @@ export const moderationCheck = async (input: string) => {
       results?.flagged;
 
     return {
-      flagged: isOffensive,
+      flagged: isOffensive || xssDetected,
+      xssDetected,
       apiResult: results,
       categories: results?.categories,
       categoryScores: results?.category_scores,
     };
   } catch (error) {
     console.error("Moderation API error:", error);
-    return { flagged: false, categories: {}, categoryScores: {} };
+    return { flagged: false, xssDetected: false, categories: {}, categoryScores: {} };
   }
 };
+
 
 export const fetchSuggestions = async (
   query: string
