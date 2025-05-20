@@ -123,6 +123,7 @@ export type PromptInputProps = {
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
   chatId?:string;
+  shareId?:string;
 };
 
 export type Message = {

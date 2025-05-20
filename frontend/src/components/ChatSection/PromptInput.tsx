@@ -12,6 +12,7 @@ const PromptInput = ({
   handleInputChange,
   handleFormSubmit,
   chatId,
+  shareId,
 }: PromptInputProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -45,7 +46,7 @@ const PromptInput = ({
 
     const wordCount = value.trim().split(/\s+/).length;
 
-    if (wordCount >= 2 && wordCount <= 3 && !chatId) {
+    if (wordCount >= 2 && wordCount <= 3 && !chatId && !shareId) {
       const result = await fetchSuggestions(value);
       if (result.success) {
         setSuggestions(result.suggestions);

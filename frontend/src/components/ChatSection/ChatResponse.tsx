@@ -28,6 +28,7 @@ const ChatResponse = ({
   const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
+  const user = useAppSelector((state) => state.user.user);
   const showToast = useToast();
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -194,7 +195,7 @@ const ChatResponse = ({
                       >
                         {copiedIndex === index ? <Check /> : <Copy />}
                       </button>
-                      {!shareId && (
+                      {user && (
                         <>
                           {msg?.id && (
                             <button
@@ -279,7 +280,7 @@ const ChatResponse = ({
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
-                    {!shareId && (
+                    {user && (
                       <>
                         <button
                           className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -358,6 +359,7 @@ const ChatResponse = ({
               handleInputChange={handleInputChange}
               handleFormSubmit={handleFormSubmit}
               chatId={chatId}
+              shareId={shareId}
             />
           </>
         )}

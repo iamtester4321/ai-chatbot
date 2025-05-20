@@ -1,15 +1,18 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../actions/auth.actions";
 import useToast from "../../hooks/useToast";
 import { LogoutModalProps } from "../../lib/types";
+import { clearUser } from "../../store/features/user/userSlice";
 
 export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   const navigate = useNavigate();
   const showToast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     try {
@@ -17,6 +20,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
       const result = await logoutUser();
 
       if (result.success) {
+        dispatch(clearUser());
         navigate("/login");
         onClose();
       } else {
