@@ -160,7 +160,7 @@ const ChatResponse = ({
                 return (
                   <div key={index} className="flex justify-end">
                     <div className="space-y-2">
-                      <div className="bg-[var(--color-muted)] px-4 py-1 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
+                      <div className="bg-[var(--color-muted)] px-4 py-1 rounded-2xl max-w-full sm:max-w-xs md:max-w-md whitespace-pre-wrap break-words">
                         {msg.content}
                       </div>
                       <div className="flex justify-end">
@@ -356,6 +356,7 @@ const ChatResponse = ({
               isLoading={isLoading}
               handleInputChange={handleInputChange}
               handleFormSubmit={handleFormSubmit}
+              chatId={chatId}
             />
           </>
         )}

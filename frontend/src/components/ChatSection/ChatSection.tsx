@@ -1,5 +1,3 @@
-import "github-markdown-css/github-markdown-dark.css";
-import "highlight.js/styles/github-dark.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
