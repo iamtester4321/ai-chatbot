@@ -11,6 +11,9 @@ import chatRoutes from "./routes/chat.routes";
 import messageRoutes from "./routes/message.routes";
 import shareRoutes from "./routes/share.routes";
 import userRoutes from "./routes/user.route";
+import handshakeRoutes from "./routes/handshake.routes";
+import session from "express-session";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -21,6 +24,19 @@ app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
     credentials: true,
+  })
+);
+
+app.use(
+  session({
+    secret: crypto.randomBytes(32).toString("hex"),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // set to true in production with HTTPS
+      httpOnly: true,
+      sameSite: "lax",
+    },
   })
 );
 
@@ -41,6 +57,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/message", ensureAuthenticated, messageRoutes);
 app.use("/api/user", ensureAuthenticated, userRoutes);
 app.use("/api/share", shareRoutes);
+app.use("/api/handshake", handshakeRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

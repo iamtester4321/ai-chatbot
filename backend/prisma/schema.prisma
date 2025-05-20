@@ -36,6 +36,7 @@ model Chat {
   messages   Message[]
   files      FileUpload[]
   share      share?
+  encryptedAesKey String 
 }
 
 model share {
