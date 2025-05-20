@@ -175,7 +175,6 @@ export const useChatActions = ({
   };
 };
 
-
 export const fetchMessages = async (chatId: string) => {
   try {
     // 2. Get encrypted messages from API

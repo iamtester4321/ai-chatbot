@@ -1,4 +1,5 @@
 import { prisma } from "../config/db";
+import { encryptWithAesGcm } from "../utils/encryptStream";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
@@ -103,9 +104,15 @@ export const toggleArchiveStatus = async (
 };
 
 export const renameChat = async (chatId: string, newName: string) => {
+  const dbData = await prisma.chat.findUnique({
+    where: { id: chatId },
+  });
+  const aesKey = dbData?.encryptedAesKey;
+  const aesKeyBuffer = Buffer.from(aesKey!, "base64");
+
   return prisma.chat.update({
     where: { id: chatId },
-    data: { name: newName },
+    data: { name: encryptWithAesGcm(newName, aesKeyBuffer) },
   });
 };
 

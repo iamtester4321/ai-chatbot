@@ -12,6 +12,7 @@ import messageRoutes from "./routes/message.routes";
 import shareRoutes from "./routes/share.routes";
 import userRoutes from "./routes/user.route";
 import handshakeRoutes from "./routes/handshake.routes";
+import suggestionsRoutes from "./routes/suggestions.routes";
 import session from "express-session";
 import crypto from "crypto";
 
@@ -33,7 +34,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // set to true in production with HTTPS
+      secure: false,
       httpOnly: true,
       sameSite: "lax",
     },
