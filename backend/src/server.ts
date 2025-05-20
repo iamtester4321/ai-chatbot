@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import "./config/passport";
-import { redisClient } from "./config/redis";
 import { ensureAuthenticated } from "./middlewares/auth.middleware";
 import authRoutes from "./routes/auth.routes";
 import chatRoutes from "./routes/chat.routes";
@@ -15,18 +14,26 @@ import handshakeRoutes from "./routes/handshake.routes";
 import suggestionsRoutes from "./routes/suggestions.routes";
 import session from "express-session";
 import crypto from "crypto";
-
+import { redisClient } from "./config/redis";
+import { env } from "./config/env";
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-    credentials: true,
-  })
-);
+const allowedOrigins = [env.CLIENT_ORIGIN];
+const corsOptions = {
+  origin: function (origin: any, callback: any) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(
   session({
