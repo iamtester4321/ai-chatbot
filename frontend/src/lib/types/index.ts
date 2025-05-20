@@ -157,7 +157,6 @@ export type ChatState = {
   mode: "chat" | "chart";
   chatNameLoading: boolean;
   actionLoadingId: string | null;
-  isAllChatsLoading: boolean;
 };
 
 export interface ChatHookProps {

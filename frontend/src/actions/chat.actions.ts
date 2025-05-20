@@ -22,6 +22,7 @@ import {
   setChatList,
   setChatName,
   setCurrentResponse,
+  setIsLoading,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
@@ -40,6 +41,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
+      dispatch(setIsLoading(true));
       const moderationResult = await moderationCheck(input);
       if (moderationResult.xssDetected) {
         showToast.error(
@@ -120,6 +122,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           }
         } finally {
           reader.releaseLock();
+          dispatch(setIsLoading(false));
         }
       }
     },

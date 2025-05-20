@@ -17,6 +17,7 @@ const AllChats = ({
   const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
   if (chats.length === 0) return null;
   const nonArchivedChats = chats.filter((chat) => !chat.isArchived);
+  const StreamisLoading = useAppSelector((state) => state.chat.isLoading);
 
   if (nonArchivedChats.length === 0) return null;
 
@@ -25,6 +26,7 @@ const AllChats = ({
       <div className="px-2.5 py-2 text-sm text-[color:var(--color-secondary-text)]">
         All Chats
       </div>
+      {StreamisLoading && <ChatItemLoader />}
       {nonArchivedChats.map((chat) => (
         <div key={chat.id} className="relative group w-full">
           {actionLoadingId === chat.id ? (
