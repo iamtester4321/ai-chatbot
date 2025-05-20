@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import DynamicChart from "../components/chart/DynamicCharts";
-import { CodeBlock } from "./responseRenderer";
 
 const ChartCodeRenderer = ({ children }: { children: string }) => {
   const content = useMemo(() => {
@@ -9,7 +8,6 @@ const ChartCodeRenderer = ({ children }: { children: string }) => {
       return <DynamicChart data={parsed.data} name={parsed.name} />;
     } catch (error) {
       console.error("Invalid JSON for DynamicChart:", error);
-      return <CodeBlock language="json">{children}</CodeBlock>;
     }
   }, [children]);
 
