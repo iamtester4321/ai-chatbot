@@ -11,6 +11,9 @@ const initialState: ChatState = {
   isFavorite: false,
   isShare: false,
   mode: "chat",
+  chatNameLoading: false,
+  actionLoadingId: null,
+  isAllChatsLoading: false,
 };
 
 const chatSlice = createSlice({
@@ -31,12 +34,17 @@ const chatSlice = createSlice({
     },
     setChatName: (state, action: PayloadAction<string>) => {
       state.chatName = action.payload;
+      state.chatNameLoading = false; // Reset loading when name is set
+    },
+    setChatNameLoading: (state, action: PayloadAction<boolean>) => {
+      state.chatNameLoading = action.payload;
     },
     resetChat: (state) => {
       state.messages = initialState.messages;
       state.currentResponse = initialState.currentResponse;
       state.isLoading = initialState.isLoading;
       state.chatName = initialState.chatName;
+      state.chatNameLoading = initialState.chatNameLoading; // Reset chat name loading
     },
     setChatList: (
       state,
@@ -64,6 +72,12 @@ const chatSlice = createSlice({
     setMode: (state, action: PayloadAction<"chat" | "chart">) => {
       state.mode = action.payload;
     },
+    setActionLoadingId: (state, action: PayloadAction<string | null>) => {
+      state.actionLoadingId = action.payload;
+    },
+    setAllChatsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isAllChatsLoading = action.payload;
+    },
   },
 });
 
@@ -73,12 +87,15 @@ export const {
   setCurrentResponse,
   setIsLoading,
   setChatName,
+  setChatNameLoading,
   resetChat,
   setChatList,
   setIsArchived,
   setIsFavorite,
   setIsShare,
   setMode,
+  setActionLoadingId,
+  setAllChatsLoading
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

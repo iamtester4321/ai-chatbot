@@ -1,9 +1,13 @@
 import { Archive, MoreHorizontal, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
 import { DesktopMenuProps } from "../../lib/types";
+import { useAppSelector } from "../../store/hooks";
 
 const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
-  ({ isOpen, toggleMenu, archiveChat, openDeleteModal, isArchive }, ref) => {
+  ({ isOpen, toggleMenu, archiveChat, openDeleteModal, isArchive, chatId }, ref) => {
+    const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
+    const isLoading = actionLoadingId === chatId;
+
     return (
       <div className="relative hidden sm:block" ref={ref}>
         <button
@@ -17,8 +21,9 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
           }}
           title="More Options"
           onClick={toggleMenu}
+          disabled={isLoading}
         >
-          <MoreHorizontal size={20} />
+          <MoreHorizontal size={20} className={isLoading ? "opacity-50" : ""} />
         </button>
 
         {isOpen && (
@@ -34,16 +39,18 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
               <button
                 onClick={archiveChat}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                disabled={isLoading}
               >
-                <Archive size={16} className="mr-2" />
+                <Archive size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
                 {isArchive ? "Un-archive" : "Archive"}
               </button>
               <button
                 onClick={openDeleteModal}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                 style={{ color: "var(--color-error)" }}
+                disabled={isLoading}
               >
-                <Trash2 size={16} className="mr-2" />
+                <Trash2 size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
                 Delete
               </button>
             </div>

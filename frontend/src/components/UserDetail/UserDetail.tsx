@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchUserProfile } from "../../actions/user.actions";
 import { UserDetailProps } from "../../lib/types";
 import { setUser } from "../../store/features/user/userSlice";
 import { useAppSelector } from "../../store/hooks";
+import { UserDetailLoader } from "../Loaders";
 
 export const UserDetail = ({ onClick }: UserDetailProps) => {
   const dispatch = useDispatch();
   const user = useAppSelector((state) => state.user.user);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -19,10 +21,16 @@ export const UserDetail = ({ onClick }: UserDetailProps) => {
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     getUserProfile();
   }, [dispatch]);
+
+  if (isLoading) {
+    return <UserDetailLoader />;
+  }
 
   if (!user) {
     return (

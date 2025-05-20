@@ -18,7 +18,7 @@ import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
 import Error from "../Common/Error";
 
-const ChatSection = () => {
+const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { shareId } = useParams();
@@ -154,6 +154,7 @@ const ChatSection = () => {
               handleFormSubmit={handleFormSubmit}
               chatId={chatId || ""}
               shareId={shareId || ""}
+              isMobile={isMobile}
             />
           )}
 

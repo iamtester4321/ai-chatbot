@@ -10,7 +10,7 @@ import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
-import StreamLoader from "../StreamLoader/StreamLoader";
+import StreamLoader from "../Loaders/StreamLoader";
 import PromptInput from "./PromptInput";
 
 const ChatResponse = ({
@@ -23,6 +23,7 @@ const ChatResponse = ({
   handleFormSubmit,
   chatId,
   shareId,
+  isMobile,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
@@ -171,7 +172,7 @@ const ChatResponse = ({
                           aria-label="Copy to clipboard"
                           onClick={() => copyToClipboard(msg.content, index)}
                         >
-                          {copiedIndex === index ? <Check /> : <Copy />}
+                          {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
                         </button>
                       </div>
                     </div>
@@ -193,7 +194,7 @@ const ChatResponse = ({
                         aria-label="Copy to clipboard"
                         onClick={() => copyToClipboard(msg.content, index)}
                       >
-                        {copiedIndex === index ? <Check /> : <Copy />}
+                        {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
                       </button>
                       {user && (
                         <>
@@ -215,12 +216,8 @@ const ChatResponse = ({
                               }
                             >
                               <ThumbsUp
-                                size={20}
-                                fill={
-                                  likedMessages[msg.id]
-                                    ? "currentColor"
-                                    : "none"
-                                }
+                                size={isMobile ? 16 : 20}
+                                fill={likedMessages[msg.id] ? "currentColor" : "none"}
                                 color="currentColor"
                               />
                             </button>
@@ -244,12 +241,8 @@ const ChatResponse = ({
                               }
                             >
                               <ThumbsDown
-                                size={20}
-                                fill={
-                                  dislikedMessages[msg.id]
-                                    ? "currentColor"
-                                    : "none"
-                                }
+                                size={isMobile ? 16 : 20}
+                                fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
                                 color="currentColor"
                               />
                             </button>
@@ -291,12 +284,8 @@ const ChatResponse = ({
                           }
                         >
                           <ThumbsUp
-                            size={20}
-                            fill={
-                              likedMessages[chatResponse]
-                                ? "currentColor"
-                                : "none"
-                            }
+                            size={isMobile ? 16 : 20}
+                            fill={likedMessages[chatResponse] ? "currentColor" : "none"}
                             color="currentColor"
                           />
                         </button>
@@ -309,12 +298,8 @@ const ChatResponse = ({
                           }
                         >
                           <ThumbsDown
-                            size={20}
-                            fill={
-                              dislikedMessages[chatResponse]
-                                ? "currentColor"
-                                : "none"
-                            }
+                            size={isMobile ? 16 : 20}
+                            fill={dislikedMessages[chatResponse] ? "currentColor" : "none"}
                             color="currentColor"
                           />
                         </button>

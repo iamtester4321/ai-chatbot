@@ -1,6 +1,7 @@
 import { Archive, MoreHorizontal, Share2, Star, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
 import { MobileMenuProps } from "../../lib/types";
+import { useAppSelector } from "../../store/hooks";
 
 const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
   (
@@ -13,9 +14,13 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
       archiveChat,
       openDeleteModal,
       setShareOpen,
+      chatId,
     },
     ref
   ) => {
+    const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
+    const isLoading = actionLoadingId === chatId;
+
     return (
       <div className="relative sm:hidden" ref={ref}>
         <button
@@ -29,8 +34,9 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
           }}
           title="More Options"
           onClick={toggleMenu}
+          disabled={isLoading}
         >
-          <MoreHorizontal size={20} />
+          <MoreHorizontal size={20} className={isLoading ? "opacity-50" : ""} />
         </button>
 
         {isOpen && (
@@ -47,8 +53,9 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                 style={{ color: "var(--color-text)" }}
                 onClick={() => setShareOpen(true)}
+                disabled={isLoading}
               >
-                <Share2 size={18} className="mr-2" />
+                <Share2 size={18} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
                 Share
               </button>
 
@@ -57,9 +64,10 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                   onClick={toggleFavorite}
                   className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                   style={{ color: "var(--color-text)" }}
+                  disabled={isLoading}
                 >
                   <Star
-                    className="mr-2"
+                    className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
                     size={18}
                     fill={isFavorite ? "gold" : "none"}
                     color={isFavorite ? "gold" : "currentColor"}
@@ -72,16 +80,18 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 onClick={archiveChat}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                 style={{ color: "var(--color-text)" }}
+                disabled={isLoading}
               >
-                <Archive size={16} className="mr-2" />
+                <Archive size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
                 {isArchive ? "Un-archive" : "Archive"}
               </button>
               <button
                 onClick={openDeleteModal}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
                 style={{ color: "var(--color-error)" }}
+                disabled={isLoading}
               >
-                <Trash2 size={16} className="mr-2" />
+                <Trash2 size={16} className={`mr-2 ${isLoading ? "opacity-50" : ""}`} />
                 Delete
               </button>
             </div>
