@@ -11,12 +11,14 @@ import { generateExpiration, updateChatVersion, updateUserVersion } from "../uti
 export async function saveChat(
   userId: string,
   messages: { id: string; role: string; content: string }[],
-  chatId: string
+  chatId: string,
+  aesKey: string
 ) {
   const result = await chatRepo.createChatWithMessagesOrApendMesages(
     userId,
     messages,
-    chatId
+    chatId,
+    aesKey
   );
 
   await Promise.all([
@@ -110,6 +112,7 @@ export async function findChatNamesByService(userId: string) {
   }
 
   const dbChatNames = await chatRepo.getChatNamesByUser(userId);
+
   const version = Date.now().toString();
 
   await Promise.all([
