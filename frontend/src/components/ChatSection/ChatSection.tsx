@@ -39,29 +39,32 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   });
 
   useEffect(() => {
-    if (chatId) {
-      const loadMessages = async () => {
-        const { success, data, error } = await fetchMessages(chatId);
-        if (success && data) {
-          dispatch(setMessages(data.messages));
-          dispatch(setChatName(data.name));
-          dispatch(setIsArchived(data.isArchived));
-          setError(null);
-        } else {
-          console.error(error);
-          if (chatId !== generatedChatId) {
-            setError(
-              "Chat not found. This chat might have been deleted or doesn't exist."
-            );
-            dispatch(setMessages([]));
-          }
+  setError(null);
+
+  if (chatId) {
+    const loadMessages = async () => {
+      const { success, data, error } = await fetchMessages(chatId);
+      if (success && data) {
+        dispatch(setMessages(data.messages));
+        dispatch(setChatName(data.name));
+        dispatch(setIsArchived(data.isArchived));
+        setError(null);
+      } else {
+        console.error(error);
+        if (chatId !== generatedChatId) {
+          setError(
+            "Chat not found. This chat might have been deleted or doesn't exist."
+          );
+          dispatch(setMessages([]));
         }
-      };
+      }
+    };
 
-      loadMessages();
-    }
-  }, [chatId, dispatch, generatedChatId]);
-
+    loadMessages();
+  } else {
+    dispatch(setMessages([]));
+  }
+}, [chatId, dispatch, generatedChatId]);
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

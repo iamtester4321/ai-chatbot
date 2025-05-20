@@ -8,7 +8,6 @@ import {
 export const updateMessageReactionLike = asyncHandler(
   async (req: Request, res: Response) => {
     const { messageId } = req.params;
-    const { liked } = req.body;
 
     try {
       const updatedMessage = await updateMessageReactionLikeService(messageId);
@@ -26,7 +25,6 @@ export const updateMessageReactionLike = asyncHandler(
 export const updateMessageReactionDislike = asyncHandler(
   async (req: Request, res: Response) => {
     const { messageId } = req.params;
-    const { disliked } = req.body;
 
     try {
       const updatedMessage = await updateMessageReactionDislikeService(

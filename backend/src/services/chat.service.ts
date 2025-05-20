@@ -6,7 +6,7 @@ import {
   USER_VERSION_PREFIX,
 } from "../constants/redisKeys";
 import * as chatRepo from "../repositories/chat.repository";
-import { updateChatVersion, updateUserVersion } from "../utils/cache.utils";
+import { generateExpiration, updateChatVersion, updateUserVersion } from "../utils/cache.utils";
 
 export async function saveChat(
   userId: string,
@@ -49,7 +49,12 @@ export async function findChatById(chatId: string) {
     const version = Date.now().toString();
     await Promise.all([
       redisClient.set(versionKey, version),
-      redisClient.set(key, JSON.stringify({ _version: version, data: dbChat })),
+      redisClient.set(
+        key,
+        JSON.stringify({ _version: version, data: dbChat }),
+        "EX",
+        generateExpiration()
+      ),
     ]);
   }
 
@@ -77,7 +82,12 @@ export async function findChatsByService(userId: string) {
 
   await Promise.all([
     redisClient.set(versionKey, version),
-    redisClient.set(key, JSON.stringify({ _version: version, data: dbChats })),
+    redisClient.set(
+      key,
+      JSON.stringify({ _version: version, data: dbChats }),
+      "EX",
+      generateExpiration()
+    ),
   ]);
 
   return dbChats;
@@ -106,7 +116,9 @@ export async function findChatNamesByService(userId: string) {
     redisClient.set(versionKey, version),
     redisClient.set(
       key,
-      JSON.stringify({ _version: version, data: dbChatNames })
+      JSON.stringify({ _version: version, data: dbChatNames }),
+      "EX",
+      generateExpiration()
     ),
   ]);
 
