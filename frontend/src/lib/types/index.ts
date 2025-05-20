@@ -198,11 +198,6 @@ export interface ArchivedChatsProps {
   onClose: () => void;
 }
 
-export interface FavoriteChatsProps {
-  favoriteChats: ChatState["chatList"];
-  onClose: () => void;
-}
-
 
 // Chart -------------------------------------------------------------------------------------------------------------------------------
 export type ChartType =
