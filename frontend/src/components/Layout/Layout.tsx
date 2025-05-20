@@ -76,9 +76,9 @@ function Layout() {
     <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
       {/* Sidebar */}
       <div
-        className={`${
-          isSidebarOpen ? "w-[250px] md:w-[250px]" : "w-0"
-        } fixed md:relative transition-all duration-300 overflow-hidden h-screen md:h-screen bg-[var(--color-bg)] z-20 top-0`}
+        className={`${isSidebarOpen ? "w-[250px] md:w-[300px] lg:w-[350px]" : "w-0"} 
+        fixed md:relative transition-all duration-300 overflow-hidden h-screen 
+        md:h-screen bg-[var(--color-bg)] z-20 top-0`}
       >
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
@@ -103,7 +103,7 @@ function Layout() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col transition-all duration-300 w-full">
+      <div className="flex-1 flex flex-col transition-all duration-300 w-full md:ml-0">
         <Header
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}

@@ -47,7 +47,7 @@ const FavoriteChats = ({
   if (chats.length === 0) return null;
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 w-full">
       <button
         onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
         className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
@@ -62,13 +62,15 @@ const FavoriteChats = ({
       </button>
       {isFavoritesOpen &&
         chats.map((chat) => (
-          <div key={chat.id} className="relative group">
+          <div key={chat.id} className="relative group w-full">
             <Link
               to={`/chat/${chat.id}`}
-              onClick={() => {
-                if (isMobile) setIsSidebarOpen(false);
+              onClick={(e) => {
+                if (isMobile && !e.defaultPrevented) {
+                  setIsSidebarOpen(false);
+                }
               }}
-              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] ${
+              className={`flex items-center justify-between p-2.5 text-sm rounded-lg hover:bg-[var(--color-muted)] cursor-pointer mb-1.5 transition-all duration-200 text-[color:var(--color-text)] w-full ${
                 chatId === chat.id
                   ? "bg-[var(--color-muted)] text-yellow-600"
                   : ""
@@ -93,6 +95,7 @@ const FavoriteChats = ({
                 <button
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     toggleDropdown(chat.id);
                   }}
                   className="p-1 hover:bg-[var(--color-border)] rounded-lg transition-all duration-200"
@@ -118,7 +121,7 @@ const FavoriteChats = ({
                     </button>
                     <button
                       onClick={() => handleDelete(chat.id)}
-                      className="px-4 py-2 text-sm text-[var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                      className="px-4 py-2 text-sm text-[color:var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
                     >
                       <Trash2 size={16} className="mr-2" />
                       Delete
