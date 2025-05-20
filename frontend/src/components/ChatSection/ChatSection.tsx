@@ -37,7 +37,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
       dispatch(setCurrentResponse(text));
     },
   });
-
+  
   useEffect(() => {
   setError(null);
 

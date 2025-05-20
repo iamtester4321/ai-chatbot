@@ -12,7 +12,7 @@ const AllChats = ({
   handleRename,
   handleDelete,
   isMobile,
-  setIsSidebarOpen
+  setIsSidebarOpen,
 }: AllChatsProps) => {
   const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
   if (chats.length === 0) return null;
@@ -75,32 +75,33 @@ const AllChats = ({
                   <MoreHorizontal size={16} />
                 </button>
               </div>
-            </Link>)}
+            </Link>
+          )}
 
-            {activeDropdown.id === chat.id &&
-              activeDropdown.section === "all" && (
-                <div
-                  data-dropdown-menu
-                  className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)] z-50"
-                >
-                  <div className="py-1">
-                    <button
-                      onClick={() => handleRename(chat.id)}
-                      className="px-4 py-2 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
-                    >
-                      <Pencil size={16} className="mr-2" />
-                      Rename
-                    </button>
-                    <button
-                      onClick={() => handleDelete(chat.id)}
-                      className="px-4 py-2 text-sm text-[color:var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
-                    >
-                      <Trash2 size={16} className="mr-2" />
-                      Delete
-                    </button>
-                  </div>
+          {activeDropdown.id === chat.id &&
+            activeDropdown.section === "all" && (
+              <div
+                data-dropdown-menu
+                className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)] z-50"
+              >
+                <div className="py-1">
+                  <button
+                    onClick={() => handleRename(chat.id)}
+                    className="px-4 py-2 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                  >
+                    <Pencil size={16} className="mr-2" />
+                    Rename
+                  </button>
+                  <button
+                    onClick={() => handleDelete(chat.id)}
+                    className="px-4 py-2 text-sm text-[color:var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Delete
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
         </div>
       ))}
     </div>

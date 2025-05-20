@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
 import { SidebarProps } from "../../lib/types";
-import { resetChat, setActionLoadingId } from "../../store/features/chat/chatSlice";
+import { resetChat, setActionLoadingId, setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
@@ -119,6 +119,7 @@ const Sidebar = ({
             to={"/chat"}
             onClick={() => {
               dispatch(resetChat());
+              dispatch(setMode("chat"));
               if (isMobile) setIsSidebarOpen(false);
             }}
             className="flex items-center gap-2 p-2 mb-4 bg-[var(--color-primary)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-200 w-full cursor-pointer truncate"
