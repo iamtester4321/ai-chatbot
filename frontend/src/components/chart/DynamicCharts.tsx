@@ -42,7 +42,7 @@ import {
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
 import { RootState } from "../../store/store";
-import StreamLoader from "../StreamLoader/StreamLoader";
+import StreamLoader from "../Loaders/StreamLoader";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,

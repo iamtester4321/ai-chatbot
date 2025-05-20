@@ -5,19 +5,24 @@ export const updateMessageReactionLikeRepository = async (
 ) => {
   const currentMessage = await prisma.message.findUnique({
     where: { id: messageId },
-    select: { isLiked: true, isDisliked: true },
+    select: { isLiked: true, chatId: true }
   });
 
-  const dataToUpdate = currentMessage?.isDisliked
-    ? { isDisliked: false, isLiked: true }
-    : currentMessage?.isLiked
+  const dataToUpdate = currentMessage?.isLiked
     ? { isLiked: false }
     : { isLiked: true };
 
-  return prisma.message.update({
+  const updatedMessage = await prisma.message.update({
     where: { id: messageId },
     data: dataToUpdate,
+    select: {
+      id: true,
+      chatId: true,
+      isLiked: true
+    }
   });
+
+  return updatedMessage;
 };
 
 export const updateMessageReactionDislikeRepository = async (
@@ -25,17 +30,22 @@ export const updateMessageReactionDislikeRepository = async (
 ) => {
   const currentMessage = await prisma.message.findUnique({
     where: { id: messageId },
-    select: { isLiked: true, isDisliked: true },
+    select: { isDisliked: true, chatId: true }
   });
 
-  const dataToUpdate = currentMessage?.isLiked
-    ? { isLiked: false, isDisliked: true }
-    : currentMessage?.isDisliked
+  const dataToUpdate = currentMessage?.isDisliked
     ? { isDisliked: false }
     : { isDisliked: true };
 
-  return prisma.message.update({
+  const updatedMessage = await prisma.message.update({
     where: { id: messageId },
     data: dataToUpdate,
+    select: {
+      id: true,
+      chatId: true,
+      isDisliked: true
+    }
   });
+
+  return updatedMessage;
 };

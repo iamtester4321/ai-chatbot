@@ -5,6 +5,10 @@ import {
   USER_VERSION_PREFIX,
 } from "../constants/redisKeys";
 
+export function generateExpiration(): number {
+  return 172800; // 48 hours in seconds
+}
+
 // Generate version using timestamp
 function generateVersion(): string {
   return Date.now().toString();

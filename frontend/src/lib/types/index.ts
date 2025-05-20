@@ -18,6 +18,7 @@ export interface MobileMenuProps {
   archiveChat: () => void;
   openDeleteModal: () => void;
   setShareOpen: (state: boolean) => void;
+  chatId:string;
 }
 
 export interface DesktopMenuProps {
@@ -26,6 +27,7 @@ export interface DesktopMenuProps {
   archiveChat: () => void;
   openDeleteModal: () => void;
   isArchive: boolean;
+  chatId: string;
 }
 
 
@@ -50,6 +52,7 @@ export type SidebarProps = {
   setSelectedChat: (chat: { id: string; name: string } | null) => void;
   isMobile: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading?: boolean;
 };
 
 export interface UserDetailProps {
@@ -115,6 +118,7 @@ export type ChatResponseProps = {
   handleFormSubmit: (e: React.FormEvent) => void;
   chatId: string;
   shareId: string;
+  isMobile: boolean;
 };
 
 export type PromptInputProps = {
@@ -151,6 +155,8 @@ export type ChatState = {
   isFavorite: boolean;
   isShare: boolean;
   mode: "chat" | "chart";
+  chatNameLoading: boolean;
+  actionLoadingId: string | null;
 };
 
 export interface ChatHookProps {

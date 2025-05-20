@@ -21,7 +21,7 @@ import {
   resetChat,
   setChatList,
   setChatName,
-  setCurrentResponse,
+  setCurrentResponse
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
@@ -41,7 +41,13 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     id: chatId,
     onResponse: async () => {
       const moderationResult = await moderationCheck(input);
-      if (moderationResult.flagged) {
+      if (moderationResult.xssDetected) {
+        showToast.error(
+          "Potential security risk detected in your input. Please remove any unsafe code and try again."
+        );
+        navigate("/");
+        dispatch(resetChat());
+      } else if (moderationResult.flagged) {
         showToast.warning(
           "Your message contains language that may violate our content guidelines. Please revise and try again."
         );
@@ -370,6 +376,11 @@ export async function generateShareId(chatId: string) {
 
 export const moderationCheck = async (input: string) => {
   try {
+    const xssPattern =
+      /<script[\s\S]*?>[\s\S]*?<\/script\s*>|on\w+\s*=\s*["'][\s\S]*?["']|javascript:|<.*?\s+on\w+\s*=\s*["'][^"']*["'].*?>|<iframe[\s\S]*?>|<img[\s\S]*?on\w+[\s\S]*?>/gi;
+
+    const xssDetected = xssPattern.test(input);
+
     const response = await axios.post(
       "https://api.openai.com/v1/moderations",
       { input },
@@ -393,14 +404,20 @@ export const moderationCheck = async (input: string) => {
       results?.flagged;
 
     return {
-      flagged: isOffensive,
+      flagged: isOffensive || xssDetected,
+      xssDetected,
       apiResult: results,
       categories: results?.categories,
       categoryScores: results?.category_scores,
     };
   } catch (error) {
     console.error("Moderation API error:", error);
-    return { flagged: false, categories: {}, categoryScores: {} };
+    return {
+      flagged: false,
+      xssDetected: false,
+      categories: {},
+      categoryScores: {},
+    };
   }
 };
 
