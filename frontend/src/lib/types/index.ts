@@ -122,6 +122,8 @@ export type PromptInputProps = {
   isLoading: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
+  chatId?:string;
+  shareId?:string;
 };
 
 export type Message = {
@@ -194,11 +196,6 @@ export interface SettingsModalProps {
 
 export interface ArchivedChatsProps {
   archivedChats: ChatState["chatList"];
-  onClose: () => void;
-}
-
-export interface FavoriteChatsProps {
-  favoriteChats: ChatState["chatList"];
   onClose: () => void;
 }
 

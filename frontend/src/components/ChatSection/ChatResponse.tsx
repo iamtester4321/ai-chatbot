@@ -28,6 +28,7 @@ const ChatResponse = ({
   const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
+  const user = useAppSelector((state) => state.user.user);
   const showToast = useToast();
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -145,22 +146,23 @@ const ChatResponse = ({
   return (
     <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-4 md:px-8 py-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
           {chatName && (
-            <h2 className="text-3xl md:text-4xl font-normal mb-6 pt-4 text-center md:text-left">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
+              text-center md:text-left">
               {chatName}
             </h2>
           )}
 
-          <div className="space-y-8">
-            {/* All messages */}
+          <div className="space-y-6 sm:space-y-8">
             {messages.map((msg, index) => {
               const isUser = msg.role === "user";
               if (isUser) {
                 return (
                   <div key={index} className="flex justify-end">
                     <div className="space-y-2">
-                      <div className="bg-[var(--color-muted)] px-4 py-1 rounded-2xl max-w-full sm:max-w-xs md:max-w-md">
+                      <div className="bg-[var(--color-muted)] px-3 sm:px-4 py-1 rounded-2xl 
+                        max-w-[280px] sm:max-w-xs md:max-w-md break-words">
                         {msg.content}
                       </div>
                       <div className="flex justify-end">
@@ -193,7 +195,7 @@ const ChatResponse = ({
                       >
                         {copiedIndex === index ? <Check /> : <Copy />}
                       </button>
-                      {!shareId && (
+                      {user && (
                         <>
                           {msg?.id && (
                             <button
@@ -278,7 +280,7 @@ const ChatResponse = ({
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
-                    {!shareId && (
+                    {user && (
                       <>
                         <button
                           className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -356,6 +358,8 @@ const ChatResponse = ({
               isLoading={isLoading}
               handleInputChange={handleInputChange}
               handleFormSubmit={handleFormSubmit}
+              chatId={chatId}
+              shareId={shareId}
             />
           </>
         )}

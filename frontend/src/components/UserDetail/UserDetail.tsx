@@ -1,24 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchUserProfile } from "../../actions/user.actions";
 import { UserDetailProps } from "../../lib/types";
+import { setUser } from "../../store/features/user/userSlice";
+import { useAppSelector } from "../../store/hooks";
 
 export const UserDetail = ({ onClick }: UserDetailProps) => {
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const dispatch = useDispatch();
+  const user = useAppSelector((state) => state.user.user);
 
   useEffect(() => {
     const getUserProfile = async () => {
       try {
         const { success, data } = await fetchUserProfile();
         if (success && data) {
-          setUser(data);
+          dispatch(setUser(data));
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     };
     getUserProfile();
-  }, []);
+  }, [dispatch]);
 
   if (!user) {
     return (
