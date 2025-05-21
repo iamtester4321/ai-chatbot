@@ -46,7 +46,18 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   let assistantReply = "";
   let tempPrompt = prompt || "user forget to put prompt ...";
   if (mode === "chart") {
-    tempPrompt = `SYSTEM: ...\n\nUSER:${prompt}`.trim();
+    tempPrompt = `
+     SYSTEM:
+You are a data analysis assistant. When given a query, you must respond only with one or more raw JSON objects or arrays—no markdown, no backticks, no extra text. Each top-level object must include:
+- "name": a descriptive string
+- "data": an object whose values are arrays of equal length suitable for plotting (e.g., ["Jan","Feb"] and [10,20]).
+-you should only return one object as an json and that one object must have name property wich is what that data about and data propery wich is object and it should be able to show on charts
+Everything you output must be directly parseable by JSON.parse().
+
+-data must be in an formate and data must be able to project on line,area,bar,compose,sacter,pie this chart *this is must*
+
+USER:${req.body.prompt}
+`.trim();
   }
 
   const model = google("gemini-2.0-flash");
