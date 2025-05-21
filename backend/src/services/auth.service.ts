@@ -87,7 +87,7 @@ export const googleCallback = (
 
       res.cookie("authToken", token, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "none",
       });
 
