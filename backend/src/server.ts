@@ -12,18 +12,25 @@ import messageRoutes from "./routes/message.routes";
 import shareRoutes from "./routes/share.routes";
 import userRoutes from "./routes/user.route";
 import suggestionsRoutes from "./routes/suggestions.routes";
-
+import { env } from "./config/env";
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-    credentials: true,
-  })
-);
+const allowedOrigins = [env.CLIENT_ORIGIN];
+const corsOptions = {
+  origin: function (origin: any, callback: any) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 redisClient.on("connect", () => {
   console.log("✅ Redis connected");
