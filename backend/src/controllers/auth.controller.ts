@@ -13,7 +13,7 @@ export const register = async (req: Request, res: Response) => {
 
     res.cookie("authToken", result?.token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "none",
     });
 
