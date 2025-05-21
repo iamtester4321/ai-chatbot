@@ -98,7 +98,6 @@ const Sidebar = ({
       dispatch(setActionLoadingId(null));
     }
   };
-  console.log(chatList);
   const filteredChatList = chatList.filter(
   (chat) =>
     typeof chat.name === "string" &&

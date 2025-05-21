@@ -33,9 +33,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const showToast = useToast();
   const navigate = useNavigate();
   const { mode } = useAppSelector((state) => state.chat);
-
-  let modeStr = "";
-  if (mode === "chart") modeStr = "?mode=chart";
+  const modeStr = mode === "chart" ? "?mode=chart" : "";
 
   const { input, handleInputChange, handleSubmit, status } = useChat({
     api: STREAM_CHAT_RESPONSE(modeStr),

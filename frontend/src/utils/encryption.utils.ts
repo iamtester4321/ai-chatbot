@@ -20,10 +20,6 @@ export async function encryptMessage(message: string): Promise<string> {
 
   const nonce = s.randombytes_buf(s.crypto_secretbox_NONCEBYTES);
   const cipher = s.crypto_secretbox_easy(s.from_string(message), nonce, key);
-  console.log("Original message length:", message.length);
-  console.log("Nonce length:", nonce.length);
-  console.log("Cipher length:", cipher.length);
-  console.log("Plaintext length:", message.length);
 
   const payload = new Uint8Array(nonce.length + cipher.length);
   payload.set(nonce);

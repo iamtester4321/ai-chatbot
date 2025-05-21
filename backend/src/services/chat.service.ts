@@ -158,7 +158,7 @@ export async function findChatNamesByService(userId: string) {
     }
   }
   let dbChatNames = await chatRepo.getChatNamesByUser(userId);
-  // Decrypt chat names before returning or caching
+  
   dbChatNames = await Promise.all(
     dbChatNames.map(async (chat) => ({
       ...chat,

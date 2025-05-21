@@ -74,11 +74,10 @@ export async function getChatNamesByUser(userId: string) {
     },
     orderBy: { createdAt: "desc" },
   });
-
   return Promise.all(
     chats.map(async (chat) => ({
       ...chat,
-      name: await decryptMessage(chat.name),
+      name:chat.name,
     }))
   );
 }

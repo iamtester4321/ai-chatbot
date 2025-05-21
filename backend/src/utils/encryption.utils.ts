@@ -19,11 +19,7 @@ export async function encryptMessage(message: string): Promise<string> {
   const key = s.from_base64(base64Key, s.base64_variants.URLSAFE_NO_PADDING);
 
   const nonce = s.randombytes_buf(s.crypto_secretbox_NONCEBYTES);
-  const cipher = s.crypto_secretbox_easy(s.from_string(message), nonce, key);
-  console.log("Original message length:", message.length);
-  console.log("Nonce length:", nonce.length);
-  console.log("Cipher length:", cipher.length);
-  console.log("Plaintext length:", message.length);
+  const cipher = s.crypto_secretbox_easy(s.from_string(message), nonce, key); 
 
   const payload = new Uint8Array(nonce.length + cipher.length);
   payload.set(nonce);

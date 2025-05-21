@@ -76,6 +76,11 @@ export interface FavoriteChatsProps {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+export interface FavoriteChatsSettingsProps {
+  favoriteChats?: ChatState["chatList"];
+  onClose?: () => void;
+}
+
 export interface ShareChatsProps {
   chats: ChatState["chatList"];
   chatId: string | undefined;

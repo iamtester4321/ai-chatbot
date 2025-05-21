@@ -35,72 +35,76 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
 
   const { mode } = req.query;
 
-  let tempPrompt =
-    req.body.prompt ||
-    "user forget to put prompt || if chat type is chart show return some rutin data ";
-
-  if (mode === "chart") {
-    tempPrompt = `
-     SYSTEM:
-You are a data analysis assistant. When given a query, you must respond only with one or more raw JSON objects or arrays—no markdown, no backticks, no extra text. Each top-level object must include:
-- "name": a descriptive string
-- "data": an object whose values are arrays of equal length suitable for plotting (e.g., ["Jan","Feb"] and [10,20]).
--you should only return one object as an json and that one object must have name property wich is what that data about and data propery wich is object and it should be able to show on charts
-Everything you output must be directly parseable by JSON.parse().
-
-USER:${req.body.prompt}
-`.trim();
-  } else tempPrompt = tempPrompt;
-
-  const model = google("gemini-2.0-flash");
-  const decryptedMessages = await Promise.all(
-    encryptedMessages.map(async (m: { content: string }) => ({
-      ...m,
+  let messages = await Promise.all(
+    encryptedMessages.map(async (m: { content: string, role: string }) => ({
+      role: m.role,
       content: await decryptMessage(m.content),
     }))
   );
 
-  // Decrypt prompt also
+  // Decrypt prompt
   const decryptedPrompt = await decryptMessage(encryptedPrompt);
+
+  // Handle chart mode differently
+  if (mode === "chart") {
+    // Clear previous messages for chart mode to ensure clean JSON response
+    messages = [
+      {
+        role: "system",
+        content: `You are a data analysis assistant. When given a query, respond only with one raw JSON object that includes:
+- "name": a descriptive string
+- "data": an object with arrays of equal length suitable for plotting
+Your response must be directly parseable by JSON.parse() with no extra text.`
+      },
+      {
+        role: "user",
+        content: decryptedPrompt
+      }
+    ];
+  } else {
+    // Normal mode
+    messages.push({
+      role: "user",
+      content: decryptedPrompt
+    });
+  }
+
+  const model = google("gemini-2.0-flash");
+
   try {
     const result = streamText({
       model,
-      messages: [
-        ...decryptedMessages,
-        { role: "user", content: decryptedPrompt },
-      ],
+      messages,
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
       onFinish: async () => {
-        if (userId) {
-          const encryptedUserMsg = await encryptMessage(decryptedPrompt);
-          const encryptedAssistantMsg = await encryptMessage(assistantReply);
-          await saveChat(
-            userId,
-            [
-              { id: userMessageId, role: "user", content: encryptedUserMsg },
-              {
-                id: assistantMessageId,
-                role: "assistant",
-                content: encryptedAssistantMsg,
-              },
-            ],
-            chatId
-          );
-          res.status(200).json({
-            messages: [
-              { id: userMessageId, role: "user", content: encryptedUserMsg },
-              {
-                id: assistantMessageId,
-                role: "assistant",
-                content: encryptedAssistantMsg,
-              },
-            ],
-          });
+        // For chart mode, validate the JSON
+        if (mode === "chart") {
+          try {
+            JSON.parse(assistantReply);
+          } catch (e) {
+            // If not valid JSON, generate a fallback response
+            
+          }
         }
+
+        const encryptedUserMsg = await encryptMessage(decryptedPrompt);
+        const encryptedAssistantMsg = await encryptMessage(assistantReply);
+        await saveChat(
+          userId,
+          [
+            { id: userMessageId, role: "user", content: encryptedUserMsg },
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              content: encryptedAssistantMsg,
+            },
+          ],
+          chatId
+        );
       },
       onError: (err) => console.error("Stream error:", err),
     });
