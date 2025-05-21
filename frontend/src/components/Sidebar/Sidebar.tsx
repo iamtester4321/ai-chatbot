@@ -98,10 +98,13 @@ const Sidebar = ({
       dispatch(setActionLoadingId(null));
     }
   };
-
-  const filteredChatList = chatList.filter((chat) =>
+  console.log(chatList);
+  const filteredChatList = chatList.filter(
+  (chat) =>
+    typeof chat.name === "string" &&
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+);
+
 
   const favoriteChats = filteredChatList.filter(
     (chat) => chat.isFavorite && !chat.isArchived

@@ -39,21 +39,27 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const getChatNames = async () => {
-      try {
-        dispatch(setChatNameLoading(true));
-        const { success } = await fetchChatNames(dispatch);
-        if (!success) {
-          console.error("Failed to fetch chat names");
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        dispatch(setChatNameLoading(false));
-      }
+    // const getChatNames = async () => {
+    //   try {
+    //     dispatch(setChatNameLoading(true));
+    //     const { success } = await fetchChatNames(dispatch);
+    //     if (!success) {
+    //       console.error("Failed to fetch chat names");
+    //     }
+    //   } catch (error) {
+    //     console.log(error);
+    //   } finally {
+    //     dispatch(setChatNameLoading(false));
+    //   }
+    // };
+    // getChatNames();
+    const loadChats = async () => {
+      const { success } = await fetchChatNames(dispatch);
+      if (!success) console.error("Failed to load chats");
     };
-    getChatNames();
-  }, []);
+    loadChats();
+  }, [dispatch]);
+  // }, []);
 
   useEffect(() => {
     const checkMobile = () => {

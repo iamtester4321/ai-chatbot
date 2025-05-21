@@ -13,6 +13,11 @@ import {
   saveChat,
 } from "../services/chat.service";
 import { findShareById } from "../services/share.service";
+import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
+
+interface ChatRequestParams {
+  chatId: string;
+}
 
 interface ChatRequestByshareIdParams {
   shareId: string;
@@ -22,9 +27,10 @@ interface ChatRequestByshareIdParams {
 export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.user as { id: string })?.id;
   const chatId = req.body.chatId;
-  const messages = req.body.messages || [];
+  const encryptedMessages = req.body.messages || [];
   const userMessageId = req.body.userMessageId;
   const assistantMessageId = req.body.assistantMessageId;
+  const encryptedPrompt = req.body.prompt;
   let assistantReply = "";
 
   const { mode } = req.query;
@@ -47,11 +53,22 @@ USER:${req.body.prompt}
   } else tempPrompt = tempPrompt;
 
   const model = google("gemini-2.0-flash");
+  const decryptedMessages = await Promise.all(
+    encryptedMessages.map(async (m: { content: string }) => ({
+      ...m,
+      content: await decryptMessage(m.content),
+    }))
+  );
 
+  // Decrypt prompt also
+  const decryptedPrompt = await decryptMessage(encryptedPrompt);
   try {
     const result = streamText({
       model,
-      messages: [...messages, { role: "user", content: tempPrompt }],
+      messages: [
+        ...decryptedMessages,
+        { role: "user", content: decryptedPrompt },
+      ],
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
@@ -59,18 +76,30 @@ USER:${req.body.prompt}
       },
       onFinish: async () => {
         if (userId) {
+          const encryptedUserMsg = await encryptMessage(decryptedPrompt);
+          const encryptedAssistantMsg = await encryptMessage(assistantReply);
           await saveChat(
             userId,
             [
-              { id: userMessageId, role: "user", content: req.body.prompt },
+              { id: userMessageId, role: "user", content: encryptedUserMsg },
               {
                 id: assistantMessageId,
                 role: "assistant",
-                content: assistantReply,
+                content: encryptedAssistantMsg,
               },
             ],
             chatId
           );
+          res.status(200).json({
+            messages: [
+              { id: userMessageId, role: "user", content: encryptedUserMsg },
+              {
+                id: assistantMessageId,
+                role: "assistant",
+                content: encryptedAssistantMsg,
+              },
+            ],
+          });
         }
       },
       onError: (err) => console.error("Stream error:", err),
@@ -214,4 +243,4 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     console.error("Error renaming chat:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-}); 
+});

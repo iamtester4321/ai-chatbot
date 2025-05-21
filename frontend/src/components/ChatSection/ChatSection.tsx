@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
 import Error from "../Common/Error";
+import { decryptMessage } from "../../utils/encryption.utils";
 
 const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   const navigate = useNavigate();
@@ -46,7 +47,8 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
       const { success, data, error } = await fetchMessages(chatId);
       if (success && data) {
         dispatch(setMessages(data.messages));
-        dispatch(setChatName(data.name));
+        const decryptedName = await decryptMessage(data.name);
+        dispatch(setChatName(decryptedName));
         dispatch(setIsArchived(data.isArchived));
         setError(null);
       } else {
@@ -160,28 +162,28 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
               isMobile={isMobile}
             />
           )}
-
+  
           <section
-            className={`${messages.length > 0 ? "" : "pt-[100px] sm:pt-[150px] md:pt-[200px]"} 
-            h-100vh transition-all duration-300`}>
+            className={`${
+              messages.length === 0 ? "pt-[100px] sm:pt-[150px] md:pt-[200px]" : ""
+            } h-100vh transition-all duration-300`}
+          >
             <div className="container px-4 sm:px-6 md:px-8">
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-12 sm:gap-16 md:gap-24">
-                {messages.length === 0 && !shareId && !chatId &&(
+                {/* Display "Aivora" when there are no messages, chatId, or shareId */}
+                {messages.length === 0 && !shareId && !chatId && (
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
                     Aivora
                   </h3>
                 )}
-                {messages.length === 0 && !shareId && !chatId &&(
-
-                <h3
-                  className={`text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter ${
-                    messages.length > 0 ? "hidden" : "block md:hidden"
-                  }`}
-                >
-                  Aivora
-                </h3>
+  
+                {messages.length === 0 && !shareId && !chatId && (
+                  <h3 className="text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter md:hidden">
+                    Aivora
+                  </h3>
                 )}
-                
+  
+                {/* Prompt Input (only when no chatId or shareId) */}
                 {!chatId && !shareId && (
                   <PromptInput
                     input={input}
@@ -196,7 +198,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
         </>
       )}
     </div>
-  );
+  );  
 };
 
 export default ChatSection;

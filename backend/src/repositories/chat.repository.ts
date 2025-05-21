@@ -1,4 +1,5 @@
 import { prisma } from "../config/db";
+import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
@@ -26,13 +27,20 @@ export async function createChatWithMessagesOrApendMesages(
     });
   } else {
     const userMessage = messages.find((m) => m.role === "user");
-    const trimmedName = userMessage?.content.trim().slice(0, 50) || "New Chat";
+    let trimmedName = "New Chat";
+
+    if (userMessage) {
+      const decrypted = await decryptMessage(userMessage.content);
+      trimmedName = decrypted.trim().slice(0, 50);
+    }
+
+    const encryptedName = await encryptMessage(trimmedName);
 
     return prisma.chat.create({
       data: {
         id: chatId,
         userId,
-        name: trimmedName,
+        name: encryptedName,
         messages: {
           create: messages.map((m) => ({
             id: m.id,
@@ -54,8 +62,8 @@ export function getChatsByUser(userId: string) {
   });
 }
 
-export function getChatNamesByUser(userId: string) {
-  return prisma.chat.findMany({
+export async function getChatNamesByUser(userId: string) {
+  const chats = await prisma.chat.findMany({
     where: { userId },
     select: {
       id: true,
@@ -66,6 +74,13 @@ export function getChatNamesByUser(userId: string) {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  return Promise.all(
+    chats.map(async (chat) => ({
+      ...chat,
+      name: await decryptMessage(chat.name),
+    }))
+  );
 }
 
 export async function findById(chatId: string) {
@@ -98,9 +113,10 @@ export const toggleArchiveStatus = async (
 };
 
 export const renameChat = async (chatId: string, newName: string) => {
+  const encryptedName = await encryptMessage(newName);
   return prisma.chat.update({
     where: { id: chatId },
-    data: { name: newName },
+    data: { name: encryptedName },
   });
 };
 

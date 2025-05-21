@@ -25,6 +25,7 @@ import {
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
+import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
@@ -55,57 +56,58 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         dispatch(resetChat());
       } else {
         const userMessageId = uuidv4();
-        const assistantMessageId = uuidv4();
+      const assistantMessageId = uuidv4();
+      const encryptedUser = await encryptMessage(input);
+      dispatch(
+        addMessage({
+          id: userMessageId,
+          role: "user",
+          content: input,
+          createdAt: new Date().toISOString(),
+        })
+      );
+      const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userMessageId,
+          assistantMessageId,
+          prompt: encryptedUser,
+          messages,
+          chatId: chatId || "",
+        }),
+      });
 
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      if (!response.body) {
+        throw new Error("Response body is empty");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        let accumulatedText = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedText += chunk;
+          dispatch(setCurrentResponse(accumulatedText));
+          onResponseUpdate?.(accumulatedText);
+        }
+        const decryptedAssistantMessage = await decryptMessage(accumulatedText);
         dispatch(
           addMessage({
-            id: userMessageId,
-            role: "user",
-            content: input,
-            createdAt: new Date().toISOString(),
-          })
-        );
-
-        const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userMessageId,
-            assistantMessageId,
-            prompt: input,
-            messages: messages,
-            chatId: chatId || "",
-          }),
-        });
-        if (!response.ok) {
-          throw new Error("API request failed");
-        }
-
-        if (!response.body) {
-          throw new Error("Response body is empty");
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        try {
-          let accumulatedText = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedText += chunk;
-            dispatch(setCurrentResponse(accumulatedText));
-            onResponseUpdate?.(accumulatedText);
-          }
-          dispatch(
-            addMessage({
-              id: assistantMessageId,
-              role: "assistant",
-              content: accumulatedText,
+            id: assistantMessageId,
+            role: "assistant",
+            content: decryptedAssistantMessage,
               createdAt: new Date().toISOString(),
             })
           );
@@ -140,7 +142,21 @@ export const fetchMessages = async (chatId: string) => {
       withCredentials: true,
     });
 
-    return { success: true, data: response.data };
+    const decryptedMessages = await Promise.all(
+      response.data.messages.map(async (msg: any) => ({
+        ...msg,
+        content: await decryptMessage(msg.content),
+      }))
+    );
+
+    return {
+      success: true,
+      data: {
+        ...response.data,
+        messages: decryptedMessages,
+        name: response.data.name,
+      },
+    };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error(
@@ -160,11 +176,15 @@ export const fetchMessagesByShareId = async (shareId: string) => {
       withCredentials: true,
     });
 
-    return { success: true, data: response.data };
+    // No decryption
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error(
-        "Error fetching messages:",
+        "Error fetching shared messages:",
         error.response?.data || error.message
       );
     } else {
@@ -179,23 +199,25 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
     const response = await axios.get(GET_CHAT_NAMES, {
       withCredentials: true,
     });
-
-    if (response.status === 200) {
-      dispatch(setChatList(response.data));
-      return { success: true, data: response.data };
-    } else {
+    if (response.status !== 200) {
       console.error("Failed to fetch chat names");
       return { success: false, error: "Failed to fetch chat names" };
     }
+
+    const decryptedList = await Promise.all(
+      response.data.map(async (chat: any) => ({
+        ...chat,
+        name: await decryptMessage(chat.name),
+      }))
+    );
+    dispatch(setChatList(decryptedList));
+
+    return { success: true, data: response.data };
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error fetching chat names:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("An unknown error occurred:", error);
-    }
+    console.error(
+      "Error fetching chat names:",
+      axios.isAxiosError(error) ? error.response?.data || error.message : error
+    );
     return { success: false, error: "Error fetching chat names" };
   }
 };
@@ -278,9 +300,12 @@ export const renameChat = async (
   newName: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    // Always encrypt the new name before sending
+    const encryptedName = await encryptMessage(newName);
+
     const response = await axios.patch(
       RENAME_CHAT(chatId),
-      { newName },
+      { newName: encryptedName },
       {
         withCredentials: true,
         headers: {
