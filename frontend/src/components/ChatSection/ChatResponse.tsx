@@ -32,11 +32,22 @@ const ChatResponse = ({
   const user = useAppSelector((state) => state.user.user);
   const showToast = useToast();
   const dispatch = useAppDispatch();
+
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, [messages, chatResponse]);
+  const element = messagesEndRef.current;
+  if (!element) return;
+
+  const container = element.parentElement;
+  if (!container) return;
+
+  const isNearBottom =
+    container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+  if (isNearBottom) {
+    element.scrollIntoView({ block: "center" });
+  }
+}, [messages, chatResponse]);
+
 
   useEffect(() => {
     if (!isLoading && chatResponse) {

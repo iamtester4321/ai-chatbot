@@ -1,4 +1,6 @@
 "use client";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   AreaChart as AreaIcon,
   BarChart3,
@@ -27,6 +29,7 @@ import {
   CartesianGrid,
   Cell,
   ComposedChart,
+  DefaultLegendContentProps,
   Legend,
   Line,
   LineChart,
@@ -38,14 +41,12 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ZAxis,
+  ZAxis
 } from "recharts";
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
 import { RootState } from "../../store/store";
 import StreamLoader from "../Loaders/StreamLoader";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,
@@ -153,6 +154,27 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     [chartType, numericKeys]
   );
 
+  const renderWrappedLegend = (props: DefaultLegendContentProps) => {
+    const { payload } = props;
+    if (!payload) return <></>;
+    return (
+      <ul className="flex flex-wrap list-none m-0 p-0">
+        {payload.map((entry: any, index: number) => (
+          <li
+            key={`item-${index}`}
+            className="flex items-center mr-3 mb-2 text-[var(--color-text)]"
+          >
+            <span
+              className="inline-block w-[10px] h-[10px] mr-2"
+              style={{ backgroundColor: entry.color }}
+            />
+            {entry.value}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  
   // Memoize the entire chart element
   const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
@@ -161,7 +183,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     switch (chartType) {
       case "line":
         return (
-          <LineChart data={jsonData}>
+          <LineChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -185,7 +207,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
         );
       case "area":
         return (
-          <AreaChart data={jsonData}>
+          <AreaChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -209,7 +231,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
         );
       case "bar":
         return (
-          <BarChart data={jsonData}>
+          <BarChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -233,7 +255,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
         );
       case "composed":
         return (
-          <ComposedChart data={jsonData}>
+          <ComposedChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -264,7 +286,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           );
         }
         return (
-          <ScatterChart>
+          <ScatterChart className="p-2">
             <CartesianGrid />
             <XAxis dataKey={numericKeys[0]} name={numericKeys[0]} />
             <YAxis dataKey={numericKeys[1]} name={numericKeys[1]} />
@@ -305,7 +327,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
           </PieChart>
         );
       default:
@@ -322,13 +344,19 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     });
   
     const imgData = canvas.toDataURL("image/png");
+  
+    const padding = 40;
+  
+    const pdfWidth = canvas.width + padding * 2;
+    const pdfHeight = canvas.height + padding * 2;
+  
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "px",
-      format: [canvas.width, canvas.height],
+      format: [pdfWidth, pdfHeight],
     });
   
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.addImage(imgData, "PNG", padding, padding, canvas.width, canvas.height);
     pdf.save(`${name}-chart.pdf`);
   };
   

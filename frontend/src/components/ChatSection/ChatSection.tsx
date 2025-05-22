@@ -67,6 +67,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
     dispatch(setMessages([]));
   }
 }, [chatId, dispatch, generatedChatId]);
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -169,7 +170,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
             } h-100vh transition-all duration-300`}
           >
             <div className="container px-4 sm:px-6 md:px-8">
-              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-12 sm:gap-16 md:gap-24">
+              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
                 {/* Display "Aivora" when there are no messages, chatId, or shareId */}
                 {messages.length === 0 && !shareId && !chatId && (
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
