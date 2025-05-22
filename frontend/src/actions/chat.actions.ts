@@ -21,7 +21,8 @@ import {
   resetChat,
   setChatList,
   setChatName,
-  setCurrentResponse
+  setCurrentResponse,
+  setMessages,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
@@ -29,33 +30,25 @@ import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
-  const { messages } = useAppSelector((state) => state.chat);
+  const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
   const navigate = useNavigate();
-  const { mode } = useAppSelector((state) => state.chat);
+
   const modeStr = mode === "chart" ? "?mode=chart" : "";
 
-  const { input, handleInputChange, handleSubmit, status } = useChat({
+  const {
+    input,
+    handleInputChange,
+    handleSubmit: baseHandleSubmit,
+    status,
+  } = useChat({
     api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
-      const moderationResult = await moderationCheck(input);
-      if (moderationResult.xssDetected) {
-        showToast.error(
-          "Potential security risk detected in your input. Please remove any unsafe code and try again."
-        );
-        navigate("/");
-        dispatch(resetChat());
-      } else if (moderationResult.flagged) {
-        showToast.warning(
-          "Your message contains language that may violate our content guidelines. Please revise and try again."
-        );
-        navigate("/");
-        dispatch(resetChat());
-      } else {
-        const userMessageId = uuidv4();
+      const userMessageId = uuidv4();
       const assistantMessageId = uuidv4();
-      const encryptedUser = await encryptMessage(input);
+
+      // 1. Optimistically add the user message
       dispatch(
         addMessage({
           id: userMessageId,
@@ -64,12 +57,31 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           createdAt: new Date().toISOString(),
         })
       );
+
+      // 2. Run moderation check
+      const moderationResult = await moderationCheck(input);
+      if (moderationResult.xssDetected) {
+        showToast.error(
+          "Potential security risk detected in your input. Please remove any unsafe code and try again."
+        );
+        dispatch(setMessages(messages));
+
+        return;
+      } else if (moderationResult.flagged) {
+        showToast.warning(
+          "Your message may violate our content guidelines. Please revise and try again."
+        );
+        dispatch(setMessages(messages));
+
+        return;
+      }
+
+      // 3. Encrypt and send to server
+      const encryptedUser = await encryptMessage(input);
       const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userMessageId,
           assistantMessageId,
@@ -79,13 +91,8 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("API request failed");
-      }
-
-      if (!response.body) {
-        throw new Error("Response body is empty");
-      }
+      if (!response.ok) throw new Error("API request failed");
+      if (!response.body) throw new Error("Response body is empty");
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -95,32 +102,36 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+
           const chunk = decoder.decode(value, { stream: true });
           accumulatedText += chunk;
+
           dispatch(setCurrentResponse(accumulatedText));
           onResponseUpdate?.(accumulatedText);
         }
+
         const decryptedAssistantMessage = await decryptMessage(accumulatedText);
+
         dispatch(
           addMessage({
             id: assistantMessageId,
             role: "assistant",
             content: decryptedAssistantMessage,
-              createdAt: new Date().toISOString(),
-            })
-          );
-          dispatch(setCurrentResponse(""));
-          onResponseUpdate?.("");
+            createdAt: new Date().toISOString(),
+          })
+        );
+        dispatch(setCurrentResponse(""));
+        onResponseUpdate?.("");
 
-          await fetchChatNames(dispatch);
-          if (!chatId) return;
+        await fetchChatNames(dispatch);
+        if (chatId) {
           const updatedChat = await fetchMessages(chatId);
           if (updatedChat.success && updatedChat.data) {
             dispatch(setChatName(updatedChat.data.name));
           }
-        } finally {
-          reader.releaseLock();
         }
+      } finally {
+        reader.releaseLock();
       }
     },
   });
@@ -129,7 +140,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
+    handleSubmit: baseHandleSubmit,
     isLoading: status === "submitted",
   };
 };
