@@ -89,6 +89,7 @@ export const googleCallback = (
         httpOnly: true,
         secure: true,
         sameSite: "none",
+        domain: `${env.CLIENT_ORIGIN}`
       });
 
       res.redirect(`${env.CLIENT_ORIGIN}`);

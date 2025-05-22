@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
+import { env } from "../config/env";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -15,6 +16,7 @@ export const register = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      domain: `${env.CLIENT_ORIGIN}`
     });
 
     res.status(201).json({ success: true, user: result.data });
@@ -40,6 +42,7 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      domain: `${env.CLIENT_ORIGIN}`
     });
     res.json({ success: true, user: result.data?.user });
   } catch (err) {
