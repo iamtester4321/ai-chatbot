@@ -1,6 +1,5 @@
 import { useChat } from "@ai-sdk/react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
@@ -18,7 +17,6 @@ import {
 import { ChatHookProps, DeleteChatResponse } from "../lib/types";
 import {
   addMessage,
-  resetChat,
   setChatList,
   setChatName,
   setCurrentResponse,
@@ -32,7 +30,6 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
   const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
-  const navigate = useNavigate();
 
   const modeStr = mode === "chart" ? "?mode=chart" : "";
 
