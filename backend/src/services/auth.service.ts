@@ -85,7 +85,7 @@ export const googleCallback = (
       let token = null;
       if (user) token = signToken({ userId: user.id, email: user.email });
 
-      const temp = new URL(env.CLIENT_ORIGIN);
+      const temp = new URL(env.SERVER_ORIGIN);
       const domain = temp.hostname;
 
       const isLocalhost = domain === "localhost";

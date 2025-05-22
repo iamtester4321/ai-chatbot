@@ -12,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const temp = new URL(env.CLIENT_ORIGIN);
+    const temp = new URL(env.SERVER_ORIGIN);
     const domain = temp.hostname;
 
     const isLocalhost = domain === "localhost";
@@ -52,7 +52,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    const temp = new URL(env.CLIENT_ORIGIN);
+    const temp = new URL(env.SERVER_ORIGIN);
     const domain = temp.hostname;
 
     const isLocalhost = domain === "localhost";
