@@ -25,11 +25,13 @@ import {
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
+import { useNavigate } from "react-router-dom";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
   const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
+  const navigate = useNavigate();
 
   const modeStr = mode === "chart" ? "?mode=chart" : "";
 
@@ -62,14 +64,18 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           "Potential security risk detected in your input. Please remove any unsafe code and try again."
         );
         dispatch(setMessages(messages));
-
+        if (messages.length === 0) {
+          navigate("/");
+        }
         return;
       } else if (moderationResult.flagged) {
         showToast.warning(
           "Your message may violate our content guidelines. Please revise and try again."
         );
         dispatch(setMessages(messages));
-
+        if (messages.length === 0) {
+          navigate("/");
+        }
         return;
       }
 
