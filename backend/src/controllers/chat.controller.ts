@@ -14,6 +14,7 @@ import {
 } from "../services/chat.service";
 import { findShareById } from "../services/share.service";
 import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
+import { chartPrompt } from "../lib/prompts/chartPrompt";
 
 interface ChatRequestParams {
   chatId: string;
@@ -51,10 +52,7 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
     messages = [
       {
         role: "system",
-        content: `You are a data analysis assistant. When given a query, respond only with one raw JSON object that includes:
-- "name": a descriptive string
-- "data": an object with arrays of equal length suitable for plotting
-Your response must be directly parseable by JSON.parse() with no extra text.`,
+        content: chartPrompt,
       },
       {
         role: "user",
