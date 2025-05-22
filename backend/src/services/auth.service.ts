@@ -88,12 +88,24 @@ export const googleCallback = (
       let temp = env.CLIENT_ORIGIN.split("/");
       let domain = `${temp[3]}`;
 
-      res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain,
-      });
+      let cocckieOpt = {};
+
+      if (domain.includes("local")) {
+        cocckieOpt = {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        };
+      } else {
+        cocckieOpt = {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          domain,
+        };
+      }
+
+      res.cookie("authToken", token, cocckieOpt);
 
       res.redirect(`${env.CLIENT_ORIGIN}`);
     } catch (err) {
