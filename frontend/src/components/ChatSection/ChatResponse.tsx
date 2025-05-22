@@ -24,6 +24,7 @@ const ChatResponse = ({
   chatId,
   shareId,
   isMobile,
+  sourceChatId,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showResponseActions, setShowResponseActions] = useState(false);
@@ -345,6 +346,7 @@ const ChatResponse = ({
               handleFormSubmit={handleFormSubmit}
               chatId={chatId}
               shareId={shareId}
+              sourceChatId={sourceChatId}
             />
           </>
         )}

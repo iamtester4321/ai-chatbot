@@ -119,6 +119,7 @@ export type ChatResponseProps = {
   chatId: string;
   shareId: string;
   isMobile: boolean;
+  sourceChatId: string | null;
 };
 
 export type PromptInputProps = {
@@ -128,6 +129,7 @@ export type PromptInputProps = {
   handleFormSubmit: (e: React.FormEvent) => void;
   chatId?: string;
   shareId?: string;
+  sourceChatId?: string | null;
 };
 
 export type Message = {
@@ -163,6 +165,7 @@ export type ChatState = {
 export interface ChatHookProps {
   chatId?: string;
   onResponseUpdate?: (text: string) => void;
+  sourceChatId?: string | null;
 }
 
 export interface DeleteChatResponse {

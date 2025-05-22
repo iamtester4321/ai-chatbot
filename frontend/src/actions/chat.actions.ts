@@ -27,7 +27,8 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
-export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
+export const useChatActions = ({ chatId, shareId, sourceChatId, onResponseUpdate }: ChatHookProps & { shareId?: string }) => {
+  console.log(sourceChatId);
   const dispatch = useAppDispatch();
   const { messages } = useAppSelector((state) => state.chat);
   const showToast = useToast();
@@ -76,6 +77,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
           prompt: encryptedUser,
           messages,
           chatId: chatId || "",
+          sourceChatId: sourceChatId || null,
         }),
       });
 
@@ -174,10 +176,22 @@ export const fetchMessagesByShareId = async (shareId: string) => {
       withCredentials: true,
     });
 
-    // No decryption
+    // Decrypt messages and chat name
+    const decryptedMessages = await Promise.all(
+      response.data.messages.map(async (msg: any) => ({
+        ...msg,
+        content: await decryptMessage(msg.content),
+      }))
+    );
+    const decryptedName = await decryptMessage(response.data.name);
+
     return {
       success: true,
-      data: response.data,
+      data: {
+        ...response.data,
+        messages: decryptedMessages,
+        name: decryptedName,
+      },
     };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

@@ -1,18 +1,36 @@
 import { prisma } from "../config/db";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
+import { v4 as uuidv4 } from "uuid";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
   messages: { id: string; role: string; content: string }[],
-  chatId: string
+  chatId: string,
+  sourceChatId?: string
 ) {
+  console.log(chatId);
+  let allMessages = messages;
+  if (sourceChatId) {
+    const sourceChat = await prisma.chat.findUnique({
+      where: { id: sourceChatId },
+      include: { messages: true },
+    });
+    if (sourceChat) {
+      const sourceMessages = sourceChat.messages.map(m => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+      }));
+      allMessages = [...sourceMessages, ...messages];
+    }
+  }
   const existingChat = await prisma.chat.findUnique({
     where: { id: chatId },
   });
 
   if (existingChat) {
     await prisma.message.createMany({
-      data: messages.map((m) => ({
+      data: allMessages.map((m) => ({
         id: m.id,
         role: m.role,
         content: m.content,
@@ -35,15 +53,15 @@ export async function createChatWithMessagesOrApendMesages(
     }
 
     const encryptedName = await encryptMessage(trimmedName);
-
+console.log("Creating chat with ID:", chatId);
     return prisma.chat.create({
       data: {
         id: chatId,
         userId,
         name: encryptedName,
         messages: {
-          create: messages.map((m) => ({
-            id: m.id,
+          create: allMessages.map((m) => ({
+            id: uuidv4(),
             role: m.role,
             content: m.content,
           })),

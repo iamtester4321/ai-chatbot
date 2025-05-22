@@ -27,6 +27,7 @@ interface ChatRequestByshareIdParams {
 export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.user as { id: string })?.id;
   const chatId = req.body.chatId;
+  const sourceChatId = req.body.sourceChatId;
   const encryptedMessages = req.body.messages || [];
   const userMessageId = req.body.userMessageId;
   const assistantMessageId = req.body.assistantMessageId;
@@ -102,7 +103,8 @@ Your response must be directly parseable by JSON.parse() with no extra text.`,
                 content: encryptedAssistantMsg,
               },
             ],
-            chatId
+            chatId,
+            sourceChatId,
           );
         }
       },

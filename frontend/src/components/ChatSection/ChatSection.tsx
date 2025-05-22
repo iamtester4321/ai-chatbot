@@ -30,9 +30,12 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   );
   const [error, setError] = useState<string | null>(null);
   const [generatedChatId, setGeneratedChatId] = useState<string | null>(null);
+  const [sourceChatId, setsourceChatId] = useState<string | null>(null);
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
+    shareId,
+    sourceChatId,
 
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
@@ -87,6 +90,8 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
       const loadMessagesByShareId = async () => {
         const { success, data, error } = await fetchMessagesByShareId(shareId);
         if (success && data) {
+          // console.log(data.id);
+          setsourceChatId(data.id);
           dispatch(setMessages(data.messages));
         } else {
           console.error(error);
@@ -160,6 +165,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
               chatId={chatId || ""}
               shareId={shareId || ""}
               isMobile={isMobile}
+              sourceChatId={sourceChatId}
             />
           )}
   
