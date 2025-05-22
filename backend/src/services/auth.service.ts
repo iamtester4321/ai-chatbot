@@ -88,13 +88,13 @@ export const googleCallback = (
       const temp = new URL(env.SERVER_ORIGIN);
       const domain = temp.hostname;
 
-      const isLocalhost = domain === "localhost";
+      const isDevlopment = env.NODE_ENV.includes("dev");
 
       let cocckieOpt = {
         httpOnly: true,
-        secure: !isLocalhost,
-        sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
-        ...(isLocalhost ? {} : { domain: domain }),
+        secure: !isDevlopment,
+        sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+        ...(isDevlopment ? {} : { domain: domain }),
       };
 
       res.cookie("authToken", token, cocckieOpt);

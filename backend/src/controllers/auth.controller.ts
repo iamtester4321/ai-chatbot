@@ -15,13 +15,13 @@ export const register = async (req: Request, res: Response) => {
     const temp = new URL(env.SERVER_ORIGIN);
     const domain = temp.hostname;
 
-    const isLocalhost = domain === "localhost";
+    const isDevlopment = env.NODE_ENV.includes("dev");
 
     let cocckieOpt = {
       httpOnly: true,
-      secure: !isLocalhost,
-      sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
-      ...(isLocalhost ? {} : { domain: domain }),
+      secure: !isDevlopment,
+      sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isDevlopment ? {} : { domain: domain }),
     };
 
     if (!result.token) {
@@ -55,13 +55,13 @@ export const login = async (req: Request, res: Response) => {
     const temp = new URL(env.SERVER_ORIGIN);
     const domain = temp.hostname;
 
-    const isLocalhost = domain === "localhost";
+    const isDevlopment = env.NODE_ENV.includes("dev");
 
     let cocckieOpt = {
       httpOnly: true,
-      secure: !isLocalhost,
-      sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
-      ...(isLocalhost ? {} : { domain: domain }),
+      secure: !isDevlopment,
+      sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isDevlopment ? {} : { domain: domain }),
     };
 
     res.cookie("authToken", result.data?.token, cocckieOpt);
@@ -75,7 +75,20 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie("authToken");
+  const temp = new URL(env.SERVER_ORIGIN);
+  const domain = temp.hostname;
+
+  const isDevlopment = env.NODE_ENV.includes("dev");
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: !isDevlopment,
+    sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+    ...(isDevlopment ? {} : { domain }),
+    path: "/",
+  };
+
+  res.clearCookie("authToken", cookieOptions);
   res.status(200).json({ success: true, message: "Logged out" });
 };
 
