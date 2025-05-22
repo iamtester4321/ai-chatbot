@@ -13,7 +13,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     let temp = env.CLIENT_ORIGIN.split("/");
-    let domain = `${temp[3]}`;
+    let domain = `${temp[2]}`;
 
     let cocckieOpt = {};
 
@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     let temp = env.CLIENT_ORIGIN.split("/");
-    let domain = `${temp[3]}`;
+    let domain = `${temp[2]}`;
 
     let cocckieOpt = {};
 

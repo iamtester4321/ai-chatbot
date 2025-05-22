@@ -86,7 +86,7 @@ export const googleCallback = (
       if (user) token = signToken({ userId: user.id, email: user.email });
 
       let temp = env.CLIENT_ORIGIN.split("/");
-      let domain = `${temp[3]}`;
+      let domain = `${temp[2]}`;
 
       let cocckieOpt = {};
 
