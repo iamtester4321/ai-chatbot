@@ -4,7 +4,11 @@ import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
 import { SidebarProps } from "../../lib/types";
-import { resetChat, setActionLoadingId, setMode } from "../../store/features/chat/chatSlice";
+import {
+  resetChat,
+  setActionLoadingId,
+  setMode,
+} from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
@@ -24,7 +28,7 @@ const Sidebar = ({
   setSelectedChatId,
   isMobile,
   setIsSidebarOpen,
-  isLoading
+  isLoading,
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -91,7 +95,7 @@ const Sidebar = ({
   };
 
   const handleLogoutClick = async () => {
-    dispatch(setActionLoadingId('logout'));
+    dispatch(setActionLoadingId("logout"));
     try {
       setIsLogoutModalOpen(true);
     } finally {
@@ -99,11 +103,10 @@ const Sidebar = ({
     }
   };
   const filteredChatList = chatList.filter(
-  (chat) =>
-    typeof chat.name === "string" &&
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-);
-
+    (chat) =>
+      typeof chat.name === "string" &&
+      chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const favoriteChats = filteredChatList.filter(
     (chat) => chat.isFavorite && !chat.isArchived
@@ -158,6 +161,10 @@ const Sidebar = ({
           ) : chatList.length === 0 ? (
             <div className="text-center text-[color:var(--color-disabled-text)]">
               No Chats Available
+            </div>
+          ) : filteredChatList.length === 0 ? (
+            <div className="text-center text-[color:var(--color-disabled-text)]">
+              No results found
             </div>
           ) : (
             <>
