@@ -86,7 +86,11 @@ export async function findById(chatId: string) {
   return await prisma.chat.findUnique({
     where: { id: chatId },
     include: {
-      messages: true,
+      messages: {
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
     },
   });
 }
