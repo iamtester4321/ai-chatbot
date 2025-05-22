@@ -201,7 +201,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </LineChart>
         );
@@ -225,7 +225,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </AreaChart>
         );
@@ -249,7 +249,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </BarChart>
         );
@@ -273,7 +273,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </ComposedChart>
         );
@@ -292,7 +292,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
             <YAxis dataKey={numericKeys[1]} name={numericKeys[1]} />
             <ZAxis range={[60]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             <Scatter data={jsonData} fill={COLORS[0]} />
           </ScatterChart>
         );
