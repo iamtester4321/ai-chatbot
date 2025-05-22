@@ -85,25 +85,17 @@ export const googleCallback = (
       let token = null;
       if (user) token = signToken({ userId: user.id, email: user.email });
 
-      let temp = env.CLIENT_ORIGIN.split("/");
-      let domain = `${temp[2]}`;
+      const temp = new URL(env.CLIENT_ORIGIN);
+      const domain = temp.hostname;
 
-      let cocckieOpt = {};
+      const isLocalhost = domain === "localhost";
 
-      if (domain.includes("local")) {
-        cocckieOpt = {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        };
-      } else {
-        cocckieOpt = {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          domain,
-        };
-      }
+      let cocckieOpt = {
+        httpOnly: true,
+        secure: !isLocalhost,
+        sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
+        ...(isLocalhost ? {} : { domain: domain }),
+      };
 
       res.cookie("authToken", token, cocckieOpt);
 

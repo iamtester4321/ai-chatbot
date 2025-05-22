@@ -12,27 +12,26 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    let temp = env.CLIENT_ORIGIN.split("/");
-    let domain = `${temp[2]}`;
+    const temp = new URL(env.CLIENT_ORIGIN);
+    const domain = temp.hostname;
 
-    let cocckieOpt = {};
+    const isLocalhost = domain === "localhost";
 
-    if (domain.includes("local")) {
-      cocckieOpt = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      };
-    } else {
-      cocckieOpt = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain,
-      };
+    let cocckieOpt = {
+      httpOnly: true,
+      secure: !isLocalhost,
+      sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isLocalhost ? {} : { domain: domain }),
+    };
+
+    if (!result.token) {
+      res
+        .status(500)
+        .json({ success: false, message: "Token generation failed" });
+      return;
     }
 
-    res.cookie("authToken", result?.token, cocckieOpt);
+    res.cookie("authToken", result.token, cocckieOpt);
 
     res.status(201).json({ success: true, user: result.data });
   } catch (err) {
@@ -53,25 +52,17 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    let temp = env.CLIENT_ORIGIN.split("/");
-    let domain = `${temp[2]}`;
+    const temp = new URL(env.CLIENT_ORIGIN);
+    const domain = temp.hostname;
 
-    let cocckieOpt = {};
+    const isLocalhost = domain === "localhost";
 
-    if (domain.includes("local")) {
-      cocckieOpt = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      };
-    } else {
-      cocckieOpt = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain,
-      };
-    }
+    let cocckieOpt = {
+      httpOnly: true,
+      secure: !isLocalhost,
+      sameSite: (isLocalhost ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isLocalhost ? {} : { domain: domain }),
+    };
 
     res.cookie("authToken", result.data?.token, cocckieOpt);
     res.json({ success: true, user: result.data?.user });
