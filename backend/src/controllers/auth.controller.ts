@@ -12,11 +12,14 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
+    let temp = env.CLIENT_ORIGIN.split("/");
+    let domain = `${temp[3]}`;
+
     res.cookie("authToken", result?.token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      domain: `${env.CLIENT_ORIGIN}`
+      domain,
     });
 
     res.status(201).json({ success: true, user: result.data });
@@ -38,11 +41,14 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
+    let temp = env.CLIENT_ORIGIN.split("/");
+    let domain = `${temp[3]}`;
+
     res.cookie("authToken", result.data?.token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      domain: `${env.CLIENT_ORIGIN}`
+      domain,
     });
     res.json({ success: true, user: result.data?.user });
   } catch (err) {

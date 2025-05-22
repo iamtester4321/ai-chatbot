@@ -85,11 +85,14 @@ export const googleCallback = (
       let token = null;
       if (user) token = signToken({ userId: user.id, email: user.email });
 
+      let temp = env.CLIENT_ORIGIN.split("/");
+      let domain = `${temp[3]}`;
+
       res.cookie("authToken", token, {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        domain: `${env.CLIENT_ORIGIN}`
+        domain,
       });
 
       res.redirect(`${env.CLIENT_ORIGIN}`);
