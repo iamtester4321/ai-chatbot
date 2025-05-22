@@ -5,6 +5,7 @@ import {
   ChartLine,
   ChevronDown,
   ChevronUp,
+  Download,
   LayoutGrid,
   PieChart as PieIcon,
   ScatterChart as ScatterIcon,
@@ -43,6 +44,8 @@ import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
 import { RootState } from "../../store/store";
 import StreamLoader from "../Loaders/StreamLoader";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
   line: <ChartLine size={16} className="mr-2" />,
@@ -65,6 +68,8 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -308,12 +313,32 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     }
   }, [chartType, categoryKey, numericKeys, jsonData, renderSeries]);
 
+  const handleExportPDF = async () => {
+    if (!chartRef.current) return;
+  
+    const canvas = await html2canvas(chartRef.current, {
+      backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+      scale: 2,
+    });
+  
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: [canvas.width, canvas.height],
+    });
+  
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save(`${name}-chart.pdf`);
+  };
+  
+
   return (
     <div className="p-6">
       <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
         {name}
       </p>
-      <div className="relative inline-block text-left mb-4">
+      <div className="relative flex justify-between text-left mb-4">
         <button
           ref={buttonRef}
           onClick={() => setOpen((prev) => !prev)}
@@ -333,6 +358,13 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
               />
             )}
           </span>
+        </button>
+        <button
+          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center"
+          onClick={handleExportPDF}
+        >
+          <Download size={16} className="mr-2" />
+          <span>Export</span>
         </button>
 
         {open && (
@@ -361,7 +393,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           </div>
         )}
       </div>
-      <div className="h-96">
+      <div className="h-96" ref={chartRef}>
         <ResponsiveContainer width="100%" height="100%">
           {chartElement || <StreamLoader />}
         </ResponsiveContainer>

@@ -18,7 +18,8 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to={"/chat"} />} />
+          {/* <Route path="/" element={<Navigate to={"/chat"} />} /> */}
+          <Route path="/*" element={<Navigate to={"/chat"} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/share/:shareId" element={<Layout />} />
