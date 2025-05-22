@@ -36,7 +36,7 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const { mode } = req.query;
 
   let messages = await Promise.all(
-    encryptedMessages.map(async (m: { content: string, role: string }) => ({
+    encryptedMessages.map(async (m: { content: string; role: string }) => ({
       role: m.role,
       content: await decryptMessage(m.content),
     }))
@@ -54,18 +54,18 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
         content: `You are a data analysis assistant. When given a query, respond only with one raw JSON object that includes:
 - "name": a descriptive string
 - "data": an object with arrays of equal length suitable for plotting
-Your response must be directly parseable by JSON.parse() with no extra text.`
+Your response must be directly parseable by JSON.parse() with no extra text.`,
       },
       {
         role: "user",
-        content: decryptedPrompt
-      }
+        content: decryptedPrompt,
+      },
     ];
   } else {
     // Normal mode
     messages.push({
       role: "user",
-      content: decryptedPrompt
+      content: decryptedPrompt,
     });
   }
 
@@ -87,24 +87,24 @@ Your response must be directly parseable by JSON.parse() with no extra text.`
             JSON.parse(assistantReply);
           } catch (e) {
             // If not valid JSON, generate a fallback response
-            
           }
         }
-
-        const encryptedUserMsg = await encryptMessage(decryptedPrompt);
-        const encryptedAssistantMsg = await encryptMessage(assistantReply);
-        await saveChat(
-          userId,
-          [
-            { id: userMessageId, role: "user", content: encryptedUserMsg },
-            {
-              id: assistantMessageId,
-              role: "assistant",
-              content: encryptedAssistantMsg,
-            },
-          ],
-          chatId
-        );
+        if (userId) {
+          const encryptedUserMsg = await encryptMessage(decryptedPrompt);
+          const encryptedAssistantMsg = await encryptMessage(assistantReply);
+          await saveChat(
+            userId,
+            [
+              { id: userMessageId, role: "user", content: encryptedUserMsg },
+              {
+                id: assistantMessageId,
+                role: "assistant",
+                content: encryptedAssistantMsg,
+              },
+            ],
+            chatId
+          );
+        }
       },
       onError: (err) => console.error("Stream error:", err),
     });
