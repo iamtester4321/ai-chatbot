@@ -1,17 +1,18 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { useChat } from "@ai-sdk/react";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
-  ARCHIVE_CHAT,
-  DELETE_CHAT,
+  STREAM_CHAT_RESPONSE,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
   GET_SHARE_CHAT_MESSAGES,
+  ARCHIVE_CHAT,
+  DELETE_CHAT,
   PROMPT_SUGGESTION,
   RENAME_CHAT,
   SHARE_CHAT,
-  STREAM_CHAT_RESPONSE,
   TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
 import { ChatHookProps, DeleteChatResponse } from "../lib/types";
@@ -25,23 +26,28 @@ import {
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
-import { useNavigate } from "react-router-dom";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
-  const dispatch = useAppDispatch();
-  const { messages, mode } = useAppSelector((state) => state.chat);
-  const showToast = useToast();
+  const { search } = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { messages } = useAppSelector((s) => s.chat);
+  const showToast = useToast();
 
-  const modeStr = mode === "chart" ? "?mode=chart" : "";
+  // 1) parse ?mode=chart
+  const params      = new URLSearchParams(search);
+  const isChartMode = params.get("mode") === "chart";
+  const modeQuery   = isChartMode ? "?mode=chart" : "";
+  const messageType = isChartMode ? "chart" : "text";
 
+  // 2) wire up the SDK
   const {
     input,
     handleInputChange,
-    handleSubmit: baseHandleSubmit,
+    handleSubmit: sdkHandleSubmit,
     status,
   } = useChat({
-    api: STREAM_CHAT_RESPONSE(modeStr),
+    api: STREAM_CHAT_RESPONSE(modeQuery),
     id: chatId,
     onResponse: async () => {
       const userMessageId = uuidv4();
@@ -50,9 +56,10 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
       // 1. Optimistically add the user message
       dispatch(
         addMessage({
-          id: userMessageId,
-          role: "user",
-          content: input,
+          id:        userMessageId,
+          role:      "user",
+          content:   input,
+          type:      messageType,
           createdAt: new Date().toISOString(),
         })
       );
@@ -81,17 +88,17 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
 
       // 3. Encrypt and send to server
       const encryptedUser = await encryptMessage(input);
-      const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
+      const response = await fetch(STREAM_CHAT_RESPONSE(modeQuery), {
         method: "POST",
-        credentials: "include",
+          credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userMessageId,
-          assistantMessageId,
+            userMessageId,
+            assistantMessageId,
           prompt: encryptedUser,
-          messages,
+            messages,
           chatId: chatId || "",
-        }),
+          }),
       });
 
       if (!response.ok) throw new Error("API request failed");
@@ -120,17 +127,39 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
             id: assistantMessageId,
             role: "assistant",
             content: decryptedAssistantMessage,
+            type: messageType,
             createdAt: new Date().toISOString(),
           })
         );
         dispatch(setCurrentResponse(""));
         onResponseUpdate?.("");
 
-        await fetchChatNames(dispatch);
+        // 8) refresh chat names
+        const names = await axios.get(GET_CHAT_NAMES, { withCredentials: true });
+        if (names.status === 200) {
+          const list = await Promise.all(
+            names.data.map(async (c: any) => ({
+              ...c,
+              name: await decryptMessage(c.name),
+            }))
+          );
+          dispatch(setChatList(list));
+        }
+
+        // 9) refresh this chat’s name
         if (chatId) {
-          const updatedChat = await fetchMessages(chatId);
-          if (updatedChat.success && updatedChat.data) {
-            dispatch(setChatName(updatedChat.data.name));
+          const msgs = await axios.get(`${GET_CHAT_MESSAGES}/${chatId}`, {
+            withCredentials: true,
+          });
+          if (msgs.status === 200) {
+            const decrypted = await Promise.all(
+              msgs.data.messages.map(async (m: any) => ({
+                ...m,
+                content: await decryptMessage(m.content),
+              }))
+            );
+            dispatch(setChatName(msgs.data.name));
+            dispatch(setMessages(decrypted));
           }
         }
       } finally {
@@ -143,7 +172,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     messages,
     input,
     handleInputChange,
-    handleSubmit: baseHandleSubmit,
+    handleSubmit: sdkHandleSubmit,
     isLoading: status === "submitted",
   };
 };

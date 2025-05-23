@@ -50,6 +50,7 @@ model Message {
   id         String   @id
   content    String
   role       String
+  type       String   @default("text")
   createdAt  DateTime @default(now())
   isLiked    Boolean  @default(false)
   isDisliked Boolean  @default(false)

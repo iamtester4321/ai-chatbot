@@ -119,6 +119,7 @@ export type ChatResponseProps = {
   chatId: string;
   shareId: string;
   isMobile: boolean;
+  currentMode: string;
 };
 
 export type ChatMessageThreadProps = {
@@ -142,6 +143,7 @@ export type PromptInputProps = {
 };
 
 export type Message = {
+  type: string;
   id?: string;
   role: string;
   content: string;
