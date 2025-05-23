@@ -30,7 +30,7 @@ const ChatResponse = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
-  const user = useAppSelector((state) => state.user.user);
+
   const showToast = useToast();
   const dispatch = useAppDispatch();
 
