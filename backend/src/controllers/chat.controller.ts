@@ -14,6 +14,7 @@ import {
 } from "../services/chat.service";
 import { findShareById } from "../services/share.service";
 import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
+import { createChatFromSourceChat } from "../repositories/chat.repository";
 
 interface ChatRequestParams {
   chatId: string;
@@ -116,6 +117,25 @@ Your response must be directly parseable by JSON.parse() with no extra text.`,
     res.status(500).json({ error: "Internal error" });
   }
 });
+
+export const handleCreateChatFromSource = async (req: any, res: any) => {
+  const userId = req.user?.id; // Ensure this is being set by your auth middleware
+  const newChatId = req.params.chatId;
+  const sourceChatId = req.body.sourceChatId;
+
+  if (!userId || !sourceChatId) {
+    return res.status(400).json({ success: false, error: "Missing required fields." });
+  }
+
+  const result = await createChatFromSourceChat(userId, newChatId, sourceChatId);
+
+  if (result.success) {
+    return res.status(201).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: result.error });
+  }
+};
+
 
 export const findChatById: RequestHandler = asyncHandler(async (req, res) => {
   try {

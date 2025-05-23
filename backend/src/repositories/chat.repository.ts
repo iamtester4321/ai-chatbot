@@ -72,6 +72,56 @@ console.log("Creating chat with ID:", chatId);
   }
 }
 
+export async function createChatFromSourceChat(
+  userId: string,
+  newChatId: string,
+  sourceChatId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sourceChat = await prisma.chat.findUnique({
+      where: { id: sourceChatId },
+      include: { messages: true },
+    });
+
+    if (!sourceChat) {
+      return { success: false, error: "Source chat not found." };
+    }
+
+    const messages = sourceChat.messages.map((m) => ({
+      id: uuidv4(),
+      role: m.role,
+      content: m.content,
+    }));
+
+    let chatName = "New Chat";
+    const firstUserMessage = sourceChat.messages.find((m) => m.role === "user");
+
+    if (firstUserMessage) {
+      const decrypted = await decryptMessage(firstUserMessage.content);
+      chatName = decrypted.trim().slice(0, 50);
+    }
+
+    const encryptedName = await encryptMessage(chatName);
+
+    await prisma.chat.create({
+      data: {
+        id: newChatId,
+        userId,
+        name: encryptedName,
+        messages: {
+          create: messages,
+        },
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to create chat:", error);
+    return { success: false, error: "An error occurred while creating the chat." };
+  }
+}
+
+
 export function getChatsByUser(userId: string) {
   return prisma.chat.findMany({
     where: { userId },

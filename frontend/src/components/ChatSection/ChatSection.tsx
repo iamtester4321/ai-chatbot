@@ -20,6 +20,7 @@ import Error from "../Common/Error";
 import { decryptMessage } from "../../utils/encryption.utils";
 
 const ChatSection = ({isMobile}: {isMobile: boolean}) => {
+  console.log("call");
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { shareId } = useParams();
@@ -44,7 +45,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   
   useEffect(() => {
   setError(null);
-
+  if (shareId) return;
   if (chatId) {
     const loadMessages = async () => {
       const { success, data, error } = await fetchMessages(chatId);
@@ -69,7 +70,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   } else {
     dispatch(setMessages([]));
   }
-}, [chatId, dispatch, generatedChatId]);
+}, [chatId, shareId, dispatch, generatedChatId]);
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -90,7 +91,6 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
       const loadMessagesByShareId = async () => {
         const { success, data, error } = await fetchMessagesByShareId(shareId);
         if (success && data) {
-          // console.log(data.id);
           setsourceChatId(data.id);
           dispatch(setMessages(data.messages));
         } else {
@@ -100,7 +100,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
 
       loadMessagesByShareId();
     }
-  }, [chatId, dispatch]);
+  }, [shareId, dispatch]);
 
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
