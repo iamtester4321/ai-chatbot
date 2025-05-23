@@ -41,7 +41,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ZAxis
+  ZAxis,
 } from "recharts";
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
@@ -71,7 +71,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -83,14 +82,12 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
         setOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  // Transform object-of-arrays into array-of-objects
   useEffect(() => {
     if (Array.isArray(data)) {
       setJsonData(data);
@@ -116,7 +113,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     }
   }, [data]);
 
-  // Detect category (string array) and numeric series
   const { categoryKey, numericKeys } = useMemo(() => {
     if (!jsonData.length) return { categoryKey: "", numericKeys: [] };
     const sample = jsonData[0];
@@ -174,8 +170,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
       </ul>
     );
   };
-  
-  // Memoize the entire chart element
+
   const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
       return <p className="text-red-500">Insufficient data for chart</p>;
@@ -337,56 +332,78 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
 
   const handleExportPDF = async () => {
     if (!chartRef.current) return;
-  
     const canvas = await html2canvas(chartRef.current, {
       backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
       scale: 2,
     });
-  
     const imgData = canvas.toDataURL("image/png");
-  
     const padding = 40;
-  
     const pdfWidth = canvas.width + padding * 2;
     const pdfHeight = canvas.height + padding * 2;
-  
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "px",
       format: [pdfWidth, pdfHeight],
     });
-  
     pdf.addImage(imgData, "PNG", padding, padding, canvas.width, canvas.height);
     pdf.save(`${name}-chart.pdf`);
   };
-  
 
   return (
     <div className="p-6">
       <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
         {name}
       </p>
-      <div className="relative flex justify-between text-left mb-4">
-        <button
-          ref={buttonRef}
-          onClick={() => setOpen((prev) => !prev)}
-          className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
-        >
-          <span className="flex items-center">
-            {chartIcons[chartType]}
-            {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
-          </span>
-          <span>
-            {open ? (
-              <ChevronUp size={16} className="text-[color:var(--color-text)]" />
-            ) : (
-              <ChevronDown
-                size={16}
-                className="text-[color:var(--color-text)]"
-              />
-            )}
-          </span>
-        </button>
+      <div className="flex justify-between text-left mb-4">
+        <div className="relative">
+          <button
+            ref={buttonRef}
+            onClick={() => setOpen((prev) => !prev)}
+            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
+          >
+            <span className="flex items-center">
+              {chartIcons[chartType]}
+              {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
+            </span>
+            <span>
+              {open ? (
+                <ChevronUp
+                  size={16}
+                  className="text-[color:var(--color-text)]"
+                />
+              ) : (
+                <ChevronDown
+                  size={16}
+                  className="text-[color:var(--color-text)]"
+                />
+              )}
+            </span>
+          </button>
+          {open && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-10 mt-1 left-0 top-full w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+            >
+              <div className="py-1">
+                {chartOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setChartType(option);
+                      setOpen(false);
+                    }}
+                    className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
+                      option === chartType ? "font-semibold" : ""
+                    }`}
+                  >
+                    {chartIcons[option]}
+                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <button
           className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center"
           onClick={handleExportPDF}
@@ -394,32 +411,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           <Download size={16} className="mr-2" />
           <span>Export</span>
         </button>
-
-        {open && (
-          <div
-            ref={dropdownRef}
-            data-dropdown-menu
-            className="absolute z-5 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
-          >
-            <div className="py-1">
-              {chartOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    setChartType(option);
-                    setOpen(false);
-                  }}
-                  className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
-                    option === chartType ? "font-semibold" : ""
-                  }`}
-                >
-                  {chartIcons[option]}
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
       <div className="h-96" ref={chartRef}>
         <ResponsiveContainer width="100%" height="100%">
@@ -430,7 +421,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   );
 }
 
-// Only re-render when `data` or `name` change
 export default React.memo(DynamicChartComponent, (prev, next) => {
   return (
     prev.name === next.name &&

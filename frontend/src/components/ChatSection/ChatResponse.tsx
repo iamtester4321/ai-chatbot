@@ -34,20 +34,20 @@ const ChatResponse = ({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-  const element = messagesEndRef.current;
-  if (!element) return;
+    const element = messagesEndRef.current;
+    if (!element) return;
 
-  const container = element.parentElement;
-  if (!container) return;
+    const container = element.parentElement;
+    if (!container) return;
 
-  const isNearBottom =
-    container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
 
-  if (isNearBottom) {
-    element.scrollIntoView({ block: "center" });
-  }
-}, [messages, chatResponse]);
-
+    if (isNearBottom) {
+      element.scrollIntoView({ block: "center" });
+    }
+  }, [messages, chatResponse]);
 
   useEffect(() => {
     if (!isLoading && chatResponse) {
@@ -160,8 +160,10 @@ const ChatResponse = ({
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
           {chatName && (
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
-              text-center md:text-left">
+            <h2
+              className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
+              text-center md:text-left"
+            >
               {chatName}
             </h2>
           )}
@@ -173,8 +175,10 @@ const ChatResponse = ({
                 return (
                   <div key={index} className="flex justify-end">
                     <div className="space-y-2">
-                      <div className="bg-[var(--color-muted)] px-3 sm:px-4 py-1 rounded-2xl 
-                        max-w-[280px] sm:max-w-xs md:max-w-md break-words">
+                      <div
+                        className="bg-[var(--color-muted)] px-3 sm:px-4 py-1 rounded-2xl 
+                        max-w-[280px] sm:max-w-xs md:max-w-md break-words"
+                      >
                         {msg.content}
                       </div>
                       <div className="flex justify-end">
@@ -183,7 +187,11 @@ const ChatResponse = ({
                           aria-label="Copy to clipboard"
                           onClick={() => copyToClipboard(msg.content, index)}
                         >
-                          {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
+                          {copiedIndex === index ? (
+                            <Check size={isMobile ? 16 : 20} />
+                          ) : (
+                            <Copy size={isMobile ? 16 : 20} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -205,58 +213,68 @@ const ChatResponse = ({
                         aria-label="Copy to clipboard"
                         onClick={() => copyToClipboard(msg.content, index)}
                       >
-                        {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
+                        {copiedIndex === index ? (
+                          <Check size={isMobile ? 12 : 16} />
+                        ) : (
+                          <Copy size={isMobile ? 12 : 16} />
+                        )}
                       </button>
                       {user && (
                         <>
                           {msg?.id && (
-                            <button
-                              className={`p-1 transition-colors ${
-                                !(
-                                  likedMessages[msg.id] ||
-                                  dislikedMessages[msg.id]
-                                )
-                                  ? "hover:text-[var(--color-text)]"
-                                  : ""
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              aria-label="Like"
-                              onClick={() => handleLike(msg.id)}
-                              disabled={
-                                likedMessages[msg.id] ||
-                                dislikedMessages[msg.id]
-                              }
-                            >
-                              <ThumbsUp
-                                size={isMobile ? 16 : 20}
-                                fill={likedMessages[msg.id] ? "currentColor" : "none"}
-                                color="currentColor"
-                              />
-                            </button>
-                          )}
+                            <>
+                              {likedMessages[msg.id] ? (
+                                <button
+                                  className="p-1 transition-colors hover:text-[var(--color-text)]"
+                                  aria-label="Like"
+                                  onClick={() => handleLike(msg.id)}
+                                >
+                                  <ThumbsUp
+                                    size={isMobile ? 12 : 16}
+                                    fill="currentColor"
+                                    color="currentColor"
+                                  />
+                                </button>
+                              ) : dislikedMessages[msg.id] ? (
+                                <button
+                                  className="p-1 transition-colors hover:text-[var(--color-text)]"
+                                  aria-label="Dislike"
+                                  onClick={() => handleDislike(msg.id)}
+                                >
+                                  <ThumbsDown
+                                    size={isMobile ? 12 : 16}
+                                    fill="currentColor"
+                                    color="currentColor"
+                                  />
+                                </button>
+                              ) : (
+                                <>
+                                  <button
+                                    className="p-1 transition-colors hover:text-[var(--color-text)]"
+                                    aria-label="Like"
+                                    onClick={() => handleLike(msg.id)}
+                                  >
+                                    <ThumbsUp
+                                      size={isMobile ? 12 : 16}
+                                      fill="none"
+                                      color="currentColor"
+                                    />
+                                  </button>
 
-                          {msg?.id && (
-                            <button
-                              className={`p-1 transition-colors ${
-                                !(
-                                  likedMessages[msg.id] ||
-                                  dislikedMessages[msg.id]
-                                )
-                                  ? "hover:text-[var(--color-text)]"
-                                  : ""
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              aria-label="Dislike"
-                              onClick={() => handleDislike(msg.id)}
-                              disabled={
-                                likedMessages[msg.id] ||
-                                dislikedMessages[msg.id]
-                              }
-                            >
-                              <ThumbsDown
-                                size={isMobile ? 16 : 20}
-                                fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
-                                color="currentColor"
-                              />
-                            </button>
+                                  <button
+                                    className="p-1 transition-colors hover:text-[var(--color-text)]"
+                                    aria-label="Dislike"
+                                    onClick={() => handleDislike(msg.id)}
+                                  >
+                                    <ThumbsDown
+                                      size={isMobile ? 12 : 16}
+                                      fill="none"
+                                      color="currentColor"
+                                    />
+                                  </button>
+                                </>
+                              )}
+                            </>
                           )}
                         </>
                       )}
@@ -295,8 +313,12 @@ const ChatResponse = ({
                           }
                         >
                           <ThumbsUp
-                            size={isMobile ? 16 : 20}
-                            fill={likedMessages[chatResponse] ? "currentColor" : "none"}
+                            size={isMobile ? 12 : 16}
+                            fill={
+                              likedMessages[chatResponse]
+                                ? "currentColor"
+                                : "none"
+                            }
                             color="currentColor"
                           />
                         </button>
@@ -309,8 +331,12 @@ const ChatResponse = ({
                           }
                         >
                           <ThumbsDown
-                            size={isMobile ? 16 : 20}
-                            fill={dislikedMessages[chatResponse] ? "currentColor" : "none"}
+                            size={isMobile ? 12 : 16}
+                            fill={
+                              dislikedMessages[chatResponse]
+                                ? "currentColor"
+                                : "none"
+                            }
                             color="currentColor"
                           />
                         </button>
@@ -342,7 +368,7 @@ const ChatResponse = ({
               className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
               <span className="flex items-center">
-                <Archive size={16} className="mr-2" />
+                <Archive size={12} className="mr-2" />
                 Unarchive
               </span>
             </button>
