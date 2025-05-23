@@ -121,6 +121,17 @@ export type ChatResponseProps = {
   isMobile: boolean;
 };
 
+export type ChatMessageThreadProps = {
+  messages:  Message[];
+  isMobile: boolean;
+  onCopy: (text: string, index: number) => void;
+  copiedIndex: number | null;
+  likedMessages: { [key: string]: boolean };
+  dislikedMessages: { [key: string]: boolean };
+  onLike: (id: string | undefined) => void;
+  onDislike: (id: string | undefined) => void;
+};
+
 export type PromptInputProps = {
   input: string;
   isLoading: boolean;

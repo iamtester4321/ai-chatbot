@@ -12,6 +12,8 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
 import StreamLoader from "../Loaders/StreamLoader";
 import PromptInput from "./PromptInput";
+import ChatMessageThread from "./ChatMessageThread";
+import { Skeleton } from "../Loaders";
 
 const ChatResponse = ({
   messages,
@@ -26,7 +28,6 @@ const ChatResponse = ({
   isMobile,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
   const user = useAppSelector((state) => state.user.user);
@@ -92,6 +93,21 @@ const ChatResponse = ({
     [key: string]: boolean;
   }>({});
 
+  useEffect(() => {
+    const newLikedMessages: { [key: string]: boolean } = {};
+    const newDislikedMessages: { [key: string]: boolean } = {};
+
+    messages.forEach((msg) => {
+      if (msg.id) {
+        newLikedMessages[msg.id] = msg.isLiked || false;
+        newDislikedMessages[msg.id] = msg.isDisliked || false;
+      }
+    });
+
+    setLikedMessages(newLikedMessages);
+    setDislikedMessages(newDislikedMessages);
+  }, [messages]);
+
   const handleLike = async (messageId: string | undefined) => {
     if (!messageId) return;
     try {
@@ -139,21 +155,36 @@ const ChatResponse = ({
   };
 
   useEffect(() => {
-    const newLikedMessages: { [key: string]: boolean } = {};
-    const newDislikedMessages: { [key: string]: boolean } = {};
+    const element = messagesEndRef.current;
+    if (!element) return;
 
-    messages.forEach((msg) => {
-      if (msg.id) {
-        newLikedMessages[msg.id] = msg.isLiked || false;
-        newDislikedMessages[msg.id] = msg.isDisliked || false;
+    const container = element.parentElement;
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+
+    if (isNearBottom) {
+      element.scrollIntoView({ block: "center" });
+    }
+  }, [messages, chatResponse]);
+
+  const handleRestoreChat = async (chatId: string) => {
+    try {
+      const result = await archiveChat(chatId);
+
+      if (result.success) {
+        dispatch(setIsArchived(false));
+        showToast.success("Chat restored");
+      } else {
+        showToast.error(result.message || "Failed to restore chat");
       }
-    });
-
-    setLikedMessages(newLikedMessages);
-    setDislikedMessages(newDislikedMessages);
-  }, [messages]);
-
-  const { mode } = useAppSelector((state) => state.chat);
+    } catch (error) {
+      showToast.error("An error occurred while restoring chat");
+      console.error("Error restoring chat:", error);
+    }
+  };
 
   return (
     <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
@@ -288,22 +319,25 @@ const ChatResponse = ({
             {chatResponse && (
               <div className="space-y-2">
                 <div className="prose prose-invert max-w-none">
-                  {/* Use MarkdownRenderer for AI response */}
                   <MarkdownRenderer content={chatResponse} flag={true} />
                 </div>
 
                 {/* Action buttons */}
-                {showResponseActions && (
+                {chatResponse && (
                   <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
-                    <button
-                      className="p-1 hover:text-[var(--color-text)]"
-                      aria-label="Copy to clipboard"
-                      onClick={() => copyToClipboard(chatResponse, -1)}
-                    >
-                      {copiedIndex === -1 ? <Check /> : <Copy />}
-                    </button>
-                    {user && (
+                    {user && !isLoading && (
                       <>
+                        <button
+                          className="p-1 hover:text-[var(--color-text)]"
+                          aria-label="Copy to clipboard"
+                          onClick={() => {
+                            navigator.clipboard.writeText(chatResponse);
+                            setCopiedIndex(-1);
+                            setTimeout(() => setCopiedIndex(null), 2000);
+                          }}
+                        >
+                          {copiedIndex === -1 ? <Check /> : <Copy />}
+                        </button>
                         <button
                           className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Like"

@@ -67,6 +67,11 @@ const PromptInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isLoading && e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      return;
+    }
+
     if (showSuggestions && suggestions.length > 0) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
