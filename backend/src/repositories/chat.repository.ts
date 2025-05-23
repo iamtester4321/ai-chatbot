@@ -1,5 +1,6 @@
 import { prisma } from "../config/db";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
+import { v4 as uuidv } from "uuid";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
@@ -13,7 +14,7 @@ export async function createChatWithMessagesOrApendMesages(
   if (existingChat) {
     await prisma.message.createMany({
       data: messages.map((m) => ({
-        id: m.id,
+        id: uuidv(),
         role: m.role,
         content: m.content,
         chatId: chatId,
@@ -43,7 +44,7 @@ export async function createChatWithMessagesOrApendMesages(
         name: encryptedName,
         messages: {
           create: messages.map((m) => ({
-            id: m.id,
+            id: uuidv(),
             role: m.role,
             content: m.content,
           })),
@@ -77,7 +78,7 @@ export async function getChatNamesByUser(userId: string) {
   return Promise.all(
     chats.map(async (chat) => ({
       ...chat,
-      name:chat.name,
+      name: chat.name,
     }))
   );
 }
@@ -88,7 +89,7 @@ export async function findById(chatId: string) {
     include: {
       messages: {
         orderBy: {
-          createdAt: 'asc',
+          createdAt: "asc",
         },
       },
     },
@@ -130,3 +131,61 @@ export const deleteChatById = async (chatId: string) => {
     },
   });
 };
+
+export async function createChatFromSourceChat(
+  userId: string,
+  newChatId: string,
+  sourceChatId: string
+): Promise<{
+  success: boolean;
+  error?: string;
+  data?: { id: string; role: string; content: string }[];
+}> {
+  try {
+    const sourceChat = await prisma.chat.findUnique({
+      where: { id: sourceChatId },
+      include: { messages: true },
+    });
+
+    if (!sourceChat) {
+      return { success: false, error: "Source chat not found." };
+    }
+
+    const messages = sourceChat.messages.map((m) => {
+      return { ...m, id: uuidv() };
+    });
+
+    console.log("source chat messages::", messages);
+
+    let chatName = "New Chat";
+    const firstUserMessage = sourceChat.messages.find((m) => m.role === "user");
+
+    if (firstUserMessage) {
+      const decrypted = await decryptMessage(firstUserMessage.content);
+      chatName = decrypted.trim().slice(0, 50);
+    }
+
+    const encryptedName = await encryptMessage(chatName);
+
+    const data = await prisma.chat.create({
+      data: {
+        id: newChatId,
+        userId,
+        name: encryptedName,
+        messages: {
+          create: messages,
+        },
+      },
+    });
+
+    console.log("data::", data);
+
+    return { success: true, data: [] };
+  } catch (error) {
+    console.error("Failed to create chat:", error);
+    return {
+      success: false,
+      error: "An error occurred while creating the chat.",
+    };
+  }
+}

@@ -1,4 +1,4 @@
-import { Archive, Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Archive, Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { archiveChat } from "../../actions/chat.actions";
 import {

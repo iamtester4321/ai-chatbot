@@ -24,17 +24,20 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { shareId } = useParams();
+
   const dispatch = useAppDispatch();
+
+  const [showRegenerate, setShowRegenerate] = useState(false);
 
   const { messages, currentResponse, chatName } = useAppSelector(
     (state) => state.chat
   );
+
   const [error, setError] = useState<string | null>(null);
   const [generatedChatId, setGeneratedChatId] = useState<string | null>(null);
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
-
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
     },
@@ -93,6 +96,9 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
       const loadMessagesByShareId = async () => {
         dispatch(setIsLoading(true));
         const { success, data, error } = await fetchMessagesByShareId(shareId);
+
+        dispatch(setChatName(data.name));
+
         dispatch(setIsLoading(false));
 
         if (success && data) {
@@ -104,7 +110,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
 
       loadMessagesByShareId();
     }
-  }, [chatId, dispatch]);
+  }, [shareId, dispatch]);
 
   useEffect(() => {
     const storedPrompt = sessionStorage.getItem("initialPrompt");
@@ -151,20 +157,51 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
     navigate("/chat");
   };
 
+  const handleRegenerate = async () => {
+    setShowRegenerate(false);
+    dispatch(setIsLoading(true));
+    await handleSubmit(new Event("submit") as any);
+    dispatch(setIsLoading(false));
+  };
+
+  useEffect(() => {
+    if (isLoading && messages.length > 0) {
+      const timeout = setTimeout(() => {
+        if (!currentResponse) {
+          setShowRegenerate(true);
+        }
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setShowRegenerate(false);
+    }
+  }, [isLoading, currentResponse, messages.length]);
+
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {isLoading && messages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center">
-          <Spinner />
-
-          <div className="mt-2 animate-fade-in-up text-text-secondary">
-            <p className="text-lg sm:text-xl font-medium tracking-wide">
-              Getting you started with
-            </p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gold font-inter drop-shadow-glow">
-              Aivora
-            </h1>
-          </div>
+          {showRegenerate ? (
+            <button
+              onClick={handleRegenerate}
+              className="px-4 py-2 bg-gold text-white rounded hover:bg-opacity-80 transition"
+            >
+              Regenerate
+            </button>
+          ) : (
+            <>
+              <Spinner />
+              <div className="mt-2 animate-fade-in-up text-text-secondary">
+                <p className="text-lg sm:text-xl font-medium tracking-wide">
+                  Getting you started with
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gold font-inter drop-shadow-glow">
+                  Aivora
+                </h1>
+              </div>
+            </>
+          )}
         </div>
       ) : error && chatId !== generatedChatId ? (
         <Error message={error} onNewChat={handleNewChat} />

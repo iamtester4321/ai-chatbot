@@ -122,7 +122,7 @@ export type ChatResponseProps = {
 };
 
 export type ChatMessageThreadProps = {
-  messages:  Message[];
+  messages: Message[];
   isMobile: boolean;
   onCopy: (text: string, index: number) => void;
   copiedIndex: number | null;
@@ -173,6 +173,7 @@ export type ChatState = {
 
 export interface ChatHookProps {
   chatId?: string;
+  shareId?: string;
   onResponseUpdate?: (text: string) => void;
 }
 

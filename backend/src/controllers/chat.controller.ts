@@ -15,6 +15,7 @@ import {
 import { findShareById } from "../services/share.service";
 import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 import { chartPrompt } from "../lib/prompts/chartPrompt";
+import { createChatFromSourceChat } from "../repositories/chat.repository";
 
 interface ChatRequestParams {
   chatId: string;
@@ -69,23 +70,26 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
 
   const model = google("gemini-2.0-flash");
 
+  const validRoles = new Set(["user", "assistant", "system"]);
+  const promptMessages = messages
+    .filter((m) => validRoles.has(m.role) && typeof m.content === "string")
+    .map((m) => ({
+      role: m.role as "user" | "assistant" | "system",
+      content: m.content,
+    }));
+
   try {
     const result = streamText({
       model,
-      messages,
+      messages: promptMessages,
       onChunk: ({ chunk }) => {
         if (chunk.type === "text-delta") {
           assistantReply += chunk.textDelta;
         }
       },
       onFinish: async () => {
-        // For chart mode, validate the JSON
         if (mode === "chart") {
-          try {
-            JSON.parse(assistantReply);
-          } catch (e) {
-            // If not valid JSON, generate a fallback response
-          }
+          JSON.parse(assistantReply);
         }
         if (userId) {
           const encryptedUserMsg = await encryptMessage(decryptedPrompt);
@@ -246,3 +250,27 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+export const handleCreateChatFromSource = async (req: any, res: any) => {
+  const userId = req.user?.id;
+  const newChatId = req.params.chatId;
+  const sourceChatId = req.body.sourceChatId;
+
+  if (!userId || !sourceChatId) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Missing required fields." });
+  }
+
+  const result = await createChatFromSourceChat(
+    userId,
+    newChatId,
+    sourceChatId
+  );
+
+  if (result.success) {
+    return res.status(201).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: result.error });
+  }
+};

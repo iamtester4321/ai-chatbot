@@ -76,7 +76,7 @@ const RegisterForm = () => {
       }
 
       showToast.success("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/"), 2000);
     } catch (err) {
       if (err instanceof z.ZodError) {
         const issues = err.flatten().fieldErrors;

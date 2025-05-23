@@ -27,10 +27,7 @@ import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 import { useNavigate } from "react-router-dom";
 
-export const useChatActions = ({
-  chatId,
-  onResponseUpdate,
-}: ChatHookProps & { shareId?: string }) => {
+export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
   const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
@@ -61,8 +58,8 @@ export const useChatActions = ({
         navigate("/");
         dispatch(resetChat());
       } else {
-        const userMessageId = uuidv4();
-        const assistantMessageId = uuidv4();
+        const userMessageId = 1 + ""; //uuidv4();
+        const assistantMessageId = 2 + ""; //uuidv4();
         const chatName = input.trim().slice(0, 50);
         dispatch(setChatName(chatName));
         const encryptedUser = await encryptMessage(input);
@@ -74,6 +71,7 @@ export const useChatActions = ({
             createdAt: new Date().toISOString(),
           })
         );
+
         const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
           method: "POST",
           credentials: "include",
@@ -187,10 +185,21 @@ export const fetchMessagesByShareId = async (shareId: string) => {
       withCredentials: true,
     });
 
-    // No decryption
+    const decryptedMessages = await Promise.all(
+      response.data.messages.map(async (msg: any) => ({
+        ...msg,
+        content: await decryptMessage(msg.content),
+      }))
+    );
+    const decryptedName = await decryptMessage(response.data.name);
+
     return {
       success: true,
-      data: response.data,
+      data: {
+        ...response.data,
+        messages: decryptedMessages,
+        name: decryptedName,
+      },
     };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
