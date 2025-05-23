@@ -32,7 +32,11 @@ const ChatMessageThread = ({
                   className="p-1 text-[var(--color-disabled-text)] hover:text-[var(--color-text)] cursor-pointer"
                   onClick={() => onCopy(msg.content, index)}
                 >
-                  {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
+                  {copiedIndex === index ? (
+                    <Check size={isMobile ? 16 : 20} />
+                  ) : (
+                    <Copy size={isMobile ? 16 : 20} />
+                  )}
                 </button>
               </div>
             </div>
@@ -47,36 +51,55 @@ const ChatMessageThread = ({
                 className="p-1 hover:text-[var(--color-text)] cursor-pointer"
                 onClick={() => onCopy(msg.content, index)}
               >
-                {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
+                {copiedIndex === index ? (
+                  <Check size={isMobile ? 16 : 20} />
+                ) : (
+                  <Copy size={isMobile ? 16 : 20} />
+                )}
               </button>
               {user && msg?.id && (
                 <>
-                  <button
-                    className={`p-1 transition-colors ${
-                      !(likedMessages[msg.id] || dislikedMessages[msg.id]) ? "hover:text-[var(--color-text)]" : ""
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    onClick={() => onLike(msg.id)}
-                    disabled={likedMessages[msg.id] || dislikedMessages[msg.id]}
-                  >
-                    <ThumbsUp
-                      size={isMobile ? 16 : 20}
-                      fill={likedMessages[msg.id] ? "currentColor" : "none"}
-                      color="currentColor"
-                    />
-                  </button>
-                  <button
-                    className={`p-1 transition-colors ${
-                      !(likedMessages[msg.id] || dislikedMessages[msg.id]) ? "hover:text-[var(--color-text)]" : ""
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    onClick={() => onDislike(msg.id)}
-                    disabled={likedMessages[msg.id] || dislikedMessages[msg.id]}
-                  >
-                    <ThumbsDown
-                      size={isMobile ? 16 : 20}
-                      fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
-                      color="currentColor"
-                    />
-                  </button>
+                  {/* Show Thumbs Up only if not already liked */}
+                  {!dislikedMessages[msg.id] && (
+                    <button
+                      className={`p-1 transition-colors ${
+                        !dislikedMessages[msg.id]
+                          ? "hover:text-[var(--color-text)]"
+                          : ""
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      onClick={() => onLike(msg.id)}
+                      disabled={dislikedMessages[msg.id]}
+                      aria-label="Like"
+                    >
+                      <ThumbsUp
+                        size={isMobile ? 16 : 20}
+                        fill={likedMessages[msg.id] ? "currentColor" : "none"}
+                        color="currentColor"
+                      />
+                    </button>
+                  )}
+
+                  {/* Show Thumbs Down only if not already disliked */}
+                  {!likedMessages[msg.id] && (
+                    <button
+                      className={`p-1 transition-colors ${
+                        !likedMessages[msg.id]
+                          ? "hover:text-[var(--color-text)]"
+                          : ""
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      onClick={() => onDislike(msg.id)}
+                      disabled={likedMessages[msg.id]}
+                      aria-label="Dislike"
+                    >
+                      <ThumbsDown
+                        size={isMobile ? 16 : 20}
+                        fill={
+                          dislikedMessages[msg.id] ? "currentColor" : "none"
+                        }
+                        color="currentColor"
+                      />
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -88,4 +111,3 @@ const ChatMessageThread = ({
 };
 
 export default ChatMessageThread;
-

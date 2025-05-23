@@ -189,46 +189,49 @@ const ChatResponse = ({
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
-                    {user && (
+                    {/* {user && (
                       <>
-                        <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Like"
-                          disabled={
-                            likedMessages[chatResponse] ||
-                            dislikedMessages[chatResponse]
-                          }
-                        >
-                          <ThumbsUp
-                            size={isMobile ? 16 : 20}
-                            fill={
-                              likedMessages[chatResponse]
-                                ? "currentColor"
-                                : "none"
-                            }
-                            color="currentColor"
-                          />
-                        </button>
-                        <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Dislike"
-                          disabled={
-                            likedMessages[chatResponse] ||
-                            dislikedMessages[chatResponse]
-                          }
-                        >
-                          <ThumbsDown
-                            size={isMobile ? 16 : 20}
-                            fill={
-                              dislikedMessages[chatResponse]
-                                ? "currentColor"
-                                : "none"
-                            }
-                            color="currentColor"
-                          />
-                        </button>
+                        {!likedMessages[chatResponse] ? (
+                          <button
+                            className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Like"
+                            disabled={likedMessages[chatResponse]}
+                          >
+                            <ThumbsUp
+                              size={isMobile ? 12 : 16}
+                              fill={
+                                likedMessages[chatResponse]
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              color="currentColor"
+                            />
+                          </button>
+                        ) : (
+                          ""
+                        )}
+
+                        {!dislikedMessages[chatResponse] ? (
+                          <button
+                            className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Dislike"
+                            disabled={dislikedMessages[chatResponse]}
+                          >
+                            <ThumbsDown
+                              size={isMobile ? 12 : 26}
+                              fill={
+                                dislikedMessages[chatResponse]
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              color="currentColor"
+                            />
+                          </button>
+                        ) : (
+                          ""
+                        )}
                       </>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>

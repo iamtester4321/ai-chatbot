@@ -18,8 +18,9 @@ import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
 import Error from "../Common/Error";
 import { decryptMessage } from "../../utils/encryption.utils";
+import Spinner from "../Spinner";
 
-const ChatSection = ({isMobile}: {isMobile: boolean}) => {
+const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { shareId } = useParams();
@@ -38,35 +39,39 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
       dispatch(setCurrentResponse(text));
     },
   });
-  
+
   useEffect(() => {
-  setError(null);
+    setError(null);
+    if (shareId) return;
 
-  if (chatId) {
-    const loadMessages = async () => {
-      const { success, data, error } = await fetchMessages(chatId);
-      if (success && data) {
-        dispatch(setMessages(data.messages));
-        const decryptedName = await decryptMessage(data.name);
-        dispatch(setChatName(decryptedName));
-        dispatch(setIsArchived(data.isArchived));
-        setError(null);
-      } else {
-        console.error(error);
-        if (chatId !== generatedChatId) {
-          setError(
-            "Chat not found. This chat might have been deleted or doesn't exist."
-          );
-          dispatch(setMessages([]));
+    if (chatId) {
+      const loadMessages = async () => {
+        dispatch(setIsLoading(true));
+        const { success, data, error } = await fetchMessages(chatId);
+        dispatch(setIsLoading(false));
+
+        if (success && data) {
+          dispatch(setMessages(data.messages));
+          const decryptedName = await decryptMessage(data.name);
+          dispatch(setChatName(decryptedName));
+          dispatch(setIsArchived(data.isArchived));
+          setError(null);
+        } else {
+          console.error(error);
+          if (chatId !== generatedChatId) {
+            setError(
+              "Chat not found. This chat might have been deleted or doesn't exist."
+            );
+            dispatch(setMessages([]));
+          }
         }
-      }
-    };
+      };
 
-    loadMessages();
-  } else {
-    dispatch(setMessages([]));
-  }
-}, [chatId, dispatch, generatedChatId]);
+      loadMessages();
+    } else {
+      dispatch(setMessages([]));
+    }
+  }, [chatId, shareId, dispatch, generatedChatId]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +91,10 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
   useEffect(() => {
     if (shareId) {
       const loadMessagesByShareId = async () => {
+        dispatch(setIsLoading(true));
         const { success, data, error } = await fetchMessagesByShareId(shareId);
+        dispatch(setIsLoading(false));
+
         if (success && data) {
           dispatch(setMessages(data.messages));
         } else {
@@ -145,7 +153,20 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
 
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
-      {error && chatId !== generatedChatId ? (
+      {isLoading && messages.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-screen text-center">
+          <Spinner />
+
+          <div className="mt-2 animate-fade-in-up text-text-secondary">
+            <p className="text-lg sm:text-xl font-medium tracking-wide">
+              Getting you started with
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gold font-inter drop-shadow-glow">
+              Aivora
+            </h1>
+          </div>
+        </div>
+      ) : error && chatId !== generatedChatId ? (
         <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
@@ -163,10 +184,12 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
               isMobile={isMobile}
             />
           )}
-  
+
           <section
             className={`${
-              messages.length === 0 ? "pt-[100px] sm:pt-[150px] md:pt-[200px]" : ""
+              messages.length === 0
+                ? "pt-[100px] sm:pt-[150px] md:pt-[200px]"
+                : ""
             } h-100vh transition-all duration-300`}
           >
             <div className="container px-4 sm:px-6 md:px-8">
@@ -177,13 +200,13 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
                     Aivora
                   </h3>
                 )}
-  
+
                 {messages.length === 0 && !shareId && !chatId && (
                   <h3 className="text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter md:hidden">
                     Aivora
                   </h3>
                 )}
-  
+
                 {/* Prompt Input (only when no chatId or shareId) */}
                 {!chatId && !shareId && (
                   <PromptInput
@@ -199,7 +222,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
         </>
       )}
     </div>
-  );  
+  );
 };
 
 export default ChatSection;

@@ -17,17 +17,20 @@ import {
 import { ChatHookProps, DeleteChatResponse } from "../lib/types";
 import {
   addMessage,
+  resetChat,
   setChatList,
   setChatName,
   setCurrentResponse,
-  setMessages,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 import { useNavigate } from "react-router-dom";
 
-export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
+export const useChatActions = ({
+  chatId,
+  onResponseUpdate,
+}: ChatHookProps & { shareId?: string }) => {
   const dispatch = useAppDispatch();
   const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
@@ -44,97 +47,93 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
-      const userMessageId = uuidv4();
-      const assistantMessageId = uuidv4();
-
-      // 1. Optimistically add the user message
-      dispatch(
-        addMessage({
-          id: userMessageId,
-          role: "user",
-          content: input,
-          createdAt: new Date().toISOString(),
-        })
-      );
-
-      // 2. Run moderation check
       const moderationResult = await moderationCheck(input);
       if (moderationResult.xssDetected) {
         showToast.error(
           "Potential security risk detected in your input. Please remove any unsafe code and try again."
         );
-        dispatch(setMessages(messages));
-        if (messages.length === 0) {
-          navigate("/");
-        }
-        return;
+        navigate("/");
+        dispatch(resetChat());
       } else if (moderationResult.flagged) {
         showToast.warning(
-          "Your message may violate our content guidelines. Please revise and try again."
+          "Your message contains language that may violate our content guidelines. Please revise and try again."
         );
-        dispatch(setMessages(messages));
-        if (messages.length === 0) {
-          navigate("/");
-        }
-        return;
-      }
-
-      // 3. Encrypt and send to server
-      const encryptedUser = await encryptMessage(input);
-      const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userMessageId,
-          assistantMessageId,
-          prompt: encryptedUser,
-          messages,
-          chatId: chatId || "",
-        }),
-      });
-
-      if (!response.ok) throw new Error("API request failed");
-      if (!response.body) throw new Error("Response body is empty");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      try {
-        let accumulatedText = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
-
-          dispatch(setCurrentResponse(accumulatedText));
-          onResponseUpdate?.(accumulatedText);
-        }
-
-        const decryptedAssistantMessage = await decryptMessage(accumulatedText);
-
+        navigate("/");
+        dispatch(resetChat());
+      } else {
+        const userMessageId = uuidv4();
+        const assistantMessageId = uuidv4();
+        const chatName = input.trim().slice(0, 50);
+        dispatch(setChatName(chatName));
+        const encryptedUser = await encryptMessage(input);
         dispatch(
           addMessage({
-            id: assistantMessageId,
-            role: "assistant",
-            content: decryptedAssistantMessage,
+            id: userMessageId,
+            role: "user",
+            content: input,
             createdAt: new Date().toISOString(),
           })
         );
-        dispatch(setCurrentResponse(""));
-        onResponseUpdate?.("");
+        const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userMessageId,
+            assistantMessageId,
+            prompt: encryptedUser,
+            messages,
+            chatId: chatId || "",
+          }),
+        });
 
-        await fetchChatNames(dispatch);
-        if (chatId) {
-          const updatedChat = await fetchMessages(chatId);
-          if (updatedChat.success && updatedChat.data) {
-            dispatch(setChatName(updatedChat.data.name));
-          }
+        if (!response.ok) {
+          throw new Error("API request failed");
         }
-      } finally {
-        reader.releaseLock();
+
+        if (!response.body) {
+          throw new Error("Response body is empty");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        try {
+          let accumulatedText = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedText += chunk;
+            dispatch(setCurrentResponse(accumulatedText));
+            onResponseUpdate?.(accumulatedText);
+          }
+          const decryptedAssistantMessage = await decryptMessage(
+            accumulatedText
+          );
+          dispatch(
+            addMessage({
+              id: assistantMessageId,
+              role: "assistant",
+              content: decryptedAssistantMessage,
+              createdAt: new Date().toISOString(),
+            })
+          );
+          dispatch(setCurrentResponse(""));
+          onResponseUpdate?.("");
+
+          await fetchChatNames(dispatch);
+          if (chatId) {
+            const updatedChat = await fetchMessages(chatId);
+            if (updatedChat.success && updatedChat.data) {
+              dispatch(setChatName(updatedChat.data.name));
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
       }
     },
   });
