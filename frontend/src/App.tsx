@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { applyStoredTheme } from "./store/features/theme/themeSlice";
 import ErrorBoundary from "./components/Common/ErrorBoundary";
-import TestError from "./components/Common/TestError";
 
 function App() {
   const dispatch = useDispatch();
@@ -24,7 +23,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/share/:shareId" element={<Layout />} />
-          <Route path="/test-error" element={<TestError />} />
           <Route element={<Layout />}>
             <Route path="/chat" />
             <Route path="/chat/:chatId" />
