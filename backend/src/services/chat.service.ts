@@ -20,7 +20,7 @@ import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
 export async function saveChat(
   userId: string,
-  messages: { id: string; role: string; content: string }[],
+  messages: { id: string; role: string; content: string; for: string }[],
   chatId: string
 ) {
   const result = await chatRepo.createChatWithMessagesOrApendMesages(
@@ -158,7 +158,7 @@ export async function findChatNamesByService(userId: string) {
     }
   }
   let dbChatNames = await chatRepo.getChatNamesByUser(userId);
-  
+
   dbChatNames = await Promise.all(
     dbChatNames.map(async (chat) => ({
       ...chat,

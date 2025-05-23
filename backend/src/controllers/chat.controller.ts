@@ -47,9 +47,7 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   // Decrypt prompt
   const decryptedPrompt = await decryptMessage(encryptedPrompt);
 
-  // Handle chart mode differently
   if (mode === "chart") {
-    // Clear previous messages for chart mode to ensure clean JSON response
     messages = [
       {
         role: "system",
@@ -88,20 +86,23 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
         }
       },
       onFinish: async () => {
-        if (mode === "chart") {
-          JSON.parse(assistantReply);
-        }
         if (userId) {
           const encryptedUserMsg = await encryptMessage(decryptedPrompt);
           const encryptedAssistantMsg = await encryptMessage(assistantReply);
           await saveChat(
             userId,
             [
-              { id: userMessageId, role: "user", content: encryptedUserMsg },
+              {
+                id: userMessageId,
+                role: "user",
+                content: encryptedUserMsg,
+                for: mode === "chart" ? "chart" : "chat",
+              },
               {
                 id: assistantMessageId,
                 role: "assistant",
                 content: encryptedAssistantMsg,
+                for: mode === "chart" ? "chart" : "chat",
               },
             ],
             chatId

@@ -4,7 +4,7 @@ import { v4 as uuidv } from "uuid";
 
 export async function createChatWithMessagesOrApendMesages(
   userId: string,
-  messages: { id: string; role: string; content: string }[],
+  messages: { id: string; role: string; content: string; for?: string }[],
   chatId: string
 ) {
   const existingChat = await prisma.chat.findUnique({
@@ -18,6 +18,7 @@ export async function createChatWithMessagesOrApendMesages(
         role: m.role,
         content: m.content,
         chatId: chatId,
+        for: m.for,
       })),
       skipDuplicates: true,
     });
@@ -47,6 +48,7 @@ export async function createChatWithMessagesOrApendMesages(
             id: uuidv(),
             role: m.role,
             content: m.content,
+            for: m.for,
           })),
         },
       },
