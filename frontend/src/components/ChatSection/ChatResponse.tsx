@@ -12,6 +12,8 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
 import StreamLoader from "../Loaders/StreamLoader";
 import PromptInput from "./PromptInput";
+import { useLocation } from 'react-router-dom';
+
 
 const ChatResponse = ({
   messages,
@@ -38,6 +40,9 @@ const ChatResponse = ({
       messagesEndRef.current.scrollIntoView();
     }
   }, [messages, chatResponse]);
+const location = useLocation();
+const isSharedChat = location.pathname.startsWith('/share/');
+
 
   useEffect(() => {
     if (!isLoading && chatResponse) {
@@ -197,7 +202,7 @@ const ChatResponse = ({
                       >
                         {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
                       </button>
-                      {user && (
+                      {user && !isSharedChat && (
                         <>
                           {msg?.id && (
                             <button
@@ -274,7 +279,7 @@ const ChatResponse = ({
                     >
                       {copiedIndex === -1 ? <Check /> : <Copy />}
                     </button>
-                    {user && (
+                    {user && !isSharedChat && (
                       <>
                         <button
                           className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
