@@ -6,6 +6,7 @@ import { fetchSuggestions } from "../../actions/chat.actions";
 import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import SuggestionBox from "../inputSuggestion/SuggestionBox";
 
 const PromptInput = ({
   input,
@@ -185,63 +186,10 @@ const PromptInput = ({
 
   return (
     <div className="relative w-full max-w-3xl mx-auto">
-      {showSuggestions && suggestions.length > 0 && (
-        <div
-          ref={suggestionBoxRef}
-          className="absolute top-full left-0 right-0 mb-3 z-50"
-        >
-          <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl shadow-xl backdrop-blur-md overflow-hidden">
-            <div className="px-4 py-3 border-b border-[var(--color-border)]">
-              <div className="text-xs font-medium text-[var(--color-disabled-text)] uppercase tracking-wide">
-                Suggestions
-              </div>
-            </div>
-            <div className="max-h-48 overflow-y-auto">
-              {suggestions.map((suggestion, idx) => (
-                <button
-                  key={idx}
-                  ref={(el) => {
-                    suggestionRefs.current[idx] = el;
-                  }}
-                  onClick={() => handleSuggestionSelect(suggestion)}
-                  className={`w-full px-4 py-3 text-left transition-all duration-200 ease-out border-b border-[var(--color-border)] last:border-b-0 group
-                    ${
-                      selectedSuggestionIndex === idx
-                        ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm transform scale-[0.98]"
-                        : "hover:bg-[var(--color-muted)] text-[var(--color-text)] hover:transform hover:scale-[0.99]"
-                    }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{suggestion}</span>
-                    <div
-                      className={`transition-opacity duration-200 ${
-                        selectedSuggestionIndex === idx
-                          ? "opacity-100"
-                          : "opacity-0 group-hover:opacity-60"
-                      }`}
-                    >
-                      <ArrowUpRight size={14} />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="px-4 py-2 bg-[var(--color-muted)] border-t border-[var(--color-border)]">
-              <div className="text-xs text-[var(--color-disabled-text)] flex items-center justify-between">
-                <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
-                <span className="font-mono">
-                  {suggestions.length} suggestions
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <form
         ref={formRef}
         onSubmit={handleFormSubmitWithFocus}
-        className="bg-[var(--color-bg)] border border-[var(--color-border)] flex flex-col rounded-2xl px-4 py-4 w-full shadow-md gap-4"
+        className="mb-2 bg-[var(--color-bg)] border border-[var(--color-border)] flex flex-col rounded-2xl px-4 py-4 w-full shadow-md gap-4"
       >
         <div className="relative w-full">
           <textarea
@@ -300,6 +248,16 @@ const PromptInput = ({
           </button>
         </div>
       </form>
+
+      {showSuggestions && suggestions.length > 0 && (
+        <SuggestionBox
+          suggestions={suggestions}
+          selectedSuggestionIndex={selectedSuggestionIndex}
+          suggestionRefs={suggestionRefs}
+          suggestionBoxRef={suggestionBoxRef}
+          onSelect={handleSuggestionSelect}
+        />
+      )}
     </div>
   );
 };
