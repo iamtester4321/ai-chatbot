@@ -64,6 +64,8 @@ const PromptInput = ({
     };
   }, []);
 
+  let debounceTimeout: NodeJS.Timeout;
+
   const handleChangeWithSuggestions = async (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -73,20 +75,24 @@ const PromptInput = ({
 
     const wordCount = value.trim().split(/\s+/).length;
 
-    if (wordCount >= 2 && wordCount <= 3 && !chatId && !shareId) {
-      const result = await fetchSuggestions(value);
-      if (result.success) {
-        setSuggestions(result.suggestions);
-        setSelectedSuggestionIndex(-1);
-        setShowSuggestions(true);
+    clearTimeout(debounceTimeout);
+
+    debounceTimeout = setTimeout(async () => {
+      if (wordCount >= 2 && wordCount <= 3 && !chatId && !shareId) {
+        const result = await fetchSuggestions(value);
+        if (result.success) {
+          setSuggestions(result.suggestions);
+          setSelectedSuggestionIndex(-1);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
       } else {
-        setSuggestions([]);
         setShowSuggestions(false);
+        setSuggestions([]);
       }
-    } else {
-      setShowSuggestions(false);
-      setSuggestions([]);
-    }
+    }, 2000);
   };
 
   const handleModeChange = (newMode: "chat" | "chart") => {

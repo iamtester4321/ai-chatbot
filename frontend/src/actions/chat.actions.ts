@@ -61,7 +61,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         const userMessageId = 1 + ""; //uuidv4();
         const assistantMessageId = 2 + ""; //uuidv4();
         const chatName = input.trim().slice(0, 50);
-        dispatch(setChatName(chatName));
+        if (messages.length < 0) dispatch(setChatName(chatName));
         const encryptedUser = await encryptMessage(input);
         dispatch(
           addMessage({

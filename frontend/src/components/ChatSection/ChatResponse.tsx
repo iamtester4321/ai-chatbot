@@ -1,4 +1,4 @@
-import { Archive, Check, Copy } from "lucide-react";
+import { Archive } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { archiveChat } from "../../actions/chat.actions";
 import {
@@ -10,10 +10,10 @@ import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
-import StreamLoader from "../Loaders/StreamLoader";
-import PromptInput from "./PromptInput";
-import ChatMessageThread from "./ChatMessageThread"; // Import ChatMessageThread
 import { Skeleton } from "../Loaders";
+import StreamLoader from "../Loaders/StreamLoader";
+import ChatMessageThread from "./ChatMessageThread";
+import PromptInput from "./PromptInput";
 
 const ChatResponse = ({
   messages,
@@ -174,66 +174,6 @@ const ChatResponse = ({
                 <div className="prose prose-invert max-w-none">
                   <MarkdownRenderer content={chatResponse} flag={true} />
                 </div>
-
-                {/* Action buttons */}
-                {chatResponse && (
-                  <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
-                    <button
-                      className="p-1 hover:text-[var(--color-text)]"
-                      aria-label="Copy to clipboard"
-                      onClick={() => {
-                        navigator.clipboard.writeText(chatResponse);
-                        setCopiedIndex(-1);
-                        setTimeout(() => setCopiedIndex(null), 2000);
-                      }}
-                    >
-                      {copiedIndex === -1 ? <Check /> : <Copy />}
-                    </button>
-                    {/* {user && (
-                      <>
-                        {!likedMessages[chatResponse] ? (
-                          <button
-                            className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Like"
-                            disabled={likedMessages[chatResponse]}
-                          >
-                            <ThumbsUp
-                              size={isMobile ? 12 : 16}
-                              fill={
-                                likedMessages[chatResponse]
-                                  ? "currentColor"
-                                  : "none"
-                              }
-                              color="currentColor"
-                            />
-                          </button>
-                        ) : (
-                          ""
-                        )}
-
-                        {!dislikedMessages[chatResponse] ? (
-                          <button
-                            className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label="Dislike"
-                            disabled={dislikedMessages[chatResponse]}
-                          >
-                            <ThumbsDown
-                              size={isMobile ? 12 : 26}
-                              fill={
-                                dislikedMessages[chatResponse]
-                                  ? "currentColor"
-                                  : "none"
-                              }
-                              color="currentColor"
-                            />
-                          </button>
-                        ) : (
-                          ""
-                        )}
-                      </>
-                    )} */}
-                  </div>
-                )}
               </div>
             )}
 
