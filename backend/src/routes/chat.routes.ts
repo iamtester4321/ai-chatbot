@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addOrRemoveArchive,
   addOrRemoveFavorite,
+  createChat,
   deleteChat,
   findChatById,
   findChatNamesByUserId,
@@ -14,7 +15,6 @@ import {
   ensureAuthenticated,
   exEnsureAuthenticated,
 } from "../middlewares/auth.middleware";
-import { createChatFromSourceChat } from "../repositories/chat.repository";
 
 const router = Router();
 
@@ -23,6 +23,7 @@ router.get("/names", ensureAuthenticated, findChatNamesByUserId);
 router.get("/:chatId", ensureAuthenticated, findChatById);
 router.post("/stream", exEnsureAuthenticated, streamChat);
 router.delete("/:chatId", ensureAuthenticated, deleteChat);
+router.post("/create", ensureAuthenticated, createChat);
 
 router.patch(
   "/addOrRemoveFavrate/:chatId",

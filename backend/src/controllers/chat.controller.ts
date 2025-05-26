@@ -118,6 +118,42 @@ Your response must be directly parseable by JSON.parse() with no extra text.`,
   }
 });
 
+export const createChat = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req.user as { id: string })?.id;
+  const { messages, chatId, sourceChatId } = req.body;
+
+  if (!userId || !chatId) {
+    res.status(400).json({ error: "Missing required fields." });
+    return;
+  }
+
+  try {
+    let encryptedMessages: { id: string; role: string; content: string; }[] = [];
+
+    // If messages array is passed, encrypt them
+    if (Array.isArray(messages)) {
+      encryptedMessages = await Promise.all(
+        messages.map(async (message: { id: string; role: "user" | "assistant"; content: string }) => {
+          const encryptedContent = await encryptMessage(message.content);
+          return {
+            id: message.id,
+            role: message.role,
+            content: encryptedContent,
+          };
+        })
+      );
+    }
+
+    await saveChat(userId, encryptedMessages, chatId, sourceChatId);
+
+    res.status(201).json({ success: true, message: "Chat created successfully" });
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    res.status(500).json({ error: "Failed to create chat" });
+  }
+});
+
+
 export const handleCreateChatFromSource = async (req: any, res: any) => {
   const userId = req.user?.id; // Ensure this is being set by your auth middleware
   const newChatId = req.params.chatId;

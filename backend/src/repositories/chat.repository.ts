@@ -8,22 +8,21 @@ export async function createChatWithMessagesOrApendMesages(
   chatId: string,
   sourceChatId?: string
 ) {
-  console.log(chatId);
   let allMessages = messages;
-  if (sourceChatId) {
-    const sourceChat = await prisma.chat.findUnique({
-      where: { id: sourceChatId },
-      include: { messages: true },
-    });
-    if (sourceChat) {
-      const sourceMessages = sourceChat.messages.map(m => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-      }));
-      allMessages = [...sourceMessages, ...messages];
-    }
-  }
+  // if (sourceChatId) {
+    // const sourceChat = await prisma.chat.findUnique({
+    //   where: { id: sourceChatId },
+    //   include: { messages: true },
+    // });
+    // if (sourceChat) {
+      // const sourceMessages = sourceChat.messages.map(m => ({
+      //   id: m.id,
+      //   role: m.role,
+      //   content: m.content,
+      // }));
+      allMessages = [...messages];
+    // }
+  // }
   const existingChat = await prisma.chat.findUnique({
     where: { id: chatId },
   });
@@ -53,7 +52,6 @@ export async function createChatWithMessagesOrApendMesages(
     }
 
     const encryptedName = await encryptMessage(trimmedName);
-console.log("Creating chat with ID:", chatId);
     return prisma.chat.create({
       data: {
         id: chatId,
@@ -150,11 +148,16 @@ export async function getChatNamesByUser(userId: string) {
   );
 }
 
+
 export async function findById(chatId: string) {
   return await prisma.chat.findUnique({
     where: { id: chatId },
     include: {
-      messages: true,
+      messages: {
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
     },
   });
 }

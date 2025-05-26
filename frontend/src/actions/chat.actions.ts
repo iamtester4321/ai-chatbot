@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
   ARCHIVE_CHAT,
+  CREATE_CHAT,
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
@@ -15,7 +16,7 @@ import {
   STREAM_CHAT_RESPONSE,
   TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
-import { ChatHookProps, DeleteChatResponse } from "../lib/types";
+import { ChatHookProps, DeleteChatResponse, Message } from "../lib/types";
 import {
   addMessage,
   resetChat,
@@ -28,7 +29,6 @@ import { AppDispatch, store } from "../store/store";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 
 export const useChatActions = ({ chatId, shareId, sourceChatId, onResponseUpdate }: ChatHookProps & { shareId?: string }) => {
-  console.log(sourceChatId);
   const dispatch = useAppDispatch();
   const { messages } = useAppSelector((state) => state.chat);
   const showToast = useToast();
@@ -135,6 +135,42 @@ export const useChatActions = ({ chatId, shareId, sourceChatId, onResponseUpdate
     isLoading: status === "submitted",
   };
 };
+
+export const createChatFromSource = async (
+  newChatId: string,
+  sourceChatId: string,
+  messages: Message[]
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await axios.post(
+      CREATE_CHAT,
+      { chatId: newChatId, sourceChatId, messages },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (response.status === 201) {
+      const updatedChats = await fetchChatNames(store.dispatch);
+      store.dispatch(setChatList(updatedChats.data));
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        message: response.data?.error || "Failed to create chat from source",
+      };
+    }
+  } catch (error: unknown) {
+    console.error("Error creating chat from source:", error);
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
+};
+
+
 
 export const fetchMessages = async (chatId: string) => {
   try {

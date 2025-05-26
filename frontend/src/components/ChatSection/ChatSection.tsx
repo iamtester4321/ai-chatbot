@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -20,7 +21,6 @@ import Error from "../Common/Error";
 import { decryptMessage } from "../../utils/encryption.utils";
 
 const ChatSection = ({isMobile}: {isMobile: boolean}) => {
-  console.log("call");
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { shareId } = useParams();
@@ -71,6 +71,7 @@ const ChatSection = ({isMobile}: {isMobile: boolean}) => {
     dispatch(setMessages([]));
   }
 }, [chatId, shareId, dispatch, generatedChatId]);
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
