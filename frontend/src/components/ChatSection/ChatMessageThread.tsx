@@ -58,41 +58,46 @@ const ChatMessageThread = ({
                 )}
               </button>
               {user && msg?.id && (
-  <>
-    {!dislikedMessages[msg.id] && (
-      <button
-        className={`p-1 transition-colors ${
-          !likedMessages[msg.id] ? "hover:text-[var(--color-text)]" : ""
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-        onClick={() => onLike(msg.id)}
-        disabled={!!likedMessages[msg.id]}
-      >
-        <ThumbsUp
-          size={isMobile ? 16 : 20}
-          fill={likedMessages[msg.id] ? "currentColor" : "none"}
-          color="currentColor"
-        />
-      </button>
-    )}
+                <>
+                  {!dislikedMessages[msg.id] && (
+                    <button
+                      className={`p-1 transition-colors ${
+                        !likedMessages[msg.id]
+                          ? "hover:text-[var(--color-text)] cursor-pointer"
+                          : ""
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      onClick={() => onLike(msg.id)}
+                      disabled={!!likedMessages[msg.id]}
+                    >
+                      <ThumbsUp
+                        size={isMobile ? 16 : 20}
+                        fill={likedMessages[msg.id] ? "currentColor" : "none"}
+                        color="currentColor"
+                      />
+                    </button>
+                  )}
 
-    {!likedMessages[msg.id] && (
-      <button
-        className={`p-1 transition-colors ${
-          !dislikedMessages[msg.id] ? "hover:text-[var(--color-text)]" : ""
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-        onClick={() => onDislike(msg.id)}
-        disabled={!!dislikedMessages[msg.id]}
-      >
-        <ThumbsDown
-          size={isMobile ? 16 : 20}
-          fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
-          color="currentColor"
-        />
-      </button>
-    )}
-  </>
-)}
-
+                  {!likedMessages[msg.id] && (
+                    <button
+                      className={`p-1 transition-colors ${
+                        !dislikedMessages[msg.id]
+                          ? "hover:text-[var(--color-text)] cursor-pointer"
+                          : ""
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      onClick={() => onDislike(msg.id)}
+                      disabled={!!dislikedMessages[msg.id]}
+                    >
+                      <ThumbsDown
+                        size={isMobile ? 16 : 20}
+                        fill={
+                          dislikedMessages[msg.id] ? "currentColor" : "none"
+                        }
+                        color="currentColor"
+                      />
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         );

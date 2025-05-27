@@ -12,7 +12,7 @@ const Register = () => {
           {/* Google Register */}
           <button
             onClick={googleAuth}
-            className="w-full flex flex-row gap-[5px] justify-center items-center py-4 px-5 rounded-lg mb-3 transition-colors bg-[var(--color-google-bg)] text-[var(--color-text)] hover:bg-[var(--color-google-hover)]"
+            className="w-full flex flex-row gap-[5px] justify-center items-center py-4 px-5 rounded-lg mb-3 transition-colors bg-[var(--color-google-bg)] text-[var(--color-text)] hover:bg-[var(--color-google-hover)] cursor-pointer"
           >
             <Google className="w-[22px] h-6" />
             <span className="text-base font-medium">Continue with Google</span>

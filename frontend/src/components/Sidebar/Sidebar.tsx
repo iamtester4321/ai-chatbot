@@ -216,7 +216,7 @@ const Sidebar = ({
                   setIsSettingsOpen(true);
                   setIsUserMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors cursor-pointer"
               >
                 <Settings size={16} />
                 Settings
@@ -227,7 +227,7 @@ const Sidebar = ({
                   handleLogoutClick();
                   setIsUserMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors cursor-pointer"
               >
                 <LogOut size={16} />
                 Logout

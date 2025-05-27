@@ -39,7 +39,7 @@ const GeneralSettings = () => {
         <h3 className="text-lg font-medium text-text mb-2">Theme</h3>
         <button
           onClick={() => setIsThemeMenuOpen((prev) => !prev)}
-          className="w-full flex items-center justify-between p-2 bg-muted border border-border rounded-lg hover:bg-muted-hover transition-colors"
+          className="w-full flex items-center justify-between p-2 bg-muted border border-border rounded-lg hover:bg-muted-hover transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <SelectedIcon size={18} className="text-icon" />
@@ -67,7 +67,7 @@ const GeneralSettings = () => {
                     dispatch(setTheme(theme.id as any));
                     setIsThemeMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-sm flex items-center transition-colors rounded-md"
+                  className="w-full px-4 py-2 text-sm flex items-center transition-colors rounded-md cursor-pointer"
                   style={{
                     color: "var(--color-text)",
                     backgroundColor: "transparent",
@@ -100,7 +100,7 @@ const GeneralSettings = () => {
         </h3>
         <button
           onClick={() => setIsLogoutModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 border border-border color-error"
+          className="flex items-center gap-2 px-4 py-2 border border-border color-error cursor-pointer"
           style={{
             backgroundColor: "var(--color-muted-hover)",
             borderRadius: "8px",

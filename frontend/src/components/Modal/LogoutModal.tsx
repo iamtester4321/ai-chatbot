@@ -80,7 +80,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
+              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors cursor-pointer"
               style={{
                 color: "var(--color-disabled-text)",
                 backgroundColor: "transparent",
@@ -98,7 +98,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             <button
               onClick={handleLogout}
               disabled={isLoading}
-              className="px-4 py-2 text-sm rounded-md transition-colors disabled:opacity-50 flex items-center"
+              className="px-4 py-2 text-sm rounded-md transition-colors disabled:opacity-50 flex items-center cursor-pointer"
               style={{
                 backgroundColor: "var(--color-delete-base)",
                 color: "white",

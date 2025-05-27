@@ -106,7 +106,7 @@ const LoginForm = () => {
         disabled={!isValid || isLoading}
         className={`w-full py-3 px-4 rounded-lg mt-2 flex items-center justify-center transition-colors ${
           isValid && !isLoading
-            ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white"
+            ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white cursor-pointer"
             : "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
         }`}
       >

@@ -5,7 +5,7 @@ export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
   return (
     <div className="flex items-center">
       <button
-        className="p-2 rounded-full transition duration-200"
+        className="p-2 rounded-full transition duration-200 cursor-pointer"
         style={{ backgroundColor: "transparent" }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
