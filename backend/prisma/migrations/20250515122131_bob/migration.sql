@@ -1,2 +1,0 @@
--- AddForeignKey
-ALTER TABLE "share" ADD CONSTRAINT "share_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
