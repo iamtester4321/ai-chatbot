@@ -113,7 +113,7 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
       },
       onError: (err) => {
         console.error("Stream error:", err);
-        throw new Error("Stream error");
+        //throw new Error("Stream error");
       },
     });
     result.pipeTextStreamToResponse(res);
