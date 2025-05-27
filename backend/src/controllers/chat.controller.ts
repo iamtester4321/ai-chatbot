@@ -107,11 +107,14 @@ export const streamChat = asyncHandler(async (req: Request, res: Response) => {
               },
             ],
             chatId,
-            sourceChatId,
+            sourceChatId
           );
         }
       },
-      onError: (err) => console.error("Stream error:", err),
+      onError: (err) => {
+        console.error("Stream error:", err);
+        throw new Error("Stream error");
+      },
     });
     result.pipeTextStreamToResponse(res);
   } catch (err) {
@@ -132,32 +135,44 @@ export const createChat = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    let encryptedMessages: { id: string; role: string; content: string; for: string }[] = [];
+    let encryptedMessages: {
+      id: string;
+      role: string;
+      content: string;
+      for: string;
+    }[] = [];
 
     // If messages array is passed, encrypt them
     if (Array.isArray(messages)) {
       encryptedMessages = await Promise.all(
-        messages.map(async (message: { id: string; role: "user" | "assistant"; content: string;}) => {
-          const encryptedContent = await encryptMessage(message.content);
-          return {
-            id: message.id,
-            role: message.role,
-            content: encryptedContent,
-            for: mode === "chart" ? "chart" : "chat",
-          };
-        })
+        messages.map(
+          async (message: {
+            id: string;
+            role: "user" | "assistant";
+            content: string;
+          }) => {
+            const encryptedContent = await encryptMessage(message.content);
+            return {
+              id: message.id,
+              role: message.role,
+              content: encryptedContent,
+              for: mode === "chart" ? "chart" : "chat",
+            };
+          }
+        )
       );
     }
 
     await saveChat(userId, encryptedMessages, chatId, sourceChatId);
 
-    res.status(201).json({ success: true, message: "Chat created successfully" });
+    res
+      .status(201)
+      .json({ success: true, message: "Chat created successfully" });
   } catch (error) {
     console.error("Error creating chat:", error);
     res.status(500).json({ error: "Failed to create chat" });
   }
 });
-
 
 export const handleCreateChatFromSource = async (req: any, res: any) => {
   const userId = req.user?.id; // Ensure this is being set by your auth middleware
@@ -165,10 +180,16 @@ export const handleCreateChatFromSource = async (req: any, res: any) => {
   const sourceChatId = req.body.sourceChatId;
 
   if (!userId || !sourceChatId) {
-    return res.status(400).json({ success: false, error: "Missing required fields." });
+    return res
+      .status(400)
+      .json({ success: false, error: "Missing required fields." });
   }
 
-  const result = await createChatFromSourceChat(userId, newChatId, sourceChatId);
+  const result = await createChatFromSourceChat(
+    userId,
+    newChatId,
+    sourceChatId
+  );
 
   if (result.success) {
     return res.status(201).json({ success: true });
@@ -176,7 +197,6 @@ export const handleCreateChatFromSource = async (req: any, res: any) => {
     return res.status(500).json({ success: false, error: result.error });
   }
 };
-
 
 export const findChatById: RequestHandler = asyncHandler(async (req, res) => {
   try {

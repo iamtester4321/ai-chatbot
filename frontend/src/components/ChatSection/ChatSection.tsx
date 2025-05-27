@@ -13,6 +13,7 @@ import {
   setIsArchived,
   setIsLoading,
   setMessages,
+  setMode,
 } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { decryptMessage } from "../../utils/encryption.utils";
@@ -49,37 +50,39 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   });
 
   useEffect(() => {
-  setError(null);
-  if (shareId) return;
-  if (chatId) {
-    const loadMessages = async () => {
-      const { success, data, error } = await fetchMessages(chatId);
-      if (success && data) {
-        dispatch(setMessages(data.messages));
-        const decryptedName = await decryptMessage(data.name);
-        dispatch(setChatName(decryptedName));
-        dispatch(setIsArchived(data.isArchived));
-        setError(null);
-      } else {
-        console.error(error);
-        if (chatId !== generatedChatId) {
-          setError(
-            "Chat not found. This chat might have been deleted or doesn't exist."
-          );
-          dispatch(setMessages([]));
-        }
+    setError(null);
+    if (shareId) return;
+    if (chatId) {
+      const loadMessages = async () => {
+        const { success, data, error } = await fetchMessages(chatId);
+        if (success && data) {
+          dispatch(setMessages(data.messages));
+          const lMsg = data.messages[data.messages.length - 1];
+          dispatch(setMode(lMsg.for));
+          const decryptedName = await decryptMessage(data.name);
+
+          dispatch(setChatName(decryptedName));
+          dispatch(setIsArchived(data.isArchived));
+          setError(null);
+        } else {
+          console.error(error);
+          if (chatId !== generatedChatId) {
+            setError(
+              "Chat not found. This chat might have been deleted or doesn't exist."
+            );
+            dispatch(setMessages([]));
+          }
         }
       };
 
-    loadMessages();
-  } else {
-    dispatch(setMessages([]));
-  }
-}, [chatId, shareId, dispatch, generatedChatId]);
+      loadMessages();
+    } else {
+      dispatch(setMessages([]));
+    }
+  }, [chatId, shareId, dispatch, generatedChatId]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!chatId) {
       const newChatId = generateChatId();
       setGeneratedChatId(newChatId);
@@ -105,6 +108,8 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
         if (success && data) {
           setsourceChatId(data.id);
           dispatch(setMessages(data.messages));
+          const lMsg = data.messages[data.messages.length - 1];
+          dispatch(setMode(lMsg.for));
         } else {
           console.error(error);
         }
@@ -224,6 +229,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
           )}
           {mode === "chart" && messages.length > 0 && (
             <ChatResponse
+              sourceChatId={sourceChatId}
               messages={chartMessages}
               chatResponse={currentResponse}
               isLoading={isLoading}
