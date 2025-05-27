@@ -244,14 +244,14 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
             />
           )}
 
-          <section
+          {/* <section
             className={`${
               (mode === "chat" && chatMessages.length === 0) ||
               (mode === "chart" && chartMessages.length === 0)
                 ? "pt-[100px] sm:pt-[150px] md:pt-[200px]"
                 : ""
-            } h-100vh transition-all duration-300`}
-          >
+            } transition-all duration-300`}
+          > */}
             <div className="container px-4 sm:px-6 md:px-8">
               <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
                 {/* Display "Aivora" when there are no messages, chatId, or shareId */}
@@ -280,7 +280,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
                 )}
               </div>
             </div>
-          </section>
+          {/* </section> */}
         </>
       )}
     </div>
