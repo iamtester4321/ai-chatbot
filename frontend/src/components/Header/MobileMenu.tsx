@@ -1,5 +1,13 @@
-import { Archive, MoreHorizontal, Share2, Star, Trash2 } from "lucide-react";
+import {
+  Archive,
+  MoreHorizontal,
+  Share2,
+  SquarePen,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { forwardRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { MobileMenuProps } from "../../lib/types";
 import { useAppSelector } from "../../store/hooks";
 
@@ -23,9 +31,30 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
     );
     const user = useAppSelector((state) => state.user.user);
     const isLoading = actionLoadingId === chatId;
+    const navigate = useNavigate();
+
+    const handleNewChat = () => {
+      navigate("/chat");
+    };
 
     return (
       <div className="relative sm:hidden" ref={ref}>
+        {/* New Chat Button */}
+        <button
+          className="p-2 rounded-full transition duration-200 cursor-pointer"
+          style={{ backgroundColor: "transparent" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          title="New Chat"
+          onClick={handleNewChat}
+          disabled={isLoading}
+        >
+          <SquarePen size={20} className={isLoading ? "opacity-50" : ""} />
+        </button>
         {user && (
           <button
             className="p-2 rounded-full transition duration-200 cursor-pointer"

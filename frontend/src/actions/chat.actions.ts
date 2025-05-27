@@ -1,5 +1,6 @@
 import { useChat } from "@ai-sdk/react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
@@ -17,15 +18,14 @@ import {
 import { ChatHookProps, DeleteChatResponse } from "../lib/types";
 import {
   addMessage,
-  resetChat,
   setChatList,
   setChatName,
   setCurrentResponse,
+  setMessages
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
-import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
-import { useNavigate } from "react-router-dom";
+import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
 export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
   const dispatch = useAppDispatch();
@@ -49,14 +49,20 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         showToast.error(
           "Potential security risk detected in your input. Please remove any unsafe code and try again."
         );
-        navigate("/");
-        dispatch(resetChat());
+        dispatch(setMessages(messages));
+        if (messages.length === 0) {
+          navigate("/");
+        }
+        return;
       } else if (moderationResult.flagged) {
         showToast.warning(
           "Your message contains language that may violate our content guidelines. Please revise and try again."
         );
-        navigate("/");
-        dispatch(resetChat());
+        dispatch(setMessages(messages));
+        if (messages.length === 0) {
+          navigate("/");
+        }
+        return;
       } else {
         const userMessageId = 1 + ""; //uuidv4();
         const assistantMessageId = 2 + ""; //uuidv4();

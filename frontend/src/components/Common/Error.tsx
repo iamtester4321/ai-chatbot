@@ -29,7 +29,7 @@ const Error = ({ message, onNewChat }: ErrorProps) => {
         <div className="flex flex-col items-center gap-4">
           <button
             onClick={() => (window.location.href = "/login")}
-            className="px-8 py-3 text-base font-medium rounded-lg transition-colors w-full"
+            className="px-8 py-3 text-base font-medium rounded-lg transition-colors w-full cursor-pointer"
             style={{
               backgroundColor: "var(--color-primary)",
               color: "var(--color-button-text)",
@@ -48,7 +48,7 @@ const Error = ({ message, onNewChat }: ErrorProps) => {
 
           <button
             onClick={onNewChat}
-            className="px-8 py-3 text-base font-medium rounded-lg transition-colors w-full border"
+            className="px-8 py-3 text-base font-medium rounded-lg transition-colors w-full border cursor-pointer"
             style={{
               backgroundColor: "var(--color-surface)",
               color: "var(--color-text)",
@@ -68,7 +68,7 @@ const Error = ({ message, onNewChat }: ErrorProps) => {
       ) : (
         <button
           onClick={onNewChat}
-          className="px-8 py-3 text-base font-medium rounded-lg transition-colors"
+          className="px-8 py-3 text-base font-medium rounded-lg transition-colors cursor-pointer"
           style={{
             backgroundColor: "var(--color-primary)",
             color: "var(--color-button-text)",
