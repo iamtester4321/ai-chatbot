@@ -84,6 +84,7 @@ function Layout() {
           setSelectedChat={setSelectedChat}
           setSelectedChatId={setSelectedChatId}
           isMobile={isMobile}
+          isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           isLoading={chatNameLoading}
         />

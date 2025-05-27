@@ -1,4 +1,4 @@
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
@@ -10,12 +10,12 @@ import {
   setMode,
 } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
+import { ChatSectionLoader } from "../Loaders";
 import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
 import FavoriteChats from "./FavoriteChats";
 import SparkChats from "./SparkChats";
-import { ChatSectionLoader } from "../Loaders";
 
 const Sidebar = ({
   isLogoutModalOpen,
@@ -29,6 +29,7 @@ const Sidebar = ({
   isMobile,
   setIsSidebarOpen,
   isLoading,
+  isSidebarOpen,
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -44,6 +45,13 @@ const Sidebar = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Reset search term when sidebar is closed
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      setSearchTerm(""); // Reset search field
+    }
+  }, [isSidebarOpen]); // Trigger effect when `isSidebarOpen` changes
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -102,6 +110,7 @@ const Sidebar = ({
       dispatch(setActionLoadingId(null));
     }
   };
+
   const filteredChatList = chatList.filter(
     (chat) =>
       typeof chat.name === "string" &&
@@ -145,9 +154,19 @@ const Sidebar = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search chats"
-              className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[color:var(--color-placeholder)] focus:outline-none focus:border-[var(--color-primary)] truncate"
+              className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[var(--color-disabled-text)] focus:outline-none focus:border-[var(--color-primary)] truncate"
             />
             <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[color:var(--color-placeholder)] flex-shrink-0" />
+
+            {/* Clear Search Button */}
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute top-2.5 right-2.5 p-1 text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         )}
 

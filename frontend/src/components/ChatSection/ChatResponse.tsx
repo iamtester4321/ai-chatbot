@@ -28,6 +28,7 @@ const ChatResponse = ({
   isMobile,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const user = useAppSelector((state) => state.user.user);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
 
@@ -139,14 +140,14 @@ const ChatResponse = ({
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
           {/* Skeleton Loader for chatName */}
-          {!chatName ? (
+          {user && !chatName ? (
             <Skeleton className="w-1/2 h-8 mb-4 sm:mb-6" />
           ) : (
             <h2
               className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
               text-center md:text-left"
             >
-              {chatName}
+              {chatName.length >= 50 ? chatName.concat("...") : chatName}
             </h2>
           )}
 

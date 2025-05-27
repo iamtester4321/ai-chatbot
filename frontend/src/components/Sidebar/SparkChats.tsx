@@ -31,7 +31,7 @@ const SparkChats = ({
     <div className="mb-4 w-full">
       <button
         onClick={() => setIsShareOpen(!isShareOpen)}
-        className="flex items-center gap-5 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
+        className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
       >
         {isShareOpen ? (
           <ChevronDown size={16} className="text-[color:var(--color-text)]" />

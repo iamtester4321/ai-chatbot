@@ -48,6 +48,7 @@ export type SidebarProps = {
   setSelectedChatId: (id: string | null) => void;
   setSelectedChat: (chat: { id: string; name: string } | null) => void;
   isMobile: boolean;
+  isSidebarOpen: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading?: boolean;
 };

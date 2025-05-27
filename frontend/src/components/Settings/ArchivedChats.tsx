@@ -1,6 +1,6 @@
 import { CornerUpLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { archiveChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ArchivedChatsProps } from "../../lib/types";
@@ -13,6 +13,7 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const openDeleteModal = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -32,6 +33,7 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
         dispatch(setIsArchived(false));
         onClose();
         showToast.success("Chat restored");
+        navigate(`/chat/${chatId}`);
       } else {
         showToast.error(result.message || "Failed to restore chat");
       }
