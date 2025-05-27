@@ -68,7 +68,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
               <button
                 onClick={onClose}
                 style={{ color: "var(--color-disabled-text)" }}
-                className="p-2 hover:text-white transition-colors"
+                className="p-2 hover:text-white transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -80,7 +80,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                     activeTab === tab.id
                       ? "bg-[var(--color-muted)] border border-[var(--color-primary)] text-[var(--color-primary)]"
                       : "text-[var(--color-disabled-text)] hover:bg-[var(--color-hover-bg)]"
@@ -112,7 +112,7 @@ const SettingsModal = ({ isOpen, onClose, chatList }: SettingsModalProps) => {
               </h2>
               <button
                 onClick={onClose}
-                className="text-[var(--color-disabled-text)] hover:text-[var(--color-text)] transition duration-200"
+                className="text-[var(--color-disabled-text)] hover:text-[var(--color-text)] transition duration-200 cursor-pointer"
               >
                 ✕
               </button>

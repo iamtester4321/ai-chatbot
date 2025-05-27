@@ -1,4 +1,3 @@
-
 // Header -------------------------------------------------------------------------------------------------------------------------------
 export interface HeaderProps {
   toggleSidebar: () => void;
@@ -18,7 +17,7 @@ export interface MobileMenuProps {
   archiveChat: () => void;
   openDeleteModal: () => void;
   setShareOpen: (state: boolean) => void;
-  chatId:string;
+  chatId: string;
 }
 
 export interface DesktopMenuProps {
@@ -30,7 +29,6 @@ export interface DesktopMenuProps {
   chatId: string;
 }
 
-
 export interface ChatActionsProps {
   chatId: string;
   isFavorite: boolean;
@@ -38,7 +36,6 @@ export interface ChatActionsProps {
   toggleFavorite: () => void;
   setShareOpen: (state: boolean) => void;
 }
-
 
 // Sidebar -------------------------------------------------------------------------------------------------------------------------------
 export type SidebarProps = {
@@ -51,6 +48,7 @@ export type SidebarProps = {
   setSelectedChatId: (id: string | null) => void;
   setSelectedChat: (chat: { id: string; name: string } | null) => void;
   isMobile: boolean;
+  isSidebarOpen: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading?: boolean;
 };
@@ -58,7 +56,6 @@ export type SidebarProps = {
 export interface UserDetailProps {
   onClick: () => void;
 }
-
 
 export interface FavoriteChatsProps {
   chats: ChatState["chatList"];
@@ -74,6 +71,11 @@ export interface FavoriteChatsProps {
   handleDelete: (chatId: string) => void;
   isMobile: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface FavoriteChatsSettingsProps {
+  favoriteChats?: ChatState["chatList"];
+  onClose?: () => void;
 }
 
 export interface ShareChatsProps {
@@ -106,7 +108,6 @@ export interface AllChatsProps {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
 // ChatSection -------------------------------------------------------------------------------------------------------------------------------
 export type ChatResponseProps = {
   messages: Message[];
@@ -119,6 +120,18 @@ export type ChatResponseProps = {
   chatId: string;
   shareId: string;
   isMobile: boolean;
+  sourceChatId: string | null;
+};
+
+export type ChatMessageThreadProps = {
+  messages: Message[];
+  isMobile: boolean;
+  onCopy: (text: string, index: number) => void;
+  copiedIndex: number | null;
+  likedMessages: { [key: string]: boolean };
+  dislikedMessages: { [key: string]: boolean };
+  onLike: (id: string | undefined) => void;
+  onDislike: (id: string | undefined) => void;
 };
 
 export type PromptInputProps = {
@@ -126,17 +139,20 @@ export type PromptInputProps = {
   isLoading: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleFormSubmit: (e: React.FormEvent) => void;
-  chatId?:string;
-  shareId?:string;
+  chatId?: string;
+  shareId?: string;
+  sourceChatId?: string | null;
 };
 
 export type Message = {
+  for: string;
   id?: string;
   role: string;
   content: string;
   createdAt: string;
   isLiked?: boolean;
   isDisliked?: boolean;
+  encryptedContent?: string;
 };
 
 export type ChatState = {
@@ -161,7 +177,9 @@ export type ChatState = {
 
 export interface ChatHookProps {
   chatId?: string;
+  shareId?: string;
   onResponseUpdate?: (text: string) => void;
+  sourceChatId?: string | null;
 }
 
 export interface DeleteChatResponse {
@@ -169,8 +187,7 @@ export interface DeleteChatResponse {
   message?: string;
 }
 
-
-// Modals -------------------------------------------------------------------------------------------------------------------------------
+// Modals --------------------------------------------------------------------------------------------------------------------------------
 export interface DeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -205,7 +222,6 @@ export interface ArchivedChatsProps {
   onClose: () => void;
 }
 
-
 // Chart -------------------------------------------------------------------------------------------------------------------------------
 export type ChartType =
   | "line"
@@ -215,13 +231,11 @@ export type ChartType =
   | "scatter"
   | "pie";
 
-
 // Error -------------------------------------------------------------------------------------------------------------------------------
 export interface ErrorProps {
   message: string;
   onNewChat: () => void;
 }
-
 
 // Theme -------------------------------------------------------------------------------------------------------------------------------
 export interface ThemeToggleButtonProps {

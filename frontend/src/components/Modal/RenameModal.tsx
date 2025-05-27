@@ -114,22 +114,28 @@ export default function RenameModal({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
+              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors cursor-pointer"
             >
               Cancel
             </button>
 
             <button
               onClick={handleRename}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm rounded-md transition-colors disabled:opacity-50 flex items-center"
+              disabled={isLoading || !newName.trim()}
+              className={`px-4 py-2 text-sm rounded-md transition-colors flex items-center ${
+                isLoading || !newName.trim()
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
               style={{
                 backgroundColor: "var(--color-primary)",
                 color: "white",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "var(--color-primary-hover)";
+                if (!(isLoading || !newName.trim())) {
+                  e.currentTarget.style.backgroundColor =
+                    "var(--color-primary-hover)";
+                }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--color-primary)";

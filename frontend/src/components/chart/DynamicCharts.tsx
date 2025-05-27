@@ -1,9 +1,13 @@
+"use client";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   AreaChart as AreaIcon,
   BarChart3,
   ChartLine,
   ChevronDown,
   ChevronUp,
+  Download,
   LayoutGrid,
   PieChart as PieIcon,
   ScatterChart as ScatterIcon,
@@ -25,6 +29,7 @@ import {
   CartesianGrid,
   Cell,
   ComposedChart,
+  DefaultLegendContentProps,
   Legend,
   Line,
   LineChart,
@@ -64,6 +69,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   const { isDarkMode } = useSelector((state: RootState) => state.theme);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -76,14 +82,12 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
         setOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  // Transform object-of-arrays into array-of-objects
   useEffect(() => {
     if (Array.isArray(data)) {
       setJsonData(data);
@@ -109,7 +113,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     }
   }, [data]);
 
-  // Detect category (string array) and numeric series
   const { categoryKey, numericKeys } = useMemo(() => {
     if (!jsonData.length) return { categoryKey: "", numericKeys: [] };
     const sample = jsonData[0];
@@ -147,7 +150,27 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     [chartType, numericKeys]
   );
 
-  // Memoize the entire chart element
+  const renderWrappedLegend = (props: DefaultLegendContentProps) => {
+    const { payload } = props;
+    if (!payload) return <></>;
+    return (
+      <ul className="flex flex-wrap list-none m-0 p-0">
+        {payload.map((entry: any, index: number) => (
+          <li
+            key={`item-${index}`}
+            className="flex items-center mr-3 mb-2 text-[var(--color-text)]"
+          >
+            <span
+              className="inline-block w-[10px] h-[10px] mr-2"
+              style={{ backgroundColor: entry.color }}
+            />
+            {entry.value}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
       return <p className="text-red-500">Insufficient data for chart</p>;
@@ -155,7 +178,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     switch (chartType) {
       case "line":
         return (
-          <LineChart data={jsonData}>
+          <LineChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -173,13 +196,13 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </LineChart>
         );
       case "area":
         return (
-          <AreaChart data={jsonData}>
+          <AreaChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -197,13 +220,13 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </AreaChart>
         );
       case "bar":
         return (
-          <BarChart data={jsonData}>
+          <BarChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -221,13 +244,13 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </BarChart>
         );
       case "composed":
         return (
-          <ComposedChart data={jsonData}>
+          <ComposedChart data={jsonData} className="p-2">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={categoryKey} />
             <YAxis />
@@ -245,7 +268,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             {renderSeries()}
           </ComposedChart>
         );
@@ -258,13 +281,13 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           );
         }
         return (
-          <ScatterChart>
+          <ScatterChart className="p-2">
             <CartesianGrid />
             <XAxis dataKey={numericKeys[0]} name={numericKeys[0]} />
             <YAxis dataKey={numericKeys[1]} name={numericKeys[1]} />
             <ZAxis range={[60]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
             <Scatter data={jsonData} fill={COLORS[0]} />
           </ScatterChart>
         );
@@ -299,7 +322,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                 strokeWidth: 1,
               }}
             />
-            <Legend />
+            <Legend content={renderWrappedLegend} />
           </PieChart>
         );
       default:
@@ -307,60 +330,89 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     }
   }, [chartType, categoryKey, numericKeys, jsonData, renderSeries]);
 
+  const handleExportPDF = async () => {
+    if (!chartRef.current) return;
+    const canvas = await html2canvas(chartRef.current, {
+      backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+      scale: 2,
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const padding = 40;
+    const pdfWidth = canvas.width + padding * 2;
+    const pdfHeight = canvas.height + padding * 2;
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: [pdfWidth, pdfHeight],
+    });
+    pdf.addImage(imgData, "PNG", padding, padding, canvas.width, canvas.height);
+    pdf.save(`${name}-chart.pdf`);
+  };
+
   return (
     <div className="p-6">
       <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
         {name}
       </p>
-      <div className="relative inline-block text-left mb-4">
-        <button
-          ref={buttonRef}
-          onClick={() => setOpen((prev) => !prev)}
-          className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
-        >
-          <span className="flex items-center">
-            {chartIcons[chartType]}
-            {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
-          </span>
-          <span>
-            {open ? (
-              <ChevronUp size={16} className="text-[color:var(--color-text)]" />
-            ) : (
-              <ChevronDown
-                size={16}
-                className="text-[color:var(--color-text)]"
-              />
-            )}
-          </span>
-        </button>
-
-        {open && (
-          <div
-            ref={dropdownRef}
-            data-dropdown-menu
-            className="absolute z-5 mt-1 w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+      <div className="flex justify-between text-left mb-4">
+        <div className="relative">
+          <button
+            ref={buttonRef}
+            onClick={() => setOpen((prev) => !prev)}
+            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
           >
-            <div className="py-1">
-              {chartOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    setChartType(option);
-                    setOpen(false);
-                  }}
-                  className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
-                    option === chartType ? "font-semibold" : ""
-                  }`}
-                >
-                  {chartIcons[option]}
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </button>
-              ))}
+            <span className="flex items-center">
+              {chartIcons[chartType]}
+              {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
+            </span>
+            <span>
+              {open ? (
+                <ChevronUp
+                  size={16}
+                  className="text-[color:var(--color-text)]"
+                />
+              ) : (
+                <ChevronDown
+                  size={16}
+                  className="text-[color:var(--color-text)]"
+                />
+              )}
+            </span>
+          </button>
+          {open && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-10 mt-1 left-0 top-full w-36 rounded-md shadow-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+            >
+              <div className="py-1">
+                {chartOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setChartType(option);
+                      setOpen(false);
+                    }}
+                    className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
+                      option === chartType ? "font-semibold" : ""
+                    }`}
+                  >
+                    {chartIcons[option]}
+                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+        <button
+          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center"
+          onClick={handleExportPDF}
+        >
+          <Download size={16} className="mr-2" />
+          <span>Export</span>
+        </button>
       </div>
-      <div className="h-96">
+      <div className="h-96" ref={chartRef}>
         <ResponsiveContainer width="100%" height="100%">
           {chartElement || <StreamLoader />}
         </ResponsiveContainer>
@@ -369,7 +421,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
   );
 }
 
-// Only re-render when `data` or `name` change
 export default React.memo(DynamicChartComponent, (prev, next) => {
   return (
     prev.name === next.name &&

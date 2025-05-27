@@ -104,7 +104,7 @@ export default function ShareModal({
             <button
               onClick={handleCopy}
               disabled={!shareId}
-              className="p-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-button-text)] transition-colors disabled:opacity-50"
+              className="p-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-button-text)] transition-colors disabled:opacity-50 cursor-pointer"
             >
               {copied ? (
                 <span className="flex items-center">
@@ -120,7 +120,7 @@ export default function ShareModal({
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
+              className="px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors cursor-pointer"
             >
               Close
             </button>

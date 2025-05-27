@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
+import { env } from "../config/env";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -11,11 +12,27 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    res.cookie("authToken", result?.token, {
+    const temp = new URL(env.SERVER_ORIGIN);
+    const domain = temp.hostname;
+
+    const isDevlopment = env.NODE_ENV.includes("dev");
+
+    let cocckieOpt = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+      secure: !isDevlopment,
+      sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isDevlopment ? {} : { domain: domain }),
+    };
+
+    if (!result.token) {
+      res
+        .status(500)
+        .json({ success: false, message: "Token generation failed" });
+      return;
+    }
+
+    res.cookie("authToken", result.token, cocckieOpt);
+
     res.status(201).json({ success: true, user: result.data });
   } catch (err) {
     res.status(500).json({
@@ -35,11 +52,19 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    res.cookie("authToken", result.data?.token, {
+    const temp = new URL(env.SERVER_ORIGIN);
+    const domain = temp.hostname;
+
+    const isDevlopment = env.NODE_ENV.includes("dev");
+
+    let cocckieOpt = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+      secure: !isDevlopment,
+      sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+      ...(isDevlopment ? {} : { domain: domain }),
+    };
+
+    res.cookie("authToken", result.data?.token, cocckieOpt);
     res.json({ success: true, user: result.data?.user });
   } catch (err) {
     res.status(500).json({
@@ -50,7 +75,20 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie("authToken");
+  const temp = new URL(env.SERVER_ORIGIN);
+  const domain = temp.hostname;
+
+  const isDevlopment = env.NODE_ENV.includes("dev");
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: !isDevlopment,
+    sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+    ...(isDevlopment ? {} : { domain }),
+    path: "/",
+  };
+
+  res.clearCookie("authToken", cookieOptions);
   res.status(200).json({ success: true, message: "Logged out" });
 };
 

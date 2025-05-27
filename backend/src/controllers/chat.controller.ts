@@ -13,12 +13,13 @@ import {
   saveChat,
 } from "../services/chat.service";
 import { findShareById } from "../services/share.service";
-import {
-  createAesGcmEncryptStream,
-  decryptAesPayload,
-  encryptWithAesGcm,
-} from "../utils/encryptStream";
-import { Readable } from "stream";
+import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
+import { chartPrompt } from "../lib/prompts/chartPrompt";
+import { createChatFromSourceChat } from "../repositories/chat.repository";
+
+interface ChatRequestParams {
+  chatId: string;
+}
 
 interface ChatRequestByshareIdParams {
   shareId: string;
@@ -27,83 +28,175 @@ interface ChatRequestByshareIdParams {
 
 export const streamChat = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req.user as { id: string })?.id;
-  const { chatId, messages = [], userMessageId, assistantMessageId } = req.body;
-
-  const aesKey = req.session.aesKey;
-
-  if (!aesKey) {
-    res.status(401).send("No encryption key");
-    return;
-  }
-  const aesKeyBuffer = Buffer.from(aesKey, "base64");
-
-  const enPrompt = req.body.prompt;
-
-  const prompt = await decryptAesPayload(enPrompt, aesKeyBuffer);
+  const chatId = req.body.chatId;
+  const sourceChatId = req.body.sourceChatId;
+  const encryptedMessages = req.body.messages || [];
+  const userMessageId = req.body.userMessageId;
+  const assistantMessageId = req.body.assistantMessageId;
+  const encryptedPrompt = req.body.prompt;
+  let assistantReply = "";
 
   const { mode } = req.query;
 
-  let assistantReply = "";
-  let tempPrompt = prompt || "user forget to put prompt ...";
+  let messages = await Promise.all(
+    encryptedMessages.map(async (m: { content: string; role: string }) => ({
+      role: m.role,
+      content: await decryptMessage(m.content),
+    }))
+  );
+
+  // Decrypt prompt
+  const decryptedPrompt = await decryptMessage(encryptedPrompt);
+
   if (mode === "chart") {
-    tempPrompt = `
-     SYSTEM:
-You are a data analysis assistant. When given a query, you must respond only with one or more raw JSON objects or arrays—no markdown, no backticks, no extra text. Each top-level object must include:
-- "name": a descriptive string
-- "data": an object whose values are arrays of equal length suitable for plotting (e.g., ["Jan","Feb"] and [10,20]).
--you should only return one object as an json and that one object must have name property wich is what that data about and data propery wich is object and it should be able to show on charts
-Everything you output must be directly parseable by JSON.parse().
-
--data must be in an formate and data must be able to project on line,area,bar,compose,sacter,pie this chart *this is must*
-
-USER:${req.body.prompt}
-`.trim();
+    messages = [
+      {
+        role: "system",
+        content: chartPrompt,
+      },
+      {
+        role: "user",
+        content: decryptedPrompt,
+      },
+    ];
+  } else {
+    // Normal mode
+    messages.push({
+      role: "user",
+      content: decryptedPrompt,
+    });
   }
 
   const model = google("gemini-2.0-flash");
-  const result = await streamText({
-    model,
-    messages: [...messages, { role: "user", content: tempPrompt }],
-    onChunk: ({ chunk }) => {
-      if (chunk.type === "text-delta") {
-        assistantReply += chunk.textDelta;
-      }
-    },
-    onFinish: async () => {
-      if (userId) {
-        // Import the AES key as CryptoKey
 
-        const encryptedPrompt = encryptWithAesGcm(prompt, aesKeyBuffer);
-        const encryptedReply = encryptWithAesGcm(assistantReply, aesKeyBuffer);
+  const validRoles = new Set(["user", "assistant", "system"]);
+  const promptMessages = messages
+    .filter((m) => validRoles.has(m.role) && typeof m.content === "string")
+    .map((m) => ({
+      role: m.role as "user" | "assistant" | "system",
+      content: m.content,
+    }));
 
-        await saveChat(
-          userId,
-          [
-            { id: userMessageId, role: "user", content: encryptedPrompt },
-            {
-              id: assistantMessageId,
-              role: "assistant",
-              content: encryptedReply,
-            },
-          ],
-          chatId,
-          aesKey
-        );
-      }
-    },
-    onError: (err) => console.error("Stream error:", err),
-  });
-
-  // Convert AsyncIterable to Node Readable
-  const readable = Readable.from(result.textStream);
-  const encryptStream = createAesGcmEncryptStream(aesKeyBuffer);
-
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-
-  readable.pipe(encryptStream).pipe(res);
+  try {
+    const result = streamText({
+      model,
+      messages: promptMessages,
+      onChunk: ({ chunk }) => {
+        if (chunk.type === "text-delta") {
+          assistantReply += chunk.textDelta;
+        }
+      },
+      onFinish: async () => {
+        if (userId) {
+          const encryptedUserMsg = await encryptMessage(decryptedPrompt);
+          const encryptedAssistantMsg = await encryptMessage(assistantReply);
+          await saveChat(
+            userId,
+            [
+              {
+                id: userMessageId,
+                role: "user",
+                content: encryptedUserMsg,
+                for: mode === "chart" ? "chart" : "chat",
+              },
+              {
+                id: assistantMessageId,
+                role: "assistant",
+                content: encryptedAssistantMsg,
+                for: mode === "chart" ? "chart" : "chat",
+              },
+            ],
+            chatId,
+            sourceChatId
+          );
+        }
+      },
+      onError: (err) => {
+        console.error("Stream error:", err);
+        throw new Error("Stream error");
+      },
+    });
+    result.pipeTextStreamToResponse(res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal error" });
+  }
 });
+
+export const createChat = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req.user as { id: string })?.id;
+  const { messages, chatId, sourceChatId } = req.body;
+
+  const { mode } = req.query;
+
+  if (!userId || !chatId) {
+    res.status(400).json({ error: "Missing required fields." });
+    return;
+  }
+
+  try {
+    let encryptedMessages: {
+      id: string;
+      role: string;
+      content: string;
+      for: string;
+    }[] = [];
+
+    // If messages array is passed, encrypt them
+    if (Array.isArray(messages)) {
+      encryptedMessages = await Promise.all(
+        messages.map(
+          async (message: {
+            id: string;
+            role: "user" | "assistant";
+            content: string;
+          }) => {
+            const encryptedContent = await encryptMessage(message.content);
+            return {
+              id: message.id,
+              role: message.role,
+              content: encryptedContent,
+              for: mode === "chart" ? "chart" : "chat",
+            };
+          }
+        )
+      );
+    }
+
+    await saveChat(userId, encryptedMessages, chatId, sourceChatId);
+
+    res
+      .status(201)
+      .json({ success: true, message: "Chat created successfully" });
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    res.status(500).json({ error: "Failed to create chat" });
+  }
+});
+
+export const handleCreateChatFromSource = async (req: any, res: any) => {
+  const userId = req.user?.id; // Ensure this is being set by your auth middleware
+  const newChatId = req.params.chatId;
+  const sourceChatId = req.body.sourceChatId;
+
+  if (!userId || !sourceChatId) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Missing required fields." });
+  }
+
+  const result = await createChatFromSourceChat(
+    userId,
+    newChatId,
+    sourceChatId
+  );
+
+  if (result.success) {
+    return res.status(201).json({ success: true });
+  } else {
+    return res.status(500).json({ success: false, error: result.error });
+  }
+};
 
 export const findChatById: RequestHandler = asyncHandler(async (req, res) => {
   try {
@@ -239,3 +332,27 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// export const handleCreateChatFromSource = async (req: any, res: any) => {
+//   const userId = req.user?.id;
+//   const newChatId = req.params.chatId;
+//   const sourceChatId = req.body.sourceChatId;
+
+//   if (!userId || !sourceChatId) {
+//     return res
+//       .status(400)
+//       .json({ success: false, error: "Missing required fields." });
+//   }
+
+//   const result = await createChatFromSourceChat(
+//     userId,
+//     newChatId,
+//     sourceChatId
+//   );
+
+//   if (result.success) {
+//     return res.status(201).json({ success: true });
+//   } else {
+//     return res.status(500).json({ success: false, error: result.error });
+//   }
+// };

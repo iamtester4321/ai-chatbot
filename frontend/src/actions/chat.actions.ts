@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
   ARCHIVE_CHAT,
+  CREATE_CHAT,
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
@@ -15,81 +16,74 @@ import {
   STREAM_CHAT_RESPONSE,
   TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
-import { DeleteChatResponse } from "../lib/types";
+import { ChatHookProps, DeleteChatResponse, Message } from "../lib/types";
 import {
   addMessage,
-  resetChat,
   setChatList,
   setChatName,
   setCurrentResponse,
+  setMessages,
 } from "../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
-import {
-  decryptChunk,
-  decryptWithAesKey,
-  encryptWithAesKey,
-  performHandshake,
-} from "../utils/helpers/e2e";
+import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
 export const useChatActions = ({
   chatId,
+  sourceChatId,
   onResponseUpdate,
-}: {
-  chatId: string;
-  onResponseUpdate?: (text: string) => void;
-}) => {
+}: ChatHookProps & { shareId?: string }) => {
   const dispatch = useAppDispatch();
-  const { messages, mode } = useAppSelector((s) => s.chat);
+  const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
   const navigate = useNavigate();
+
   const modeStr = mode === "chart" ? "?mode=chart" : "";
 
   const {
     input,
     handleInputChange,
-    handleSubmit: originalHandleSubmit,
+    handleSubmit: baseHandleSubmit,
     status,
   } = useChat({
     api: STREAM_CHAT_RESPONSE(modeStr),
     id: chatId,
     onResponse: async () => {
-      const moderationResult = await moderationCheck(input);
+      const tempChatName = input.trim().slice(0, 50);
+      dispatch(setChatName(tempChatName));
 
+      const moderationResult = await moderationCheck(input);
       if (moderationResult.xssDetected) {
         showToast.error(
           "Potential security risk detected in your input. Please remove any unsafe code and try again."
         );
-        navigate("/");
-        dispatch(resetChat());
+        dispatch(setMessages(messages));
+        if (messages.length === 0) {
+          navigate("/");
+        }
         return;
-      }
-
-      if (moderationResult.flagged) {
+      } else if (moderationResult.flagged) {
+        dispatch(setChatName(""));
         showToast.warning(
           "Your message may violate our content guidelines. Please revise and try again."
         );
-        navigate("/");
-        dispatch(resetChat());
-        return;
-      }
-
-      // If moderation passes, run all main chat logic
-      try {
-        const { aesKey } = await performHandshake();
-
+        dispatch(setMessages(messages));
+        if (messages.length === 0) {
+          navigate("/");
+        }
+      } else {
         const userMessageId = uuidv4();
         const assistantMessageId = uuidv4();
-
+        const encryptedUser = await encryptMessage(input);
         dispatch(
           addMessage({
             id: userMessageId,
             role: "user",
             content: input,
             createdAt: new Date().toISOString(),
+            for: mode,
           })
         );
-
         const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
           method: "POST",
           credentials: "include",
@@ -97,11 +91,16 @@ export const useChatActions = ({
           body: JSON.stringify({
             userMessageId,
             assistantMessageId,
-            prompt: await encryptWithAesKey(aesKey, input),
+            prompt: encryptedUser,
             messages,
-            chatId,
+            chatId: chatId || "",
+            sourceChatId: sourceChatId || null,
           }),
         });
+
+        if (!response.ok) {
+          throw new Error("API request failed");
+        }
 
         if (!response.ok || !response.body) {
           throw new Error("Streaming API failed");
@@ -116,47 +115,32 @@ export const useChatActions = ({
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const parts = buffer.split("\n\n");
-            buffer = parts.pop() || "";
-
-            for (const part of parts) {
-              const m = part.match(/^data:\s*(.+)$/m);
-              if (!m) continue;
-              const encryptedB64 = m[1].trim();
-
-              try {
-                const decrypted = await decryptChunk(aesKey, encryptedB64);
-                accumulated += decrypted;
-                dispatch(setCurrentResponse(accumulated));
-                onResponseUpdate?.(accumulated);
-              } catch (e) {
-                console.error("decryptChunk error:", e);
-              }
-            }
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedText += chunk;
+            dispatch(setCurrentResponse(accumulatedText));
+            onResponseUpdate?.(accumulatedText);
           }
-        } finally {
-          reader.releaseLock();
-        }
+          const decryptedAssistantMessage = await decryptMessage(
+            accumulatedText
+          );
+          dispatch(
+            addMessage({
+              id: assistantMessageId,
+              role: "assistant",
+              content: decryptedAssistantMessage,
+              createdAt: new Date().toISOString(),
+              for: mode,
+            })
+          );
+          dispatch(setCurrentResponse(""));
+          onResponseUpdate?.("");
 
-        dispatch(
-          addMessage({
-            id: assistantMessageId,
-            role: "assistant",
-            content: accumulated,
-            createdAt: new Date().toISOString(),
-          })
-        );
-        dispatch(setCurrentResponse(""));
-        onResponseUpdate?.("");
-
-        await fetchChatNames(dispatch);
-
-        if (chatId) {
-          const updated = await fetchMessages(chatId);
-          if (updated.success && updated.data) {
-            dispatch(setChatName(updated.data.name));
+          await fetchChatNames(dispatch);
+          if (chatId) {
+            const updatedChat = await fetchMessages(chatId);
+            if (updatedChat.success && updatedChat.data) {
+              dispatch(setChatName(updatedChat.data.name));
+            }
           }
         }
       } catch (err) {
@@ -170,9 +154,43 @@ export const useChatActions = ({
     messages,
     input,
     handleInputChange,
-    handleSubmit: originalHandleSubmit,
+    handleSubmit: baseHandleSubmit,
     isLoading: status === "submitted",
   };
+};
+
+export const createChatFromSource = async (
+  newChatId: string,
+  sourceChatId: string,
+  messages: Message[]
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await axios.post(
+      CREATE_CHAT,
+      { chatId: newChatId, sourceChatId, messages },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (response.status === 201) {
+      const updatedChats = await fetchChatNames(store.dispatch);
+      store.dispatch(setChatList(updatedChats.data));
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        message: response.data?.error || "Failed to create chat from source",
+      };
+    }
+  } catch (error: unknown) {
+    console.error("Error creating chat from source:", error);
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
 };
 
 export const fetchMessages = async (chatId: string) => {
@@ -182,36 +200,19 @@ export const fetchMessages = async (chatId: string) => {
       withCredentials: true,
     });
 
-    const encryptedMessages = response.data.messages;
-    const aesKeyBase64 = response.data.encryptedAesKey;
-
-    const aesKeyRaw = Uint8Array.from(atob(aesKeyBase64), (c) =>
-      c.charCodeAt(0)
-    );
-    const aesKey = await crypto.subtle.importKey(
-      "raw",
-      aesKeyRaw,
-      { name: "AES-GCM" },
-      false,
-      ["decrypt"]
-    );
-
-    // 3. Decrypt each message
     const decryptedMessages = await Promise.all(
-      encryptedMessages.map(async (msg: any) => ({
+      response.data.messages.map(async (msg: any) => ({
         ...msg,
-        content: await decryptWithAesKey(aesKey, msg.content),
+        content: await decryptMessage(msg.content),
       }))
     );
-
-    const decryptedName = decryptWithAesKey(aesKey, response.data.name);
 
     return {
       success: true,
       data: {
         ...response.data,
         messages: decryptedMessages,
-        name: decryptedName,
+        name: response.data.name,
       },
     };
   } catch (error: unknown) {
@@ -233,11 +234,26 @@ export const fetchMessagesByShareId = async (shareId: string) => {
       withCredentials: true,
     });
 
-    return { success: true, data: response.data };
+    const decryptedMessages = await Promise.all(
+      response.data.messages.map(async (msg: any) => ({
+        ...msg,
+        content: await decryptMessage(msg.content),
+      }))
+    );
+    const decryptedName = await decryptMessage(response.data.name);
+
+    return {
+      success: true,
+      data: {
+        ...response.data,
+        messages: decryptedMessages,
+        name: decryptedName,
+      },
+    };
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error(
-        "Error fetching messages:",
+        "Error fetching shared messages:",
         error.response?.data || error.message
       );
     } else {
@@ -252,44 +268,25 @@ export const fetchChatNames = async (dispatch: AppDispatch) => {
     const response = await axios.get(GET_CHAT_NAMES, {
       withCredentials: true,
     });
-
-    // Decrypt chat names
-    const returnData = await Promise.all(
-      response.data.map(async (x: any) => {
-        const aesKeyBase64 = x.encryptedAesKey;
-
-        const aesKeyRaw = Uint8Array.from(atob(aesKeyBase64), (c) =>
-          c.charCodeAt(0)
-        );
-        const aesKey = await crypto.subtle.importKey(
-          "raw",
-          aesKeyRaw,
-          { name: "AES-GCM" },
-          false,
-          ["decrypt"]
-        );
-
-        const decryptedName = await decryptWithAesKey(aesKey, x.name);
-        return { ...x, name: decryptedName };
-      })
-    );
-
-    if (response.status === 200) {
-      dispatch(setChatList(returnData));
-      return { success: true, data: returnData };
-    } else {
+    if (response.status !== 200) {
       console.error("Failed to fetch chat names");
       return { success: false, error: "Failed to fetch chat names" };
     }
+
+    const decryptedList = await Promise.all(
+      response.data.map(async (chat: any) => ({
+        ...chat,
+        name: await decryptMessage(chat.name),
+      }))
+    );
+    dispatch(setChatList(decryptedList));
+
+    return { success: true, data: response.data };
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error fetching chat names:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("An unknown error occurred:", error);
-    }
+    console.error(
+      "Error fetching chat names:",
+      axios.isAxiosError(error) ? error.response?.data || error.message : error
+    );
     return { success: false, error: "Error fetching chat names" };
   }
 };
@@ -372,9 +369,12 @@ export const renameChat = async (
   newName: string
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    // Always encrypt the new name before sending
+    const encryptedName = await encryptMessage(newName);
+
     const response = await axios.patch(
       RENAME_CHAT(chatId),
-      { newName },
+      { newName: encryptedName },
       {
         withCredentials: true,
         headers: {

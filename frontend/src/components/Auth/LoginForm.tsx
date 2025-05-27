@@ -73,7 +73,9 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full flex flex-col">
-      <label htmlFor="email" className="text-sm mb-1">Email</label>
+      <label htmlFor="email" className="text-sm mb-1">
+        Email
+      </label>
       <input
         id="email"
         type="text"
@@ -87,7 +89,9 @@ const LoginForm = () => {
         <p className="text-[var(--color-error)] text-sm mb-2">{errors.email}</p>
       )}
 
-      <label htmlFor="password" className="text-sm mb-1">Password</label>
+      <label htmlFor="password" className="text-sm mb-1">
+        Password
+      </label>
       <input
         id="password"
         type="password"
@@ -98,7 +102,9 @@ const LoginForm = () => {
         className="w-full rounded-lg outline-none py-3 px-4 text-base font-normal mb-1 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)]"
       />
       {errors.password && (
-        <p className="text-[var(--color-error)] text-sm mb-2">{errors.password}</p>
+        <p className="text-[var(--color-error)] text-sm mb-2">
+          {errors.password}
+        </p>
       )}
 
       <button
@@ -106,7 +112,7 @@ const LoginForm = () => {
         disabled={!isValid || isLoading}
         className={`w-full py-3 px-4 rounded-lg mt-2 flex items-center justify-center transition-colors ${
           isValid && !isLoading
-            ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white"
+            ? "bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white cursor-pointer"
             : "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
         }`}
       >

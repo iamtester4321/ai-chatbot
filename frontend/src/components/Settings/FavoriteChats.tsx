@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
-import { FavoriteChatsProps } from "../../lib/types";
+import { FavoriteChatsSettingsProps } from "../../lib/types";
 import { setIsFavorite } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 
-const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
+const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsSettingsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const showToast = useToast();
@@ -74,7 +74,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleToggleFavorite(chat.id)}
-                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 title="Remove from favorites"
               >
                 <Star size={16} fill="gold" color="gold" />
@@ -82,7 +82,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsProps) => {
 
               <button
                 onClick={() => openDeleteModal(chat.id)}
-                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 style={{ color: "var(--color-error)" }}
                 title="Delete"
               >

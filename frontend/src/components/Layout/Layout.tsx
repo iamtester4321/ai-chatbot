@@ -39,21 +39,12 @@ function Layout() {
   }, []);
 
   useEffect(() => {
-    const getChatNames = async () => {
-      try {
-        dispatch(setChatNameLoading(true));
-        const { success } = await fetchChatNames(dispatch);
-        if (!success) {
-          console.error("Failed to fetch chat names");
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        dispatch(setChatNameLoading(false));
-      }
+    const loadChats = async () => {
+      const { success } = await fetchChatNames(dispatch);
+      if (!success) console.error("Failed to load chats");
     };
-    getChatNames();
-  }, []);
+    loadChats();
+  }, [dispatch]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -79,9 +70,11 @@ function Layout() {
 
   return (
     <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
-      <div className={`${isSidebarOpen ? "w-[250px]" : "w-0"} 
+      <div
+        className={`${isSidebarOpen ? "w-[250px]" : "w-0"} 
         fixed md:relative transition-all duration-300 overflow-hidden h-screen 
-        md:h-screen bg-[var(--color-bg)] z-20 top-0`}>
+        md:h-screen bg-[var(--color-bg)] z-20 top-0`}
+      >
         <Sidebar
           isLogoutModalOpen={isLogoutModalOpen}
           setIsLogoutModalOpen={setIsLogoutModalOpen}
@@ -92,6 +85,7 @@ function Layout() {
           setSelectedChat={setSelectedChat}
           setSelectedChatId={setSelectedChatId}
           isMobile={isMobile}
+          isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           isLoading={chatNameLoading}
         />
@@ -111,10 +105,11 @@ function Layout() {
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}
         />
-        <div className="flex-1 overflow-y-auto">
-          <ChatSection isMobile={isMobile}/>
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent">
+          <ChatSection isMobile={isMobile} />
         </div>
       </div>
+
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}

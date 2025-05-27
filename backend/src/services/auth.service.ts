@@ -85,11 +85,19 @@ export const googleCallback = (
       let token = null;
       if (user) token = signToken({ userId: user.id, email: user.email });
 
-      res.cookie("authToken", token, {
+      const temp = new URL(env.SERVER_ORIGIN);
+      const domain = temp.hostname;
+
+      const isDevlopment = env.NODE_ENV.includes("dev");
+
+      let cocckieOpt = {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
+        secure: !isDevlopment,
+        sameSite: (isDevlopment ? "lax" : "none") as "lax" | "none" | "strict",
+        ...(isDevlopment ? {} : { domain: domain }),
+      };
+
+      res.cookie("authToken", token, cocckieOpt);
 
       res.redirect(`${env.CLIENT_ORIGIN}`);
     } catch (err) {

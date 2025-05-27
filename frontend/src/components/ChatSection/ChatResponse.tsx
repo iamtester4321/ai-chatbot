@@ -1,17 +1,22 @@
-import { Archive, Check, Copy, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Archive } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { archiveChat } from "../../actions/chat.actions";
 import {
   updateDislikeStatus,
   updateLikeStatus,
 } from "../../actions/message.actions";
+import { createChatFromSource } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
+import { Skeleton } from "../Loaders";
 import StreamLoader from "../Loaders/StreamLoader";
+import ChatMessageThread from "./ChatMessageThread";
 import PromptInput from "./PromptInput";
+import { useLocation, useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 const ChatResponse = ({
   messages,
@@ -22,57 +27,29 @@ const ChatResponse = ({
   handleInputChange,
   handleFormSubmit,
   chatId,
-  shareId,
   isMobile,
+  sourceChatId,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showResponseActions, setShowResponseActions] = useState(false);
+  const user = useAppSelector((state) => state.user.user);
+  // const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
-  const user = useAppSelector((state) => state.user.user);
+
   const showToast = useToast();
   const dispatch = useAppDispatch();
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, [messages, chatResponse]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLoading && chatResponse) {
-      setShowResponseActions(true);
-    } else {
-      setShowResponseActions(false);
-    }
-  }, [isLoading, chatResponse]);
+  const isSharedChat = location.pathname.startsWith("/share/");
 
-  const copyToClipboard = (text: string, index: number) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000);
-      })
-      .catch((err) => {
-        console.error("Failed to copy: ", err);
-      });
-  };
-
-  const handleRestoreChat = async (chatId: string) => {
-    try {
-      const result = await archiveChat(chatId);
-
-      if (result.success) {
-        dispatch(setIsArchived(false));
-        showToast.success("Chat restored");
-      } else {
-        showToast.error(result.message || "Failed to restore chat");
-      }
-    } catch (error) {
-      showToast.error("An error occurred while restoring chat");
-      console.error("Error restoring chat:", error);
-    }
-  };
+  // useEffect(() => {
+  //   if (!isLoading && chatResponse) {
+  //     setShowResponseActions(true);
+  //   } else {
+  //     setShowResponseActions(false);
+  //   }
+  // }, [isLoading, chatResponse]);
 
   const [likedMessages, setLikedMessages] = useState<{
     [key: string]: boolean;
@@ -80,6 +57,21 @@ const ChatResponse = ({
   const [dislikedMessages, setDislikedMessages] = useState<{
     [key: string]: boolean;
   }>({});
+
+  useEffect(() => {
+    const newLikedMessages: { [key: string]: boolean } = {};
+    const newDislikedMessages: { [key: string]: boolean } = {};
+
+    messages.forEach((msg) => {
+      if (msg.id) {
+        newLikedMessages[msg.id] = msg.isLiked || false;
+        newDislikedMessages[msg.id] = msg.isDisliked || false;
+      }
+    });
+
+    setLikedMessages(newLikedMessages);
+    setDislikedMessages(newDislikedMessages);
+  }, [messages]);
 
   const handleLike = async (messageId: string | undefined) => {
     if (!messageId) return;
@@ -128,185 +120,97 @@ const ChatResponse = ({
   };
 
   useEffect(() => {
-    const newLikedMessages: { [key: string]: boolean } = {};
-    const newDislikedMessages: { [key: string]: boolean } = {};
+    const element = messagesEndRef.current;
+    if (!element) return;
 
-    messages.forEach((msg) => {
-      if (msg.id) {
-        newLikedMessages[msg.id] = msg.isLiked || false;
-        newDislikedMessages[msg.id] = msg.isDisliked || false;
+    const container = element.parentElement;
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+
+    if (isNearBottom) {
+      element.scrollIntoView({ block: "center" });
+    }
+  }, [messages, chatResponse]);
+
+  const handleRestoreChat = async (chatId: string) => {
+    try {
+      const result = await archiveChat(chatId);
+
+      if (result.success) {
+        dispatch(setIsArchived(false));
+        showToast.success("Chat restored");
+      } else {
+        showToast.error(result.message || "Failed to restore chat");
       }
-    });
+    } catch (error) {
+      showToast.error("An error occurred while restoring chat");
+      console.error("Error restoring chat:", error);
+    }
+  };
 
-    setLikedMessages(newLikedMessages);
-    setDislikedMessages(newDislikedMessages);
-  }, [messages]);
+  const handleCreateChatFromSource = async () => {
+    if (!sourceChatId) {
+      showToast.error("Source chat ID is missing");
+      return;
+    }
+    const newChatId = uuidv4();
 
-  const { mode } = useAppSelector((state) => state.chat);
+    const result = await createChatFromSource(
+      newChatId,
+      sourceChatId,
+      messages
+    );
+
+    if (result.success) {
+      showToast.success("Chat created from shared source");
+      navigate(`/chat/${newChatId}`);
+    } else {
+      showToast.error(result.message || "Failed to create chat from source");
+    }
+  };
 
   return (
-    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
-      <div className="flex-1 overflow-y-auto">
+    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col ">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-border)] scrollbar-track-transparent scrollbar-thumb-rounded-md">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
-          {chatName && (
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
-              text-center md:text-left">
-              {chatName}
+          {/* Skeleton Loader for chatName */}
+          {user && !chatName ? (
+            <Skeleton className="w-1/2 h-8 mb-4 sm:mb-6" />
+          ) : (
+            <h2
+              className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
+              text-center md:text-left"
+            >
+              {chatName.length >= 50 ? chatName.concat("...") : chatName}
             </h2>
           )}
 
           <div className="space-y-6 sm:space-y-8">
-            {messages.map((msg, index) => {
-              const isUser = msg.role === "user";
-              if (isUser) {
-                return (
-                  <div key={index} className="flex justify-end">
-                    <div className="space-y-2">
-                      <div className="bg-[var(--color-muted)] px-3 sm:px-4 py-1 rounded-2xl 
-                        max-w-[280px] sm:max-w-xs md:max-w-md break-words">
-                        {msg.content}
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          className="p-1 text-[var(--color-disabled-text)] hover:text-[var(--color-text)] cursor-pointer"
-                          aria-label="Copy to clipboard"
-                          onClick={() => copyToClipboard(msg.content, index)}
-                        >
-                          {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              } else {
-                return (
-                  <div key={index} className="space-y-2">
-                    <div className="max-w-none markdown-body [&.markdown-body]:!bg-transparent prose prose-invert p-2">
-                      {/* Use MarkdownRenderer here */}
-                      <MarkdownRenderer
-                        content={msg.content}
-                        flag={mode === "chart" ? true : false}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
-                      <button
-                        className="p-1 hover:text-[var(--color-text)] cursor-pointer"
-                        aria-label="Copy to clipboard"
-                        onClick={() => copyToClipboard(msg.content, index)}
-                      >
-                        {copiedIndex === index ? <Check size={isMobile ? 16 : 20} /> : <Copy size={isMobile ? 16 : 20} />}
-                      </button>
-                      {user && (
-                        <>
-                          {msg?.id && (
-                            <button
-                              className={`p-1 transition-colors ${
-                                !(
-                                  likedMessages[msg.id] ||
-                                  dislikedMessages[msg.id]
-                                )
-                                  ? "hover:text-[var(--color-text)]"
-                                  : ""
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              aria-label="Like"
-                              onClick={() => handleLike(msg.id)}
-                              disabled={
-                                likedMessages[msg.id] ||
-                                dislikedMessages[msg.id]
-                              }
-                            >
-                              <ThumbsUp
-                                size={isMobile ? 16 : 20}
-                                fill={likedMessages[msg.id] ? "currentColor" : "none"}
-                                color="currentColor"
-                              />
-                            </button>
-                          )}
+            {/* Using ChatMessageThread to render the chat messages */}
+            <ChatMessageThread
+              messages={messages}
+              isMobile={isMobile}
+              onCopy={(text, index) => {
+                navigator.clipboard.writeText(text).then(() => {
+                  setCopiedIndex(index);
+                  setTimeout(() => setCopiedIndex(null), 2000);
+                });
+              }}
+              copiedIndex={copiedIndex}
+              likedMessages={likedMessages}
+              dislikedMessages={dislikedMessages}
+              onLike={handleLike}
+              onDislike={handleDislike}
+            />
 
-                          {msg?.id && (
-                            <button
-                              className={`p-1 transition-colors ${
-                                !(
-                                  likedMessages[msg.id] ||
-                                  dislikedMessages[msg.id]
-                                )
-                                  ? "hover:text-[var(--color-text)]"
-                                  : ""
-                              } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              aria-label="Dislike"
-                              onClick={() => handleDislike(msg.id)}
-                              disabled={
-                                likedMessages[msg.id] ||
-                                dislikedMessages[msg.id]
-                              }
-                            >
-                              <ThumbsDown
-                                size={isMobile ? 16 : 20}
-                                fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
-                                color="currentColor"
-                              />
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-            })}
-
-            {/* Current AI response */}
             {chatResponse && (
               <div className="space-y-2">
                 <div className="prose prose-invert max-w-none">
-                  {/* Use MarkdownRenderer for AI response */}
                   <MarkdownRenderer content={chatResponse} flag={true} />
                 </div>
-
-                {/* Action buttons */}
-                {showResponseActions && (
-                  <div className="flex items-center space-x-3 text-[var(--color-disabled-text)]">
-                    <button
-                      className="p-1 hover:text-[var(--color-text)]"
-                      aria-label="Copy to clipboard"
-                      onClick={() => copyToClipboard(chatResponse, -1)}
-                    >
-                      {copiedIndex === -1 ? <Check /> : <Copy />}
-                    </button>
-                    {user && (
-                      <>
-                        <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Like"
-                          disabled={
-                            likedMessages[chatResponse] ||
-                            dislikedMessages[chatResponse]
-                          }
-                        >
-                          <ThumbsUp
-                            size={isMobile ? 16 : 20}
-                            fill={likedMessages[chatResponse] ? "currentColor" : "none"}
-                            color="currentColor"
-                          />
-                        </button>
-                        <button
-                          className="p-1 hover:text-[var(--color-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Dislike"
-                          disabled={
-                            likedMessages[chatResponse] ||
-                            dislikedMessages[chatResponse]
-                          }
-                        >
-                          <ThumbsDown
-                            size={isMobile ? 16 : 20}
-                            fill={dislikedMessages[chatResponse] ? "currentColor" : "none"}
-                            color="currentColor"
-                          />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
@@ -316,7 +220,6 @@ const ChatResponse = ({
         </div>
       </div>
 
-      {/* Sticky input bar */}
       <div className="sticky bottom-0 bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)] z-10">
         {isArchived ? (
           <div className="text-center text-[var(--color-text)]">
@@ -336,17 +239,23 @@ const ChatResponse = ({
               </span>
             </button>
           </div>
+        ) : isSharedChat && user ? (
+          <div className="text-center">
+            <button
+              onClick={handleCreateChatFromSource}
+              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+            >
+              Interact with this chat
+            </button>
+          </div>
         ) : (
-          <>
-            <PromptInput
-              input={input}
-              isLoading={isLoading}
-              handleInputChange={handleInputChange}
-              handleFormSubmit={handleFormSubmit}
-              chatId={chatId}
-              shareId={shareId}
-            />
-          </>
+          <PromptInput
+            input={input}
+            handleInputChange={handleInputChange}
+            handleFormSubmit={handleFormSubmit}
+            isLoading={isLoading}
+            chatId={chatId}
+          />
         )}
       </div>
     </div>

@@ -55,6 +55,7 @@
   /* Remove any outline */
   box-shadow: none !important;
   /* Remove any shadow */
+  scrollbar-width: 6px;
 }
 
 /* Override table styles with high specificity */
@@ -168,7 +169,9 @@
   margin: 1.5rem 0;
   font-size: 0.875rem;
   line-height: 1.5;
-  overflow: hidden;
+  overflow-x: auto;
+  /* Apply horizontal scroll directly to table */
+  display: block;
 }
 
 .markdown-content table thead {

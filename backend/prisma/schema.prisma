@@ -56,6 +56,7 @@ model Message {
   isDisliked Boolean  @default(false)
   chat       Chat     @relation(fields: [chatId], references: [id],onDelete: Cascade)
   chatId     String
+  for        String   @default("chat")
 }
 
 model FileUpload {

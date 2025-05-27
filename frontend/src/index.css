@@ -1,64 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
 /* Default light theme */
 :root {
-  --color-bg: #f9fafb;
-  --color-text: #0b101c;
+  --color-bg: #f8fafc;
+  --color-text: #1e293b;
   --color-button-text: white;
-  --color-muted: #e5e7eb;
-  --color-border: #e5e7eb;
-  --color-primary: #10b981;
-  --color-primary-hover: #37c394;
-  --color-error: #dc2626;
+  --color-muted: #e2e8f0;
+  --color-border: #cbd5e1;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-error: #ef4444;
   --color-warning: #f59e0b;
-  --color-success: #22c55e;
-  --color-google-bg: #cbcdd0;
-  --color-google-hover: #e5e7eb;
-  --color-disabled-bg: #c6c7cb;
-  --color-disabled-text: #8c8e92;
-  --color-hover-bg: #dbd5d5;
-  --color-delete-hover: #e53e3e;
-  --color-delete-base: #e74141;
-  --color-delete-hover: #e53e3e;
+  --color-success: #10b981;
+  --color-google-bg: #6b7280;
+  --color-google-hover: #4b5563;
+  --color-disabled-bg: #e5e7eb;
+  --color-disabled-text: #9ca3af;
+  --color-hover-bg: #f1f5f9;
+  --color-delete-hover: #dc2626;
+  --color-delete-base: #ef4444;
+  --color-delete-hover: #dc2626;
   --color-delete-text: white;
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
-
-/* Auto dark theme using system preference */
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0f172a;
-    --color-text: #f9fafb;
-    --color-muted: #1e293b;
-    --color-border: #334155;
-    --color-primary: #0fa674;
-    --color-primary-hover: #0fa674;
-    --color-hover-bg: #484747;
-    --color-error: #f87171;
-    --color-google-bg: #1e293b;
-    --color-google-hover: #334155;
-    --color-disabled-bg: #334155;
-    --color-disabled-text: #6b7280;
-  }
-} */
 
 /* Manual override using .dark class */
 .dark {
   --color-bg: #0f172a;
-  --color-text: #f9fafb;
-  --color-muted: #1e293b;
-  --color-border: #334155;
-  --color-primary: #0fa674;
-  --color-primary-hover: #229770;
-  --color-hover-bg: #484747;
-  --color-error: #eb3c3c;
+  --color-text: #f8fafc;
+  --color-muted: #334155;
+  --color-border: #475569;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-hover-bg: #1e293b;
+  --color-error: #ef4444;
   --color-warning: #f59e0b;
-  --color-success: #32e674;
-  --color-google-bg: #1e293b;
-  --color-google-hover: #334155;
-  --color-disabled-bg: #334155;
+  --color-success: #22c55e;
+  --color-google-bg: #374151;
+  --color-google-hover: #4b5563;
+  --color-disabled-bg: #374151;
   --color-disabled-text: #6b7280;
-  --color-delete-base: #e42c2c;
-  --color-delete-hover: #e53e3e;
+  --color-delete-base: #ef4444;
+  --color-delete-hover: #dc2626;
   --color-delete-text: white;
 }
 
@@ -67,6 +55,18 @@ body {
   color: var(--color-text);
 }
 
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 4px;
+}
 
 .container {
   max-width: 1920px;

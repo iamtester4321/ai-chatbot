@@ -1,11 +1,16 @@
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PlusIcon from "../../assets/icons/Pluse";
 import SearchIcon from "../../assets/icons/SearchIcon";
 import { SidebarProps } from "../../lib/types";
-import { resetChat, setActionLoadingId, setMode } from "../../store/features/chat/chatSlice";
+import {
+  resetChat,
+  setActionLoadingId,
+  setMode,
+} from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
+import { ChatSectionLoader } from "../Loaders";
 import LogoutModal from "../Modal/LogoutModal";
 import { UserDetail } from "../UserDetail/UserDetail";
 import AllChats from "./AllChats";
@@ -24,7 +29,8 @@ const Sidebar = ({
   setSelectedChatId,
   isMobile,
   setIsSidebarOpen,
-  isLoading
+  isLoading,
+  isSidebarOpen,
 }: SidebarProps) => {
   const { chatId } = useParams();
   const dispatch = useAppDispatch();
@@ -40,6 +46,13 @@ const Sidebar = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Reset search term when sidebar is closed
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      setSearchTerm(""); // Reset search field
+    }
+  }, [isSidebarOpen]); // Trigger effect when `isSidebarOpen` changes
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,7 +104,7 @@ const Sidebar = ({
   };
 
   const handleLogoutClick = async () => {
-    dispatch(setActionLoadingId('logout'));
+    dispatch(setActionLoadingId("logout"));
     try {
       setIsLogoutModalOpen(true);
     } finally {
@@ -99,8 +112,10 @@ const Sidebar = ({
     }
   };
 
-  const filteredChatList = chatList.filter((chat) =>
-    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredChatList = chatList.filter(
+    (chat) =>
+      typeof chat.name === "string" &&
+      chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const favoriteChats = filteredChatList.filter(
@@ -140,9 +155,19 @@ const Sidebar = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search chats"
-              className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[color:var(--color-placeholder)] focus:outline-none focus:border-[var(--color-primary)] truncate"
+              className="w-full px-8 py-2 text-sm rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[color:var(--color-subtle-text)] placeholder-[var(--color-disabled-text)] focus:outline-none focus:border-[var(--color-primary)] truncate"
             />
             <SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-[color:var(--color-placeholder)] flex-shrink-0" />
+
+            {/* Clear Search Button */}
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute top-2.5 right-2.5 text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         )}
 
@@ -156,6 +181,10 @@ const Sidebar = ({
           ) : chatList.length === 0 ? (
             <div className="text-center text-[color:var(--color-disabled-text)]">
               No Chats Available
+            </div>
+          ) : filteredChatList.length === 0 ? (
+            <div className="text-center text-[color:var(--color-disabled-text)]">
+              No results found
             </div>
           ) : (
             <>
@@ -207,7 +236,7 @@ const Sidebar = ({
                   setIsSettingsOpen(true);
                   setIsUserMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-text)] hover:bg-[var(--color-hover-bg)] transition-colors cursor-pointer"
               >
                 <Settings size={16} />
                 Settings
@@ -218,7 +247,7 @@ const Sidebar = ({
                   handleLogoutClick();
                   setIsUserMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[color:var(--color-error)] hover:bg-[var(--color-hover-bg)] transition-colors cursor-pointer"
               >
                 <LogOut size={16} />
                 Logout

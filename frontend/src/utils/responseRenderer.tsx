@@ -113,11 +113,11 @@ export const CodeBlock = ({
         >
           {copied ? (
             <Check
-              size={16}
+              size={12}
               className={isDarkMode ? "text-green-500" : "text-green-600"}
             />
           ) : (
-            <Copy size={16} />
+            <Copy size={12} />
           )}
           <span className="text-xs">{copied ? "Copied!" : "Copy"}</span>
         </button>
@@ -176,7 +176,21 @@ const MarkdownRenderer = ({
                 </code>
               );
             } else {
-              if (lang === "json" && flag && typeof children === "string") {
+              let parsed;
+              if (typeof children === "string") {
+                try {
+                  parsed = JSON.parse(children.trim());
+                } catch (error) {
+                  console.error("Invalid JSON string:", children, error);
+                  parsed = null; // or handle as fallback rendering
+                }
+              }
+              if (
+                lang === "json" &&
+                flag &&
+                typeof children === "string" &&
+                parsed?.forCharts
+              ) {
                 return <ChartCodeRenderer>{children}</ChartCodeRenderer>;
               }
             }
