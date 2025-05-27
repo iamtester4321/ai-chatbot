@@ -244,43 +244,30 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
             />
           )}
 
-          <section
-            className={`${
-              (mode === "chat" && chatMessages.length === 0) ||
-              (mode === "chart" && chartMessages.length === 0)
-                ? "pt-[100px] sm:pt-[150px] md:pt-[200px]"
-                : ""
-            } h-100vh transition-all duration-300`}
-          >
-            <div className="container px-4 sm:px-6 md:px-8">
-              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
-                {/* Display "Aivora" when there are no messages, chatId, or shareId */}
-                {((mode === "chat" && chatMessages.length === 0) ||
-                  (mode === "chart" && chartMessages.length === 0)) &&
-                  !shareId &&
-                  !chatId && (
-                    <>
-                      <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
-                        Aivora
-                      </h3>
-                      <h3 className="text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter md:hidden">
-                        Aivora
-                      </h3>
-                    </>
-                  )}
+          {((mode === "chat" && chatMessages.length === 0) ||
+            (mode === "chart" && chartMessages.length === 0)) &&
+          !shareId &&
+          !chatId ? (
+            <section className="pt-[100px] sm:pt-[150px] md:pt-[200px] overflow-hidden">
+              <div className="container px-4 sm:px-6 md:px-8">
+                <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
+                  <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
+                    Aivora
+                  </h3>
+                  <h3 className="text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter md:hidden">
+                    Aivora
+                  </h3>
 
-                {/* Always show input if in chat or chart mode */}
-                {!chatId && !shareId && (
                   <PromptInput
                     input={input}
                     isLoading={isLoading}
                     handleInputChange={handleInputChange}
                     handleFormSubmit={handleFormSubmit}
                   />
-                )}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ) : null}
         </>
       )}
     </div>
