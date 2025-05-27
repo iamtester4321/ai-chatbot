@@ -162,7 +162,7 @@ const Sidebar = ({
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute top-2.5 right-2.5 p-1 text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] transition-colors"
+                className="absolute top-2.5 right-2.5 text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>

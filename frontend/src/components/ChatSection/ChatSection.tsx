@@ -14,11 +14,11 @@ import {
   setMessages,
 } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { decryptMessage } from "../../utils/encryption.utils";
+import Error from "../Common/Error";
+import ChatSkeleton from "../Loaders/ChatSkeleton";
 import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
-import Error from "../Common/Error";
-import { decryptMessage } from "../../utils/encryption.utils";
-import Spinner from "../Spinner";
 
 const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const navigate = useNavigate();
@@ -190,17 +190,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
               Regenerate
             </button>
           ) : (
-            <>
-              <Spinner />
-              <div className="mt-2 animate-fade-in-up text-text-secondary">
-                <p className="text-lg sm:text-xl font-medium tracking-wide">
-                  Getting you started with
-                </p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gold font-inter drop-shadow-glow">
-                  Aivora
-                </h1>
-              </div>
-            </>
+            <ChatSkeleton />
           )}
         </div>
       ) : error && chatId !== generatedChatId ? (
