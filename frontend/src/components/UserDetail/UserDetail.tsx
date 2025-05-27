@@ -50,7 +50,7 @@ export const UserDetail = ({ onClick }: UserDetailProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full mt-2 p-2 flex items-center gap-2 rounded-full transition-all duration-200"
+      className="w-full mt-2 p-2 flex items-center gap-2 rounded-full transition-all duration-200 cursor-pointer"
       style={{
         backgroundColor: "var(--color-muted)",
         color: "var(--color-text)",

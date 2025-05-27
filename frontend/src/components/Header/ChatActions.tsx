@@ -15,7 +15,7 @@ export default function ChatActions({
   return (
     <div className="hidden sm:flex items-center space-x-1 sm:space-x-3">
       <button
-        className="p-2 rounded-full transition duration-200"
+        className="p-2 rounded-full transition duration-200 cursor-pointer"
         style={{ backgroundColor: "transparent" }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
@@ -32,7 +32,7 @@ export default function ChatActions({
 
       {!isArchive && (
         <button
-          className="p-2 rounded-full transition duration-200"
+          className="p-2 rounded-full transition duration-200 cursor-pointer"
           style={{ backgroundColor: "transparent" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";

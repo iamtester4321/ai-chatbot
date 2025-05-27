@@ -214,7 +214,7 @@ const PromptInput = ({
             <button
               type="button"
               onClick={() => handleModeChange("chat")}
-              className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
+              className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
         ${
           mode === "chat"
             ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
@@ -227,7 +227,7 @@ const PromptInput = ({
             <button
               type="button"
               onClick={() => handleModeChange("chart")}
-              className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all
+              className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
         ${
           mode === "chart"
             ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"

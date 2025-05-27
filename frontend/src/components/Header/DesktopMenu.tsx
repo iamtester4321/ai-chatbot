@@ -18,7 +18,7 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
       <div className="relative hidden sm:block" ref={ref}>
         {user && (
           <button
-            className="p-2 rounded-full transition duration-200"
+            className="p-2 rounded-full transition duration-200 cursor-pointer"
             style={{ backgroundColor: "transparent" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
@@ -49,7 +49,7 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
             <div className="py-1">
               <button
                 onClick={archiveChat}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 disabled={isLoading}
               >
                 <Archive
@@ -60,7 +60,7 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
               </button>
               <button
                 onClick={openDeleteModal}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 style={{ color: "var(--color-error)" }}
                 disabled={isLoading}
               >

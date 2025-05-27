@@ -114,7 +114,7 @@ export default function RenameModal({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors"
+              className="px-4 py-2 text-sm text-[var(--color-disabled-text)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover-bg)] rounded-md transition-colors cursor-pointer"
             >
               Cancel
             </button>

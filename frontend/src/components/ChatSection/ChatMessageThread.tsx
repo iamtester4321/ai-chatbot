@@ -142,7 +142,7 @@ const ChatMessageThread = ({
                     <button
                       className={`p-1 transition-colors ${
                         !likedMessages[msg.id]
-                          ? "hover:text-[var(--color-text)]"
+                          ? "hover:text-[var(--color-text)] cursor-pointer"
                           : ""
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                       onClick={() => handleLike(msg.id!)}
@@ -168,7 +168,7 @@ const ChatMessageThread = ({
                     <button
                       className={`p-1 transition-colors ${
                         !dislikedMessages[msg.id]
-                          ? "hover:text-[var(--color-text)]"
+                          ? "hover:text-[var(--color-text)] cursor-pointer"
                           : ""
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                       onClick={() => handleDislike(msg.id!)}

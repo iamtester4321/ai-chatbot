@@ -52,7 +52,7 @@ const FavoriteChats = ({
     <div className="mb-4 w-full">
       <button
         onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
-        className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)]"
+        className="flex items-center gap-2 px-2.5 py-2 text-sm w-full hover:bg-[var(--color-muted)] rounded-lg transition-all duration-200 text-[color:var(--color-text)] cursor-pointer"
       >
         {isFavoritesOpen ? (
           <ChevronDown size={16} className="text-[color:var(--color-text)]" />
@@ -103,7 +103,7 @@ const FavoriteChats = ({
                       e.stopPropagation();
                       toggleDropdown(chat.id);
                     }}
-                    className="p-1 hover:bg-[var(--color-border)] rounded-lg transition-all duration-200"
+                    className="p-1 hover:bg-[var(--color-border)] rounded-lg transition-all duration-200 cursor-pointer"
                   >
                     <MoreHorizontal size={16} />
                   </button>
@@ -119,21 +119,21 @@ const FavoriteChats = ({
                     <div className="py-1">
                       <button
                         onClick={() => handleRename(chat.id)}
-                        className="px-4 py-2 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                        className="px-4 py-2 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-muted)] w-full text-left flex items-center cursor-pointer"
                       >
                         <Pencil size={16} className="mr-2" />
                         Rename
                       </button>
                       <button
                         onClick={() => handleDelete(chat.id)}
-                        className="px-4 py-2 text-sm text-[color:var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                        className="px-4 py-2 text-sm text-[color:var(--color-error)] hover:bg-[var(--color-muted)] w-full text-left flex items-center cursor-pointer"
                       >
                         <Trash2 size={16} className="mr-2" />
                         Delete
                       </button>
                       <button
                         onClick={() => handleRemoveFromFavorites(chat.id)}
-                        className="px-4 py-2 text-sm text-yellow-600 hover:bg-[var(--color-muted)] w-full text-left flex items-center"
+                        className="px-4 py-2 text-sm text-yellow-600 hover:bg-[var(--color-muted)] w-full text-left flex items-center cursor-pointer"
                       >
                         <Star size={16} className="mr-2" />
                         Remove

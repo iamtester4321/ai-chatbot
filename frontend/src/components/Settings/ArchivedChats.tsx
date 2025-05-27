@@ -80,14 +80,14 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleRestoreChat(chat.id)}
-                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 title="Restore Chat"
               >
                 <CornerUpLeft size={16} />
               </button>
               <button
                 onClick={() => openDeleteModal(chat.id)}
-                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)]"
+                className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 style={{ color: "var(--color-error)" }}
                 title="Delete"
               >

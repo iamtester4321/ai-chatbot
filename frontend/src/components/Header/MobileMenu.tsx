@@ -28,7 +28,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
       <div className="relative sm:hidden" ref={ref}>
         {user && (
           <button
-            className="p-2 rounded-full transition duration-200"
+            className="p-2 rounded-full transition duration-200 cursor-pointer"
             style={{ backgroundColor: "transparent" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "var(--color-hover-bg)";
@@ -58,7 +58,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
           >
             <div className="py-1">
               <button
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 style={{ color: "var(--color-text)" }}
                 onClick={() => setShareOpen(true)}
                 disabled={isLoading}
@@ -73,7 +73,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
               {!isArchive && (
                 <button
                   onClick={toggleFavorite}
-                  className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                  className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                   style={{ color: "var(--color-text)" }}
                   disabled={isLoading}
                 >
@@ -89,7 +89,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
 
               <button
                 onClick={archiveChat}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 style={{ color: "var(--color-text)" }}
                 disabled={isLoading}
               >
@@ -101,7 +101,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
               </button>
               <button
                 onClick={openDeleteModal}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)]"
+                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 style={{ color: "var(--color-error)" }}
                 disabled={isLoading}
               >
