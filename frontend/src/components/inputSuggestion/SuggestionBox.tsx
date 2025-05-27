@@ -19,7 +19,7 @@ const SuggestionBox = ({
   return (
     <div
       ref={suggestionBoxRef}
-      className="absolute top-full left-0 right-0 mb-3 z-50"
+      className="left-0 right-0 z-50"
     >
       <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl shadow-xl backdrop-blur-md overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--color-border)]">

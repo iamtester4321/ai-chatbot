@@ -240,7 +240,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
           !chatId ? (
             <section className="pt-[100px] sm:pt-[150px] md:pt-[200px] overflow-hidden">
               <div className="container px-4 sm:px-6 md:px-8">
-                <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
+                <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-3 sm:gap-4 md:gap-6">
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
                     Aivora
                   </h3>
