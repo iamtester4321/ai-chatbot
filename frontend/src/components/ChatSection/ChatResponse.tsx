@@ -43,14 +43,6 @@ const ChatResponse = ({
 
   const isSharedChat = location.pathname.startsWith("/share/");
 
-  // useEffect(() => {
-  //   if (!isLoading && chatResponse) {
-  //     setShowResponseActions(true);
-  //   } else {
-  //     setShowResponseActions(false);
-  //   }
-  // }, [isLoading, chatResponse]);
-
   const [likedMessages, setLikedMessages] = useState<{
     [key: string]: boolean;
   }>({});

@@ -15,7 +15,6 @@ import {
   ensureAuthenticated,
   exEnsureAuthenticated,
 } from "../middlewares/auth.middleware";
-import { createChatFromSourceChat } from "../repositories/chat.repository";
 
 const router = Router();
 
@@ -37,6 +36,10 @@ router.patch(
   addOrRemoveArchive
 );
 router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
-router.post("/createChat/:chatId", ensureAuthenticated, handleCreateChatFromSource);
+router.post(
+  "/createChat/:chatId",
+  ensureAuthenticated,
+  handleCreateChatFromSource
+);
 
 export default router;

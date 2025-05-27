@@ -11,7 +11,6 @@ import * as shareRepo from "../repositories/share.repository";
 import {
   generateExpiration,
   getShareVersion,
-  getUserVersion,
   updateChatVersion,
   updateShareVersion,
   updateUserVersion,
@@ -20,7 +19,7 @@ import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
 export async function saveChat(
   userId: string,
-  messages: { id: string; role: string; content: string; for:string }[],
+  messages: { id: string; role: string; content: string; for: string }[],
   chatId: string,
   sourceId?: string
 ) {

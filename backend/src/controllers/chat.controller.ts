@@ -17,10 +17,6 @@ import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 import { chartPrompt } from "../lib/prompts/chartPrompt";
 import { createChatFromSourceChat } from "../repositories/chat.repository";
 
-interface ChatRequestParams {
-  chatId: string;
-}
-
 interface ChatRequestByshareIdParams {
   shareId: string;
   user: { id: string };

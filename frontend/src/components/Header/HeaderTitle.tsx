@@ -1,5 +1,6 @@
 import { Sidebar } from "lucide-react";
 import { HeaderTitleProps } from "../../lib/types";
+import { Link } from "react-router-dom";
 
 export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
   return (
@@ -18,9 +19,11 @@ export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
       >
         <Sidebar size={20} />
       </button>
-      <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
-        Aivora
-      </h1>
+      <Link to="/chat">
+        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
+          Aivora
+        </h1>
+      </Link>
     </div>
   );
 }

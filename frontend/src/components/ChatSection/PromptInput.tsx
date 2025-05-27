@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { fetchSuggestions } from "../../actions/chat.actions";
 import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
@@ -16,7 +14,6 @@ const PromptInput = ({
   chatId,
   shareId,
 }: PromptInputProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const mode = useAppSelector((state) => state.chat.mode);
@@ -26,16 +23,6 @@ const PromptInput = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (mode === "chart") {
-      setSearchParams({ mode: "chart" });
-    } else {
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.delete("mode");
-      setSearchParams(newParams);
-    }
-  }, [mode, setSearchParams]);
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);

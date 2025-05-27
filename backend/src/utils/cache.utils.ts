@@ -38,9 +38,6 @@ export const getChatVersion = (chatId: string) =>
 
 export const updateUserVersion = (userId: string) =>
   updateVersion(USER_VERSION_PREFIX, userId);
-export const getUserVersion = (userId: string) =>
-  getVersion(USER_VERSION_PREFIX, userId);
-
 export const updateShareVersion = (shareId: string) =>
   updateVersion(SHARE_VERSION_PREFIX, shareId);
 export const getShareVersion = (shareId: string) =>
