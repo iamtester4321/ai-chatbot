@@ -52,6 +52,18 @@ export const useChatActions = ({
       const tempChatName = input.trim().slice(0, 50);
       dispatch(setChatName(tempChatName));
 
+      const userMessageId = uuidv4();
+
+      dispatch(
+        addMessage({
+          id: userMessageId,
+          role: "user",
+          content: input,
+          createdAt: new Date().toISOString(),
+          for: mode,
+        })
+      );
+
       const moderationResult = await moderationCheck(input);
       if (moderationResult.xssDetected) {
         showToast.error(
@@ -72,18 +84,9 @@ export const useChatActions = ({
           navigate("/");
         }
       } else {
-        const userMessageId = uuidv4();
         const assistantMessageId = uuidv4();
         const encryptedUser = await encryptMessage(input);
-        dispatch(
-          addMessage({
-            id: userMessageId,
-            role: "user",
-            content: input,
-            createdAt: new Date().toISOString(),
-            for: mode,
-          })
-        );
+
         const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
           method: "POST",
           credentials: "include",
