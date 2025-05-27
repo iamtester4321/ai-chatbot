@@ -20,13 +20,15 @@ import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
 export async function saveChat(
   userId: string,
-  messages: { id: string; role: string; content: string; for: string }[],
-  chatId: string
+  messages: { id: string; role: string; content: string; for:string }[],
+  chatId: string,
+  sourceId?: string
 ) {
   const result = await chatRepo.createChatWithMessagesOrApendMesages(
     userId,
     messages,
-    chatId
+    chatId,
+    sourceId
   );
 
   await Promise.all([

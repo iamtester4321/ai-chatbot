@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -35,46 +36,46 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
 
   const [error, setError] = useState<string | null>(null);
   const [generatedChatId, setGeneratedChatId] = useState<string | null>(null);
+  const [sourceChatId, setsourceChatId] = useState<string | null>(null);
 
   const { input, handleInputChange, handleSubmit, isLoading } = useChatActions({
     chatId,
+    shareId,
+    sourceChatId,
+
     onResponseUpdate: (text) => {
       dispatch(setCurrentResponse(text));
     },
   });
 
   useEffect(() => {
-    setError(null);
-    if (shareId) return;
-
-    if (chatId) {
-      const loadMessages = async () => {
-        dispatch(setIsLoading(true));
-        const { success, data, error } = await fetchMessages(chatId);
-        dispatch(setIsLoading(false));
-
-        if (success && data) {
-          dispatch(setMessages(data.messages));
-          const decryptedName = await decryptMessage(data.name);
-          dispatch(setChatName(decryptedName));
-          dispatch(setIsArchived(data.isArchived));
-          setError(null);
-        } else {
-          console.error(error);
-          if (chatId !== generatedChatId) {
-            setError(
-              "Chat not found. This chat might have been deleted or doesn't exist."
-            );
-            dispatch(setMessages([]));
-          }
+  setError(null);
+  if (shareId) return;
+  if (chatId) {
+    const loadMessages = async () => {
+      const { success, data, error } = await fetchMessages(chatId);
+      if (success && data) {
+        dispatch(setMessages(data.messages));
+        const decryptedName = await decryptMessage(data.name);
+        dispatch(setChatName(decryptedName));
+        dispatch(setIsArchived(data.isArchived));
+        setError(null);
+      } else {
+        console.error(error);
+        if (chatId !== generatedChatId) {
+          setError(
+            "Chat not found. This chat might have been deleted or doesn't exist."
+          );
+          dispatch(setMessages([]));
+        }
         }
       };
 
-      loadMessages();
-    } else {
-      dispatch(setMessages([]));
-    }
-  }, [chatId, shareId, dispatch, generatedChatId]);
+    loadMessages();
+  } else {
+    dispatch(setMessages([]));
+  }
+}, [chatId, shareId, dispatch, generatedChatId]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +103,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
         dispatch(setIsLoading(false));
 
         if (success && data) {
+          setsourceChatId(data.id);
           dispatch(setMessages(data.messages));
         } else {
           console.error(error);
@@ -217,6 +219,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
               chatId={chatId || ""}
               shareId={shareId || ""}
               isMobile={isMobile}
+              sourceChatId={sourceChatId}
             />
           )}
           {mode === "chart" && messages.length > 0 && (

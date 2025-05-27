@@ -5,6 +5,7 @@ import {
   updateDislikeStatus,
   updateLikeStatus,
 } from "../../actions/message.actions";
+import { createChatFromSource } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
@@ -14,6 +15,8 @@ import { Skeleton } from "../Loaders";
 import StreamLoader from "../Loaders/StreamLoader";
 import ChatMessageThread from "./ChatMessageThread";
 import PromptInput from "./PromptInput";
+import { useLocation, useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 const ChatResponse = ({
   messages,
@@ -24,16 +27,29 @@ const ChatResponse = ({
   handleInputChange,
   handleFormSubmit,
   chatId,
-  shareId,
   isMobile,
+  sourceChatId,
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
+  // const [showResponseActions, setShowResponseActions] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
 
   const showToast = useToast();
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isSharedChat = location.pathname.startsWith("/share/");
+
+  // useEffect(() => {
+  //   if (!isLoading && chatResponse) {
+  //     setShowResponseActions(true);
+  //   } else {
+  //     setShowResponseActions(false);
+  //   }
+  // }, [isLoading, chatResponse]);
 
   const [likedMessages, setLikedMessages] = useState<{
     [key: string]: boolean;
@@ -135,6 +151,27 @@ const ChatResponse = ({
     }
   };
 
+  const handleCreateChatFromSource = async () => {
+    if (!sourceChatId) {
+      showToast.error("Source chat ID is missing");
+      return;
+    }
+    const newChatId = uuidv4();
+
+    const result = await createChatFromSource(
+      newChatId,
+      sourceChatId,
+      messages
+    );
+
+    if (result.success) {
+      showToast.success("Chat created from shared source");
+      navigate(`/chat/${newChatId}`);
+    } else {
+      showToast.error(result.message || "Failed to create chat from source");
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col ">
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-border)] scrollbar-track-transparent scrollbar-thumb-rounded-md">
@@ -169,7 +206,6 @@ const ChatResponse = ({
               onDislike={handleDislike}
             />
 
-            {/* Current AI response */}
             {chatResponse && (
               <div className="space-y-2">
                 <div className="prose prose-invert max-w-none">
@@ -203,17 +239,23 @@ const ChatResponse = ({
               </span>
             </button>
           </div>
+        ) : isSharedChat && user ? (
+          <div className="text-center">
+            <button
+              onClick={handleCreateChatFromSource}
+              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+            >
+              Interact with this chat
+            </button>
+          </div>
         ) : (
-          <>
-            <PromptInput
-              input={input}
-              isLoading={isLoading}
-              handleInputChange={handleInputChange}
-              handleFormSubmit={handleFormSubmit}
-              chatId={chatId}
-              shareId={shareId}
-            />
-          </>
+          <PromptInput
+            input={input}
+            handleInputChange={handleInputChange}
+            handleFormSubmit={handleFormSubmit}
+            isLoading={isLoading}
+            chatId={chatId}
+          />
         )}
       </div>
     </div>

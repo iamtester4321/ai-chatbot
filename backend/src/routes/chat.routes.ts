@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addOrRemoveArchive,
   addOrRemoveFavorite,
+  createChat,
   deleteChat,
   findChatById,
   findChatNamesByUserId,
@@ -23,6 +24,7 @@ router.get("/names", ensureAuthenticated, findChatNamesByUserId);
 router.get("/:chatId", ensureAuthenticated, findChatById);
 router.post("/stream", exEnsureAuthenticated, streamChat);
 router.delete("/:chatId", ensureAuthenticated, deleteChat);
+router.post("/create", ensureAuthenticated, createChat);
 
 router.patch(
   "/addOrRemoveFavrate/:chatId",
@@ -35,10 +37,6 @@ router.patch(
   addOrRemoveArchive
 );
 router.patch("/rename/:chatId", ensureAuthenticated, renameChat);
-router.post(
-  "/createChat/:chatId",
-  ensureAuthenticated,
-  handleCreateChatFromSource
-);
+router.post("/createChat/:chatId", ensureAuthenticated, handleCreateChatFromSource);
 
 export default router;

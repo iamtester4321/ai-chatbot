@@ -15,6 +15,7 @@ const PromptInput = ({
   handleFormSubmit,
   chatId,
   shareId,
+  sourceChatId,
 }: PromptInputProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);

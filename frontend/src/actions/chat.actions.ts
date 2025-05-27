@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import useToast from "../hooks/useToast";
 import {
   ARCHIVE_CHAT,
+  CREATE_CHAT,
   DELETE_CHAT,
   GET_CHAT_MESSAGES,
   GET_CHAT_NAMES,
@@ -15,7 +16,7 @@ import {
   STREAM_CHAT_RESPONSE,
   TOGGLE_FAVORITE_CHAT,
 } from "../lib/apiUrl";
-import { ChatHookProps, DeleteChatResponse } from "../lib/types";
+import { ChatHookProps, DeleteChatResponse, Message } from "../lib/types";
 import {
   addMessage,
   setChatList,
@@ -27,7 +28,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { AppDispatch, store } from "../store/store";
 import { decryptMessage, encryptMessage } from "../utils/encryption.utils";
 
-export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
+export const useChatActions = ({ chatId, shareId, sourceChatId, onResponseUpdate }: ChatHookProps & { shareId?: string }) => {
   const dispatch = useAppDispatch();
   const { messages, mode } = useAppSelector((state) => state.chat);
   const showToast = useToast();
@@ -61,59 +62,57 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
         dispatch(setMessages(messages));
         if (messages.length === 0) {
           navigate("/");
-        }
-        return;
+        };
       } else {
-        const userMessageId = 1 + ""; //uuidv4();
-        const assistantMessageId = 2 + ""; //uuidv4();
-        const chatName = input.trim().slice(0, 50);
-        if (messages.length < 0) dispatch(setChatName(chatName));
-        const encryptedUser = await encryptMessage(input);
-        dispatch(
-          addMessage({
-            id: userMessageId,
-            role: "user",
-            content: input,
-            createdAt: new Date().toISOString(),
-            for: mode, // <-- set to "chat" or "chart"
-          })
-        );
+        const userMessageId = uuidv4();
+      const assistantMessageId = uuidv4();
+      const encryptedUser = await encryptMessage(input);
+      dispatch(
+        addMessage({
+          id: userMessageId,
+          role: "user",
+          content: input,
+          createdAt: new Date().toISOString(),
+          for: mode,
+        })
+      );
+      const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userMessageId,
+          assistantMessageId,
+          prompt: encryptedUser,
+          messages,
+          chatId: chatId || "",
+          sourceChatId: sourceChatId || null,
+        }),
+      });
 
-        const response = await fetch(STREAM_CHAT_RESPONSE(modeStr), {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userMessageId,
-            assistantMessageId,
-            prompt: encryptedUser,
-            messages,
-            chatId: chatId || "",
-          }),
-        });
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
 
-        if (!response.ok) {
-          throw new Error("API request failed");
-        }
+      if (!response.body) {
+        throw new Error("Response body is empty");
+      }
 
-        if (!response.body) {
-          throw new Error("Response body is empty");
-        }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        try {
-          let accumulatedText = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedText += chunk;
-            dispatch(setCurrentResponse(accumulatedText));
-            onResponseUpdate?.(accumulatedText);
+      try {
+        let accumulatedText = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedText += chunk;
+          dispatch(setCurrentResponse(accumulatedText));
+          onResponseUpdate?.(accumulatedText);
+       
           }
           const decryptedAssistantMessage = await decryptMessage(
             accumulatedText
@@ -124,7 +123,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
               role: "assistant",
               content: decryptedAssistantMessage,
               createdAt: new Date().toISOString(),
-              for: mode, // <-- set to "chat" or "chart"
+              for: mode,
             })
           );
           dispatch(setCurrentResponse(""));
@@ -152,6 +151,42 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
     isLoading: status === "submitted",
   };
 };
+
+export const createChatFromSource = async (
+  newChatId: string,
+  sourceChatId: string,
+  messages: Message[]
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await axios.post(
+      CREATE_CHAT,
+      { chatId: newChatId, sourceChatId, messages },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (response.status === 201) {
+      const updatedChats = await fetchChatNames(store.dispatch);
+      store.dispatch(setChatList(updatedChats.data));
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        message: response.data?.error || "Failed to create chat from source",
+      };
+    }
+  } catch (error: unknown) {
+    console.error("Error creating chat from source:", error);
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
+  }
+};
+
+
 
 export const fetchMessages = async (chatId: string) => {
   try {
