@@ -143,6 +143,7 @@ export type PromptInputProps = {
 };
 
 export type Message = {
+  for: string;
   id?: string;
   role: string;
   content: string;

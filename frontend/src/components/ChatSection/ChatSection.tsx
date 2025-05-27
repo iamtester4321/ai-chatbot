@@ -178,6 +178,13 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
     }
   }, [isLoading, currentResponse, messages.length]);
 
+  // Get mode from Redux
+  const mode = useAppSelector((state) => state.chat.mode);
+
+  // Filter messages by mode
+  const chatMessages = messages.filter((msg) => (msg as any).for !== "chart");
+  const chartMessages = messages.filter((msg) => (msg as any).for === "chart");
+
   return (
     <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
       {isLoading && messages.length === 0 ? (
@@ -197,9 +204,24 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
         <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
-          {messages.length > 0 && (
+          {/* Render Chat or Chart section based on mode */}
+          {mode === "chat" && messages.length > 0 && (
             <ChatResponse
-              messages={messages}
+              messages={chatMessages}
+              chatResponse={currentResponse}
+              isLoading={isLoading}
+              chatName={chatName}
+              input={input}
+              handleInputChange={handleInputChange}
+              handleFormSubmit={handleFormSubmit}
+              chatId={chatId || ""}
+              shareId={shareId || ""}
+              isMobile={isMobile}
+            />
+          )}
+          {mode === "chart" && messages.length > 0 && (
+            <ChatResponse
+              messages={chartMessages}
               chatResponse={currentResponse}
               isLoading={isLoading}
               chatName={chatName}
@@ -212,40 +234,30 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
             />
           )}
 
-          <section
-            className={`${
-              messages.length === 0
-                ? "pt-[100px] sm:pt-[150px] md:pt-[200px]"
-                : ""
-            } h-100vh transition-all duration-300`}
-          >
-            <div className="container px-4 sm:px-6 md:px-8">
-              <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
-                {/* Display "Aivora" when there are no messages, chatId, or shareId */}
-                {messages.length === 0 && !shareId && !chatId && (
+          {((mode === "chat" && chatMessages.length === 0) ||
+            (mode === "chart" && chartMessages.length === 0)) &&
+          !shareId &&
+          !chatId ? (
+            <section className="pt-[100px] sm:pt-[150px] md:pt-[200px] overflow-hidden">
+              <div className="container px-4 sm:px-6 md:px-8">
+                <div className="max-w-[640px] w-full items-center mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12">
                   <h3 className="text-[48px] text-text-secondary font-light text-center font-inter hidden md:block">
                     Aivora
                   </h3>
-                )}
-
-                {messages.length === 0 && !shareId && !chatId && (
                   <h3 className="text-3xl sm:text-4xl md:text-[48px] text-text-secondary font-light text-center font-inter md:hidden">
                     Aivora
                   </h3>
-                )}
 
-                {/* Prompt Input (only when no chatId or shareId) */}
-                {!chatId && !shareId && (
                   <PromptInput
                     input={input}
                     isLoading={isLoading}
                     handleInputChange={handleInputChange}
                     handleFormSubmit={handleFormSubmit}
                   />
-                )}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ) : null}
         </>
       )}
     </div>

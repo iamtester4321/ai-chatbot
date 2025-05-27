@@ -75,6 +75,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
             role: "user",
             content: input,
             createdAt: new Date().toISOString(),
+            for: mode, // <-- set to "chat" or "chart"
           })
         );
 
@@ -123,6 +124,7 @@ export const useChatActions = ({ chatId, onResponseUpdate }: ChatHookProps) => {
               role: "assistant",
               content: decryptedAssistantMessage,
               createdAt: new Date().toISOString(),
+              for: mode, // <-- set to "chat" or "chart"
             })
           );
           dispatch(setCurrentResponse(""));

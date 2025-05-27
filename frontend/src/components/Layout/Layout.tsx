@@ -104,10 +104,11 @@ function Layout() {
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}
         />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent">
           <ChatSection isMobile={isMobile} />
         </div>
       </div>
+
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
