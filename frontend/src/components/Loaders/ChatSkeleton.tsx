@@ -8,11 +8,11 @@ const ChatSkeleton = () => {
             <div className="space-y-2">
               {/* User Bubble */}
               <div className="flex justify-end">
-                <div className="bg-gray-600 w-1/4 sm:w-1/4 h-6 rounded-2xl animate-pulse px-2 py-2" />
+                <div className="w-1/4 sm:w-1/4 h-6 rounded-2xl animate-pulse bg-[var(--color-muted)] px-2 py-2" />
               </div>
               {/* AI Bubble */}
               <div className="flex justify-start">
-                <div className="bg-gray-600 w-1/2 sm:w-1/2 h-6 rounded-2xl animate-pulse px-2 py-2" />
+                <div className="w-1/2 sm:w-1/2 h-6 rounded-2xl animate-pulse bg-[var(--color-muted)] px-2 py-2" />
               </div>
             </div>
           </div>
