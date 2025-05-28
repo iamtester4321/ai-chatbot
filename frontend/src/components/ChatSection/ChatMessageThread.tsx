@@ -1,8 +1,9 @@
-import { Check, Copy, ThumbsDown, ThumbsUp, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { ChatMessageThreadProps } from "../../lib/types";
 import { useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
-import { ChatMessageThreadProps } from "../../lib/types";
-import { useState } from "react";
 
 type LoadingState = {
   [msgId: string]: {
@@ -24,6 +25,8 @@ const ChatMessageThread = ({
 }: ChatMessageThreadProps) => {
   const { user } = useAppSelector((state) => state.user);
   const { mode } = useAppSelector((state) => state.chat);
+  const location = useLocation();
+  const isSharedChat = location.pathname.startsWith("/share/");
 
   const [loadingMessages, setLoadingMessages] = useState<LoadingState>({});
 
@@ -136,7 +139,7 @@ const ChatMessageThread = ({
                 )}
               </button>
 
-              {user && msg?.id && (
+              {user && msg?.id && !isSharedChat && (
                 <>
                   {!dislikedMessages[msg.id] && (
                     <button
@@ -183,7 +186,9 @@ const ChatMessageThread = ({
                       ) : (
                         <ThumbsDown
                           size={isMobile ? 16 : 20}
-                          fill={dislikedMessages[msg.id] ? "currentColor" : "none"}
+                          fill={
+                            dislikedMessages[msg.id] ? "currentColor" : "none"
+                          }
                           color="currentColor"
                         />
                       )}

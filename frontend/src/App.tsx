@@ -24,9 +24,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/share/:shareId" element={<Layout />} />
           <Route element={<Layout />}>
-            <Route path="/chat" />
-            <Route path="/chat/:chatId" />
-            <Route path="/share/:shareId" />
+            <Route path="/chat" element={<div />} />
+            <Route path="/chat/:chatId" element={<div />} />
+            <Route path="/share/:shareId" element={<div />} />
           </Route>
         </Routes>
         <Toaster position="bottom-right" />
