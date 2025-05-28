@@ -169,7 +169,7 @@ const ChatResponse = ({
     : messages;
 
   return (
-    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col ">
+    <div className="w-full h-full bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-border)] scrollbar-track-transparent scrollbar-thumb-rounded-md">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
           {/* Skeleton Loader for chatName */}
@@ -242,7 +242,8 @@ const ChatResponse = ({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)] z-10">
+      <div className="bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)]">
+
         {isArchived ? (
           <div className="flex justify-center gap-4">
             <button

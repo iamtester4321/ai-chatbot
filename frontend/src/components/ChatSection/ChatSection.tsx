@@ -137,7 +137,6 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const generateChatId = () => {
     return uuidv4();
   };
-
   useEffect(() => {
     const handleCopyClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -185,17 +184,15 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
     }
   }, [isLoading, currentResponse, messages.length]);
 
+  // Get mode from Redux
   const mode = useAppSelector((state) => state.chat.mode);
-  const chatMessages = shareId
-    ? messages
-    : messages.filter((msg) => (msg as any).for !== "chart");
 
-  const chartMessages = shareId
-    ? messages
-    : messages.filter((msg) => (msg as any).for === "chart");
+  // Filter messages by mode
+  const chatMessages = messages.filter((msg) => (msg as any).for !== "chart");
+  const chartMessages = messages.filter((msg) => (msg as any).for === "chart");
 
   return (
-    <div className="bg-background-primary text-text-primary min-h-dvh sm:min-h-0">
+    <div className="bg-background-primary text-text-primary flex-1 h-full overflow-y-screen">
       {isLoading && messages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-screen text-center">
           {showRegenerate ? (
@@ -213,9 +210,10 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
         <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
-          {shareId ? (
+          {/* Render Chat or Chart section based on mode */}
+          {mode === "chat" && messages.length > 0 && (
             <ChatResponse
-              messages={messages}
+              messages={chatMessages}
               chatResponse={currentResponse}
               isLoading={isLoading}
               chatName={chatName}
@@ -227,39 +225,21 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
               isMobile={isMobile}
               sourceChatId={sourceChatId}
             />
-          ) : (
-            <>
-              {mode === "chat" && messages.length > 0 && (
-                <ChatResponse
-                  messages={chatMessages}
-                  chatResponse={currentResponse}
-                  isLoading={isLoading}
-                  chatName={chatName}
-                  input={input}
-                  handleInputChange={handleInputChange}
-                  handleFormSubmit={handleFormSubmit}
-                  chatId={chatId || ""}
-                  shareId={shareId || ""}
-                  isMobile={isMobile}
-                  sourceChatId={sourceChatId}
-                />
-              )}
-              {mode === "chart" && messages.length > 0 && (
-                <ChatResponse
-                  sourceChatId={sourceChatId}
-                  messages={chartMessages}
-                  chatResponse={currentResponse}
-                  isLoading={isLoading}
-                  chatName={chatName}
-                  input={input}
-                  handleInputChange={handleInputChange}
-                  handleFormSubmit={handleFormSubmit}
-                  chatId={chatId || ""}
-                  shareId={shareId || ""}
-                  isMobile={isMobile}
-                />
-              )}
-            </>
+          )}
+          {mode === "chart" && messages.length > 0 && (
+            <ChatResponse
+              sourceChatId={sourceChatId}
+              messages={chartMessages}
+              chatResponse={currentResponse}
+              isLoading={isLoading}
+              chatName={chatName}
+              input={input}
+              handleInputChange={handleInputChange}
+              handleFormSubmit={handleFormSubmit}
+              chatId={chatId || ""}
+              shareId={shareId || ""}
+              isMobile={isMobile}
+            />
           )}
 
           {((mode === "chat" && chatMessages.length === 0) ||

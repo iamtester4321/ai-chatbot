@@ -1,7 +1,7 @@
 const ChatSkeleton = () => {
   return (
-    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
-      <div className="flex-1 overflow-y-auto">
+    <div className="w-full h-screen overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
+      <div className="flex-1">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 space-y-6">
           {/* Message Bubbles */}
           <div className="space-y-2">

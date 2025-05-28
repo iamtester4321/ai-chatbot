@@ -68,7 +68,7 @@ function Layout() {
   };
 
   return (
-    <div className="flex max-h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
+    <div className="flex h-screen bg-[var(--color-bg)] text-[color:var(--color-text)]">
       <div
         className={`${isSidebarOpen ? "w-[250px]" : "w-0"} 
         fixed md:relative transition-all duration-300 overflow-hidden h-screen 
@@ -104,7 +104,7 @@ function Layout() {
           toggleSidebar={toggleSidebar}
           isLogoutModalOpen={isLogoutModalOpen}
         />
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto h-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent">
           <ChatSection isMobile={isMobile} />
         </div>
       </div>
