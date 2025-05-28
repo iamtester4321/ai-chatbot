@@ -1,11 +1,19 @@
-import { Archive, MoreHorizontal, Trash2 } from "lucide-react";
+import { Archive, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
 import { DesktopMenuProps } from "../../lib/types";
 import { useAppSelector } from "../../store/hooks";
 
 const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
   (
-    { isOpen, toggleMenu, archiveChat, openDeleteModal, isArchive, chatId },
+    {
+      isOpen,
+      toggleMenu,
+      toggleArchiveChat,
+      openDeleteModal,
+      isArchive,
+      chatId,
+      archiveLoading,
+    },
     ref
   ) => {
     const actionLoadingId = useAppSelector(
@@ -48,15 +56,16 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
           >
             <div className="py-1">
               <button
-                onClick={archiveChat}
+                onClick={toggleArchiveChat}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
-                disabled={isLoading}
+                disabled={archiveLoading}
               >
-                <Archive
-                  size={16}
-                  className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
-                />
-                {isArchive ? "Un-archive" : "Archive"}
+                {archiveLoading ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : (
+                  <Archive size={16} className="mr-2" />
+                )}
+                {isArchive ? "Unarchive" : "Archive"}
               </button>
               <button
                 onClick={openDeleteModal}

@@ -1,4 +1,4 @@
-import { CornerUpLeft, Trash2 } from "lucide-react";
+import { CornerUpLeft, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { archiveChat } from "../../actions/chat.actions";
@@ -11,6 +11,7 @@ import DeleteModal from "../Modal/DeleteModal";
 const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [restoringChatId, setRestoringChatId] = useState<string | null>(null);
   const showToast = useToast();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
   };
 
   const handleRestoreChat = async (chatId: string) => {
+    setRestoringChatId(chatId);
     try {
       const result = await archiveChat(chatId);
 
@@ -40,6 +42,8 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
     } catch (error) {
       showToast.error("An error occurred while restoring chat");
       console.error("Error restoring chat:", error);
+    } finally {
+      setRestoringChatId(null);
     }
   };
 
@@ -83,7 +87,11 @@ const ArchivedChats = ({ archivedChats, onClose }: ArchivedChatsProps) => {
                 className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 title="Restore Chat"
               >
-                <CornerUpLeft size={16} />
+                {restoringChatId === chat.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CornerUpLeft size={16} />
+                )}
               </button>
               <button
                 onClick={() => openDeleteModal(chat.id)}

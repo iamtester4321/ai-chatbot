@@ -1,5 +1,6 @@
 import {
   Archive,
+  Loader2,
   MoreHorizontal,
   Share2,
   SquarePen,
@@ -19,10 +20,12 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
       toggleFavorite,
       isFavorite,
       isArchive,
-      archiveChat,
+      toggleArchiveChat,
       openDeleteModal,
       setShareOpen,
       chatId,
+      archiveLoading,
+      favoriteLoading,
     },
     ref
   ) => {
@@ -99,6 +102,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                 Share
               </button>
 
+              {/* Favorite Button */}
               {!isArchive && (
                 <button
                   onClick={toggleFavorite}
@@ -106,28 +110,38 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
                   style={{ color: "var(--color-text)" }}
                   disabled={isLoading}
                 >
-                  <Star
-                    className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
-                    size={18}
-                    fill={isFavorite ? "gold" : "none"}
-                    color={isFavorite ? "gold" : "currentColor"}
-                  />
+                  {favoriteLoading ? (
+                    <Loader2 size={18} className="mr-2 animate-spin" />
+                  ) : (
+                    <Star
+                      className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
+                      size={18}
+                      fill={isFavorite ? "gold" : "none"}
+                      color={isFavorite ? "gold" : "currentColor"}
+                    />
+                  )}
                   Favourite
                 </button>
               )}
 
+              {/* Archive Button */}
               <button
-                onClick={archiveChat}
+                onClick={toggleArchiveChat}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
                 style={{ color: "var(--color-text)" }}
                 disabled={isLoading}
               >
-                <Archive
-                  size={16}
-                  className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
-                />
-                {isArchive ? "Un-archive" : "Archive"}
+                {archiveLoading ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : (
+                  <Archive
+                    size={16}
+                    className={`mr-2 ${isLoading ? "opacity-50" : ""}`}
+                  />
+                )}
+                {isArchive ? "Unarchive" : "Archive"}
               </button>
+
               <button
                 onClick={openDeleteModal}
                 className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"

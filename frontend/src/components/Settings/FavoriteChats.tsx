@@ -1,4 +1,4 @@
-import { Star, Trash2 } from "lucide-react";
+import { Loader2, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleFavoriteChat } from "../../actions/chat.actions";
@@ -8,9 +8,15 @@ import { setIsFavorite } from "../../store/features/chat/chatSlice";
 import { useAppDispatch } from "../../store/hooks";
 import DeleteModal from "../Modal/DeleteModal";
 
-const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsSettingsProps) => {
+const FavoriteChats = ({
+  favoriteChats,
+  onClose,
+}: FavoriteChatsSettingsProps) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState<string | null>(
+    null
+  );
   const showToast = useToast();
   const dispatch = useAppDispatch();
 
@@ -25,6 +31,7 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsSettingsProps) =
   };
 
   const handleToggleFavorite = async (chatId: string) => {
+    setFavoriteLoadingId(chatId);
     try {
       const result = await toggleFavoriteChat(chatId);
       dispatch(setIsFavorite(false));
@@ -34,6 +41,8 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsSettingsProps) =
     } catch (error) {
       showToast.error("An error occurred while updating favorite status");
       console.error("Error toggling favorite:", error);
+    } finally {
+      setFavoriteLoadingId(null);
     }
   };
 
@@ -77,7 +86,11 @@ const FavoriteChats = ({ favoriteChats, onClose }: FavoriteChatsSettingsProps) =
                 className="p-2 rounded-lg transition-colors hover:bg-[var(--color-hover-bg)] cursor-pointer"
                 title="Remove from favorites"
               >
-                <Star size={16} fill="gold" color="gold" />
+                {favoriteLoadingId === chat.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Star size={16} fill="gold" color="gold" />
+                )}
               </button>
 
               <button

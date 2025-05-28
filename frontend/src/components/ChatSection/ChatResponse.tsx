@@ -1,11 +1,12 @@
 import { Archive } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { archiveChat } from "../../actions/chat.actions";
+import { useLocation, useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import { archiveChat, createChatFromSource } from "../../actions/chat.actions";
 import {
   updateDislikeStatus,
   updateLikeStatus,
 } from "../../actions/message.actions";
-import { createChatFromSource } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
@@ -15,8 +16,7 @@ import { Skeleton } from "../Loaders";
 import StreamLoader from "../Loaders/StreamLoader";
 import ChatMessageThread from "./ChatMessageThread";
 import PromptInput from "./PromptInput";
-import { useLocation, useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { Loader2 } from "lucide-react";
 
 const ChatResponse = ({
   messages,
@@ -32,9 +32,10 @@ const ChatResponse = ({
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
-  // const [showResponseActions, setShowResponseActions] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [isUnarchiving, setIsUnarchiving] = useState(false);
+  const [isCreatingFromSource, setIsCreatingFromSource] = useState(false);
 
   const showToast = useToast();
   const dispatch = useAppDispatch();
@@ -129,6 +130,7 @@ const ChatResponse = ({
 
   const handleRestoreChat = async (chatId: string) => {
     try {
+      setIsUnarchiving(true);
       const result = await archiveChat(chatId);
 
       if (result.success) {
@@ -140,6 +142,8 @@ const ChatResponse = ({
     } catch (error) {
       showToast.error("An error occurred while restoring chat");
       console.error("Error restoring chat:", error);
+    } finally {
+      setIsUnarchiving(false);
     }
   };
 
@@ -148,19 +152,28 @@ const ChatResponse = ({
       showToast.error("Source chat ID is missing");
       return;
     }
-    const newChatId = uuidv4();
 
-    const result = await createChatFromSource(
-      newChatId,
-      sourceChatId,
-      messages
-    );
+    try {
+      setIsCreatingFromSource(true);
+      const newChatId = uuidv4();
 
-    if (result.success) {
-      showToast.success("Chat created from shared source");
-      navigate(`/chat/${newChatId}`);
-    } else {
-      showToast.error(result.message || "Failed to create chat from source");
+      const result = await createChatFromSource(
+        newChatId,
+        sourceChatId,
+        messages
+      );
+
+      if (result.success) {
+        showToast.success("Chat created from shared source");
+        navigate(`/chat/${newChatId}`);
+      } else {
+        showToast.error(result.message || "Failed to create chat from source");
+      }
+    } catch (error) {
+      showToast.error("An error occurred while creating the chat");
+      console.error("Error:", error);
+    } finally {
+      setIsCreatingFromSource(false);
     }
   };
 
@@ -220,14 +233,22 @@ const ChatResponse = ({
               first.
             </p>
             <button
-              onClick={() => {
-                handleRestoreChat(chatId);
-              }}
+              onClick={() => handleRestoreChat(chatId)}
+              disabled={isUnarchiving}
               className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
               <span className="flex items-center">
-                <Archive size={16} className="mr-2" />
-                Unarchive
+              {isUnarchiving ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Restoring...
+                </>
+              ) : (
+                <>
+                  <Archive size={16} className="mr-2" />
+                  Unarchive
+                </>
+              )}
               </span>
             </button>
           </div>
@@ -235,9 +256,19 @@ const ChatResponse = ({
           <div className="text-center">
             <button
               onClick={handleCreateChatFromSource}
+              disabled={isCreatingFromSource}
               className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
-              Interact with this chat
+              <span className="flex items-center">
+              {isCreatingFromSource ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Interact with this chat"
+              )}
+              </span>
             </button>
           </div>
         ) : (

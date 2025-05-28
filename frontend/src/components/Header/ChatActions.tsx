@@ -1,4 +1,4 @@
-import { Share2, Star } from "lucide-react";
+import { Loader2, Share2, Star } from "lucide-react";
 import { ChatActionsProps } from "../../lib/types";
 import { useAppSelector } from "../../store/hooks";
 
@@ -8,6 +8,7 @@ export default function ChatActions({
   isArchive,
   toggleFavorite,
   setShareOpen,
+  favoriteLoading,
 }: ChatActionsProps) {
   const actionLoadingId = useAppSelector((state) => state.chat.actionLoadingId);
   const isLoading = actionLoadingId === chatId;
@@ -44,12 +45,19 @@ export default function ChatActions({
           onClick={toggleFavorite}
           disabled={isLoading}
         >
-          <Star
-            size={20}
-            fill={isFavorite ? "gold" : "none"}
-            color={isFavorite ? "gold" : "currentColor"}
-            className={isLoading ? "opacity-50" : ""}
-          />
+          {favoriteLoading ? (
+            <Loader2
+              size={20}
+              className="animate-spin text-[var(--color-text)]"
+            />
+          ) : (
+            <Star
+              size={20}
+              fill={isFavorite ? "gold" : "none"}
+              color={isFavorite ? "gold" : "currentColor"}
+              className={isLoading ? "opacity-50" : ""}
+            />
+          )}
         </button>
       )}
     </div>

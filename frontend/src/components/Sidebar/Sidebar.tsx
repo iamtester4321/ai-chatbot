@@ -46,12 +46,11 @@ const Sidebar = ({
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  // Reset search term when sidebar is closed
   useEffect(() => {
     if (!isSidebarOpen) {
-      setSearchTerm(""); // Reset search field
+      setSearchTerm("");
     }
-  }, [isSidebarOpen]); // Trigger effect when `isSidebarOpen` changes
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -111,11 +110,13 @@ const Sidebar = ({
     }
   };
 
-  const filteredChatList = chatList.filter(
-    (chat) =>
-      typeof chat.name === "string" &&
-      chat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredChatList = chatList
+    .filter((chat) => !chat.isArchived)
+    .filter(
+      (chat) =>
+        typeof chat.name === "string" &&
+        chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const favoriteChats = filteredChatList.filter(
     (chat) => chat.isFavorite && !chat.isArchived
@@ -177,7 +178,7 @@ const Sidebar = ({
               <ChatSectionLoader title="Spark Chats" count={1} />
               <ChatSectionLoader title="All Chats" count={3} />
             </div>
-          ) : chatList.length === 0 ? (
+          ) : chatList.filter((chat) => !chat.isArchived).length === 0 ? (
             <div className="text-center text-[color:var(--color-disabled-text)]">
               No Chats Available
             </div>

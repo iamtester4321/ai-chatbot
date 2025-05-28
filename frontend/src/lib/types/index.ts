@@ -14,19 +14,22 @@ export interface MobileMenuProps {
   toggleFavorite: () => void;
   isFavorite: boolean;
   isArchive: boolean;
-  archiveChat: () => void;
+  toggleArchiveChat: () => void;
   openDeleteModal: () => void;
   setShareOpen: (state: boolean) => void;
   chatId: string;
+  favoriteLoading: boolean;
+  archiveLoading: boolean;
 }
 
 export interface DesktopMenuProps {
   isOpen: boolean;
   toggleMenu: () => void;
-  archiveChat: () => void;
+  toggleArchiveChat: () => void;
   openDeleteModal: () => void;
   isArchive: boolean;
   chatId: string;
+  archiveLoading: boolean;
 }
 
 export interface ChatActionsProps {
@@ -35,6 +38,7 @@ export interface ChatActionsProps {
   isArchive: boolean;
   toggleFavorite: () => void;
   setShareOpen: (state: boolean) => void;
+  favoriteLoading: boolean;
 }
 
 // Sidebar -------------------------------------------------------------------------------------------------------------------------------
