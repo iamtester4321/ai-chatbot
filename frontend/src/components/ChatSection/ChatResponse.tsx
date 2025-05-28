@@ -290,21 +290,22 @@ const ChatResponse = ({
                 </button>
               </div>
             </div>
-
-            <button
-              onClick={handleCreateChatFromSource}
-              disabled={isCreatingFromSource}
-              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer w-full max-w-lg mx-auto block"
-            >
-              {isCreatingFromSource ? (
-                <>
-                  <Loader2 size={16} className="mr-2 animate-spin" />{" "}
-                  Creating...
-                </>
-              ) : (
-                "Interact with this chat"
-              )}
-            </button>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleCreateChatFromSource}
+                disabled={isCreatingFromSource}
+                className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+              >
+                {isCreatingFromSource ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>Interact with this chat</>
+                )}
+              </button>
+            </div>
           </>
         ) : (
           <PromptInput
