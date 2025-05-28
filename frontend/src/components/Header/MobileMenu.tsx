@@ -33,6 +33,7 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
       (state) => state.chat.actionLoadingId
     );
     const user = useAppSelector((state) => state.user.user);
+    const { messages } = useAppSelector((state) => state.chat);
     const isLoading = actionLoadingId === chatId;
     const navigate = useNavigate();
 
@@ -90,10 +91,14 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
           >
             <div className="py-1">
               <button
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
+                className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                  isLoading || messages.length < 2
+                    ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                    : "hover:bg-[var(--color-muted)] cursor-pointer"
+                }`}
                 style={{ color: "var(--color-text)" }}
                 onClick={() => setShareOpen(true)}
-                disabled={isLoading}
+                disabled={isLoading || messages.length < 2}
               >
                 <Share2
                   size={18}
@@ -106,9 +111,13 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
               {!isArchive && (
                 <button
                   onClick={toggleFavorite}
-                  className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
+                  className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                    isLoading || messages.length < 2
+                      ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                      : "hover:bg-[var(--color-muted)] cursor-pointer"
+                  }`}
                   style={{ color: "var(--color-text)" }}
-                  disabled={isLoading}
+                  disabled={isLoading || messages.length < 2}
                 >
                   {favoriteLoading ? (
                     <Loader2 size={18} className="mr-2 animate-spin" />
@@ -127,9 +136,13 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
               {/* Archive Button */}
               <button
                 onClick={toggleArchiveChat}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
+                className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                  isLoading || messages.length < 2
+                    ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                    : "hover:bg-[var(--color-muted)] cursor-pointer"
+                }`}
                 style={{ color: "var(--color-text)" }}
-                disabled={isLoading}
+                disabled={isLoading || messages.length < 2}
               >
                 {archiveLoading ? (
                   <Loader2 size={16} className="mr-2 animate-spin" />
@@ -144,9 +157,13 @@ const MobileMenu = forwardRef<HTMLDivElement, MobileMenuProps>(
 
               <button
                 onClick={openDeleteModal}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
+                className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                  isLoading || messages.length < 2
+                    ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                    : "hover:bg-[var(--color-muted)] cursor-pointer text-[var(--color-error)]"
+                }`}
                 style={{ color: "var(--color-error)" }}
-                disabled={isLoading}
+                disabled={isLoading || messages.length < 2}
               >
                 <Trash2
                   size={16}

@@ -20,6 +20,7 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
       (state) => state.chat.actionLoadingId
     );
     const user = useAppSelector((state) => state.user.user);
+    const { messages } = useAppSelector((state) => state.chat);
     const isLoading = actionLoadingId === chatId;
 
     return (
@@ -57,8 +58,12 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
             <div className="py-1">
               <button
                 onClick={toggleArchiveChat}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
-                disabled={archiveLoading}
+                className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                  archiveLoading || messages.length < 2
+                    ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                    : "hover:bg-[var(--color-muted)] cursor-pointer"
+                }`}
+                disabled={archiveLoading || messages.length < 2}
               >
                 {archiveLoading ? (
                   <Loader2 size={16} className="mr-2 animate-spin" />
@@ -69,9 +74,13 @@ const DesktopMenu = forwardRef<HTMLDivElement, DesktopMenuProps>(
               </button>
               <button
                 onClick={openDeleteModal}
-                className="px-4 py-2 text-sm w-full text-left flex items-center hover:bg-[var(--color-muted)] cursor-pointer"
+                className={`px-4 py-2 text-sm w-full text-left flex items-center rounded ${
+                  isLoading || messages.length < 2
+                    ? "bg-[var(--color-disabled-bg)] text-[var(--color-disabled-text)] cursor-not-allowed"
+                    : "hover:bg-[var(--color-muted)] cursor-pointer text-[var(--color-error)]"
+                }`}
                 style={{ color: "var(--color-error)" }}
-                disabled={isLoading}
+                disabled={isLoading || messages.length < 2}
               >
                 <Trash2
                   size={16}
