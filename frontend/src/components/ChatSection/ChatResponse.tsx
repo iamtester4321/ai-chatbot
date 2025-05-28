@@ -32,18 +32,20 @@ const ChatResponse = ({
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
-  const mode = useAppSelector((state) => state.chat.mode);
+  const globalMode = useAppSelector((state) => state.chat.mode);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
+  const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isSharedChat = location.pathname.startsWith("/share/");
+
+  const [localMode, setLocalMode] = useState<"chat" | "chart">(globalMode);
+
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isUnarchiving, setIsUnarchiving] = useState(false);
   const [isCreatingFromSource, setIsCreatingFromSource] = useState(false);
 
   const showToast = useToast();
-  const dispatch = useAppDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const isSharedChat = location.pathname.startsWith("/share/");
 
   const [likedMessages, setLikedMessages] = useState<{
     [key: string]: boolean;
@@ -55,14 +57,12 @@ const ChatResponse = ({
   useEffect(() => {
     const newLikedMessages: { [key: string]: boolean } = {};
     const newDislikedMessages: { [key: string]: boolean } = {};
-
     messages.forEach((msg) => {
       if (msg.id) {
         newLikedMessages[msg.id] = msg.isLiked || false;
         newDislikedMessages[msg.id] = msg.isDisliked || false;
       }
     });
-
     setLikedMessages(newLikedMessages);
     setDislikedMessages(newDislikedMessages);
   }, [messages]);
@@ -72,17 +72,10 @@ const ChatResponse = ({
     try {
       const currentLiked = !likedMessages[messageId];
       const result = await updateLikeStatus(messageId, currentLiked);
-
       if (result) {
-        setLikedMessages((prev) => ({
-          ...prev,
-          [messageId]: currentLiked,
-        }));
+        setLikedMessages((prev) => ({ ...prev, [messageId]: currentLiked }));
         if (currentLiked && dislikedMessages[messageId]) {
-          setDislikedMessages((prev) => ({
-            ...prev,
-            [messageId]: false,
-          }));
+          setDislikedMessages((prev) => ({ ...prev, [messageId]: false }));
         }
       }
     } catch (error) {
@@ -95,17 +88,13 @@ const ChatResponse = ({
     try {
       const currentDisliked = !dislikedMessages[messageId];
       const result = await updateDislikeStatus(messageId, currentDisliked);
-
       if (result) {
         setDislikedMessages((prev) => ({
           ...prev,
           [messageId]: currentDisliked,
         }));
         if (currentDisliked && likedMessages[messageId]) {
-          setLikedMessages((prev) => ({
-            ...prev,
-            [messageId]: false,
-          }));
+          setLikedMessages((prev) => ({ ...prev, [messageId]: false }));
         }
       }
     } catch (error) {
@@ -116,14 +105,11 @@ const ChatResponse = ({
   useEffect(() => {
     const element = messagesEndRef.current;
     if (!element) return;
-
     const container = element.parentElement;
     if (!container) return;
-
     const isNearBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight <
       100;
-
     if (isNearBottom) {
       element.scrollIntoView({ block: "center" });
     }
@@ -133,7 +119,6 @@ const ChatResponse = ({
     try {
       setIsUnarchiving(true);
       const result = await archiveChat(chatId);
-
       if (result.success) {
         dispatch(setIsArchived(false));
         showToast.success("Chat restored");
@@ -153,17 +138,14 @@ const ChatResponse = ({
       showToast.error("Source chat ID is missing");
       return;
     }
-
     try {
       setIsCreatingFromSource(true);
       const newChatId = uuidv4();
-
       const result = await createChatFromSource(
         newChatId,
         sourceChatId,
         messages
       );
-
       if (result.success) {
         showToast.success("Chat created from shared source");
         navigate(`/chat/${newChatId}`);
@@ -177,6 +159,15 @@ const ChatResponse = ({
       setIsCreatingFromSource(false);
     }
   };
+  console.log(messages);
+
+  const filteredMessages = isSharedChat
+    ? messages.filter((msg) =>
+        localMode === "chat"
+          ? (msg as any).for !== "chart"
+          : (msg as any).for === "chart"
+      )
+    : messages;
 
   return (
     <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col ">
@@ -186,16 +177,15 @@ const ChatResponse = ({
           {user && !chatName ? (
             <Skeleton className="w-1/2 h-8 mb-4 sm:mb-6" />
           ) : (
-            <h2
-              className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 
-              text-center md:text-left"
-            >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-normal mb-4 sm:mb-6 pt-2 sm:pt-4 text-center md:text-left">
               {chatName.length >= 50 ? chatName.concat("...") : chatName}
             </h2>
           )}
-          {messages.length === 0 && (
+
+          {filteredMessages.length === 0 && (
             <div className="w-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-              {mode === "chart" ? (
+              {localMode === "chart" ||
+              (!isSharedChat && globalMode === "chart") ? (
                 <BarChart3
                   size={48}
                   className="mb-4 text-[var(--color-disabled-text)]"
@@ -207,93 +197,115 @@ const ChatResponse = ({
                 />
               )}
               <p className="text-lg sm:text-xl font-medium">
-                No {mode === "chart" ? "charts" : "messages"} yet.
+                No {localMode === "chart" ? "charts" : "messages"} yet.
               </p>
               <p className="text-sm sm:text-base mt-2">
                 Start{" "}
-                {mode === "chart" ? "generating charts" : "the conversation"} by
-                typing a prompt below.
+                {localMode === "chart"
+                  ? "generating charts"
+                  : "the conversation"}{" "}
+                by typing a prompt below.
               </p>
             </div>
           )}
-          <div className="space-y-6 sm:space-y-8">
-            {/* Using ChatMessageThread to render the chat messages */}
-            <ChatMessageThread
-              messages={messages}
-              isMobile={isMobile}
-              onCopy={(text, index) => {
-                navigator.clipboard.writeText(text).then(() => {
-                  setCopiedIndex(index);
-                  setTimeout(() => setCopiedIndex(null), 2000);
-                });
-              }}
-              copiedIndex={copiedIndex}
-              likedMessages={likedMessages}
-              dislikedMessages={dislikedMessages}
-              onLike={handleLike}
-              onDislike={handleDislike}
-            />
 
-            {chatResponse && (
-              <div className="space-y-2">
-                <div className="prose prose-invert max-w-none">
-                  <MarkdownRenderer content={chatResponse} flag={true} />
-                </div>
-              </div>
-            )}
+          <ChatMessageThread
+            messages={filteredMessages}
+            isMobile={isMobile}
+            onCopy={(index) => {
+              setCopiedIndex(Number(index));
+              setTimeout(() => setCopiedIndex(null), 2000);
+            }}
+            copiedIndex={copiedIndex}
+            likedMessages={likedMessages}
+            dislikedMessages={dislikedMessages}
+            onLike={handleLike}
+            onDislike={handleDislike}
+          />
 
-            {isLoading && <StreamLoader />}
-            <div ref={messagesEndRef} />
-          </div>
+          {chatResponse && (
+            <div className="prose prose-invert max-w-none mt-6">
+              <MarkdownRenderer
+                content={chatResponse}
+                flag={localMode === "chart"}
+              />
+            </div>
+          )}
+
+          {isLoading && <StreamLoader />}
+
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
       <div className="sticky bottom-0 bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)] z-10">
         {isArchived ? (
-          <div className="text-center text-[var(--color-text)]">
-            <p className="mb-4">
-              This conversation is archived. To continue, please unarchive it
-              first.
-            </p>
+          <div className="flex justify-center gap-4">
             <button
               onClick={() => handleRestoreChat(chatId)}
               disabled={isUnarchiving}
-              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+              className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
             >
-              <span className="flex items-center">
               {isUnarchiving ? (
                 <>
-                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  <Loader2 size={16} className="mr-2 animate-spin" />{" "}
                   Restoring...
                 </>
               ) : (
                 <>
-                  <Archive size={16} className="mr-2" />
-                  Unarchive
+                  <Archive size={16} /> Restore Chat
                 </>
               )}
-              </span>
             </button>
           </div>
         ) : isSharedChat && user ? (
-          <div className="text-center">
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center bg-[var(--color-muted)] rounded-2xl p-1 w-fit">
+                <button
+                  type="button"
+                  onClick={() => setLocalMode("chat")}
+                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
+      ${
+        localMode === "chat"
+          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+          : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+      }`}
+                >
+                  <MessageSquare size={16} />
+                  Chat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocalMode("chart")}
+                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
+      ${
+        localMode === "chart"
+          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+          : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+      }`}
+                >
+                  <BarChart3 size={16} />
+                  Chart
+                </button>
+              </div>
+            </div>
+
             <button
               onClick={handleCreateChatFromSource}
               disabled={isCreatingFromSource}
-              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+              className="bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer w-full max-w-lg mx-auto block"
             >
-              <span className="flex items-center">
               {isCreatingFromSource ? (
                 <>
-                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  <Loader2 size={16} className="mr-2 animate-spin" />{" "}
                   Creating...
                 </>
               ) : (
                 "Interact with this chat"
               )}
-              </span>
             </button>
-          </div>
+          </>
         ) : (
           <PromptInput
             input={input}

@@ -171,7 +171,7 @@ export const createChat = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const handleCreateChatFromSource = async (req: any, res: any) => {
-  const userId = req.user?.id; // Ensure this is being set by your auth middleware
+  const userId = req.user?.id;
   const newChatId = req.params.chatId;
   const sourceChatId = req.body.sourceChatId;
 

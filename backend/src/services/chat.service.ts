@@ -23,7 +23,7 @@ export async function saveChat(
   chatId: string,
   sourceId?: string
 ) {
-  const result = await chatRepo.createChatWithMessagesOrApendMesages(
+  const result = await chatRepo.createChatWithMessagesOrAppendMessages(
     userId,
     messages,
     chatId,

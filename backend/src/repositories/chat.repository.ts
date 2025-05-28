@@ -2,7 +2,7 @@ import { prisma } from "../config/db";
 import { encryptMessage, decryptMessage } from "../utils/encryption.utils";
 import { v4 as uuidv4 } from "uuid";
 
-export async function createChatWithMessagesOrApendMesages(
+export async function createChatWithMessagesOrAppendMessages(
   userId: string,
   messages: { id: string; role: string; content: string; for?: string }[],
   chatId: string,
@@ -10,7 +10,23 @@ export async function createChatWithMessagesOrApendMesages(
 ) {
   let allMessages = messages;
 
-  allMessages = [...messages];
+  if (sourceChatId) {
+    const sourceChat = await prisma.chat.findUnique({
+      where: { id: sourceChatId },
+      include: { messages: true },
+    });
+
+    if (!sourceChat) {
+      throw new Error("Source chat not found");
+    }
+
+    allMessages = sourceChat.messages.map((m) => ({
+      id: uuidv4(),
+      role: m.role,
+      content: m.content,
+      for: (m as any).for,
+    }));
+  }
 
   const existingChat = await prisma.chat.findUnique({
     where: { id: chatId },
@@ -33,23 +49,24 @@ export async function createChatWithMessagesOrApendMesages(
       include: { messages: true },
     });
   } else {
-    const userMessage = messages.find((m) => m.role === "user");
     let trimmedName = "New Chat";
 
+    const userMessage = allMessages.find((m) => m.role === "user");
     if (userMessage) {
       const decrypted = await decryptMessage(userMessage.content);
       trimmedName = decrypted.trim().slice(0, 50);
     }
 
     const encryptedName = await encryptMessage(trimmedName);
-    return prisma.chat.create({
+
+    const chat = await prisma.chat.create({
       data: {
         id: chatId,
         userId,
         name: encryptedName,
         messages: {
           create: allMessages.map((m) => ({
-            id: uuidv4(),
+            id: m.id || uuidv4(),
             role: m.role,
             content: m.content,
             for: m.for,
@@ -58,6 +75,8 @@ export async function createChatWithMessagesOrApendMesages(
       },
       include: { messages: true },
     });
+
+    return chat;
   }
 }
 
