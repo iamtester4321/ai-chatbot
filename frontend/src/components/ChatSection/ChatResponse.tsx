@@ -159,7 +159,6 @@ const ChatResponse = ({
       setIsCreatingFromSource(false);
     }
   };
-  console.log(messages);
 
   const filteredMessages = isSharedChat
     ? messages.filter((msg) =>
