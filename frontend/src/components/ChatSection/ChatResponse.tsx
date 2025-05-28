@@ -211,9 +211,14 @@ const ChatResponse = ({
           <ChatMessageThread
             messages={filteredMessages}
             isMobile={isMobile}
-            onCopy={(index) => {
-              setCopiedIndex(Number(index));
-              setTimeout(() => setCopiedIndex(null), 2000);
+            onCopy={async (msg, index) => {
+              try {
+                await navigator.clipboard.writeText(msg);
+                setCopiedIndex(index);
+                setTimeout(() => setCopiedIndex(null), 2000);
+              } catch (error) {
+                console.error("Failed to copy text:", error);
+              }
             }}
             copiedIndex={copiedIndex}
             likedMessages={likedMessages}
