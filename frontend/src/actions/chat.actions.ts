@@ -50,7 +50,7 @@ export const useChatActions = ({
     id: chatId,
     onResponse: async () => {
       const tempChatName = input.trim().slice(0, 50);
-      dispatch(setChatName(tempChatName));
+      if (messages.length === 0) dispatch(setChatName(tempChatName));
 
       const userMessageId = uuidv4();
 
@@ -75,7 +75,6 @@ export const useChatActions = ({
         }
         return;
       } else if (moderationResult.flagged) {
-        dispatch(setChatName(""));
         showToast.warning(
           "Your message contains language that may violate our content guidelines. Please revise and try again."
         );
