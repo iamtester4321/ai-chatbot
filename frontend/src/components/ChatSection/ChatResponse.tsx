@@ -1,11 +1,12 @@
-import { Archive } from "lucide-react";
+import { Archive, BarChart3, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { archiveChat } from "../../actions/chat.actions";
+import { useLocation, useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+import { archiveChat, createChatFromSource } from "../../actions/chat.actions";
 import {
   updateDislikeStatus,
   updateLikeStatus,
 } from "../../actions/message.actions";
-import { createChatFromSource } from "../../actions/chat.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
 import { setIsArchived } from "../../store/features/chat/chatSlice";
@@ -15,8 +16,6 @@ import { Skeleton } from "../Loaders";
 import StreamLoader from "../Loaders/StreamLoader";
 import ChatMessageThread from "./ChatMessageThread";
 import PromptInput from "./PromptInput";
-import { useLocation, useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 
 const ChatResponse = ({
   messages,
@@ -33,6 +32,7 @@ const ChatResponse = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
   // const [showResponseActions, setShowResponseActions] = useState(false);
+  const mode = useAppSelector((state) => state.chat.mode);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
 
@@ -179,7 +179,29 @@ const ChatResponse = ({
               {chatName.length >= 50 ? chatName.concat("...") : chatName}
             </h2>
           )}
-
+          {messages.length === 0 && (
+            <div className="w-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+              {mode === "chart" ? (
+                <BarChart3
+                  size={48}
+                  className="mb-4 text-[var(--color-disabled-text)]"
+                />
+              ) : (
+                <MessageSquare
+                  size={48}
+                  className="mb-4 text-[var(--color-disabled-text)]"
+                />
+              )}
+              <p className="text-lg sm:text-xl font-medium">
+                No {mode === "chart" ? "charts" : "messages"} yet.
+              </p>
+              <p className="text-sm sm:text-base mt-2">
+                Start{" "}
+                {mode === "chart" ? "generating charts" : "the conversation"} by
+                typing a prompt below.
+              </p>
+            </div>
+          )}
           <div className="space-y-6 sm:space-y-8">
             {/* Using ChatMessageThread to render the chat messages */}
             <ChatMessageThread
