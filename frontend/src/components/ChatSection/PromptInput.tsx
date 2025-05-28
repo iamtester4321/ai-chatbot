@@ -1,5 +1,6 @@
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { fetchSuggestions } from "../../actions/chat.actions";
 import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
@@ -23,6 +24,8 @@ const PromptInput = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const isSharedChat = location.pathname.startsWith("/share/");
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -236,7 +239,7 @@ const PromptInput = ({
         </div>
       </form>
 
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && suggestions.length > 0 && !isSharedChat && (
         <SuggestionBox
           suggestions={suggestions}
           selectedSuggestionIndex={selectedSuggestionIndex}
