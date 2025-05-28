@@ -52,7 +52,7 @@ const PromptInput = ({
     };
   }, []);
 
-  let debounceTimeout: NodeJS.Timeout;
+  let debounceTimeout: ReturnType<typeof setTimeout>;
 
   const handleChangeWithSuggestions = async (
     e: React.ChangeEvent<HTMLTextAreaElement>
