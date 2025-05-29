@@ -317,7 +317,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           <button
             ref={buttonRef}
             onClick={() => setOpen((prev) => !prev)}
-            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center cursor-pointer"
+            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center cursor-pointer transition duration-200"
           >
             <span className="flex items-center">
               {chartIcons[chartType]}
@@ -363,7 +363,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           )}
         </div>
         <button
-          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center cursor-pointer"
+          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center cursor-pointer transition duration-200"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
             handleExportPDF(chartRef, name, isDarkMode);
