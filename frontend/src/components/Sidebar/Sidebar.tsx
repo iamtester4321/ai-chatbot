@@ -115,7 +115,7 @@ const Sidebar = ({
     .filter(
       (chat) =>
         typeof chat.name === "string" &&
-        chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+        chat.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
     );
 
   const favoriteChats = filteredChatList.filter(

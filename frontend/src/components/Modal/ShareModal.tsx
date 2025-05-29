@@ -104,7 +104,7 @@ export default function ShareModal({
             <button
               onClick={handleCopy}
               disabled={!shareId}
-              className="p-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-button-text)] transition-colors disabled:opacity-50 cursor-pointer"
+              className="p-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-button-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {copied ? (
                 <span className="flex items-center">

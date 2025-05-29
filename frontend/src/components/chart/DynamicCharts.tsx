@@ -1,6 +1,4 @@
 "use client";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import {
   AreaChart as AreaIcon,
   BarChart3,
@@ -29,7 +27,6 @@ import {
   CartesianGrid,
   Cell,
   ComposedChart,
-  DefaultLegendContentProps,
   Legend,
   Line,
   LineChart,
@@ -46,6 +43,7 @@ import {
 import { chartOptions, COLORS } from "../../lib/constants";
 import { ChartType } from "../../lib/types";
 import { RootState } from "../../store/store";
+import { handleExportPDF, renderWrappedLegend } from "../../utils/chart.utils";
 import StreamLoader from "../Loaders/StreamLoader";
 
 const chartIcons: Record<ChartType, JSX.Element> = {
@@ -149,27 +147,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
       }),
     [chartType, numericKeys]
   );
-
-  const renderWrappedLegend = (props: DefaultLegendContentProps) => {
-    const { payload } = props;
-    if (!payload) return <></>;
-    return (
-      <ul className="flex flex-wrap list-none m-0 p-0">
-        {payload.map((entry: any, index: number) => (
-          <li
-            key={`item-${index}`}
-            className="flex items-center mr-3 mb-2 text-[var(--color-text)]"
-          >
-            <span
-              className="inline-block w-[10px] h-[10px] mr-2"
-              style={{ backgroundColor: entry.color }}
-            />
-            {entry.value}
-          </li>
-        ))}
-      </ul>
-    );
-  };
 
   const chartElement = useMemo(() => {
     if (!categoryKey || !numericKeys.length) {
@@ -330,25 +307,6 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
     }
   }, [chartType, categoryKey, numericKeys, jsonData, renderSeries]);
 
-  const handleExportPDF = async () => {
-    if (!chartRef.current) return;
-    const canvas = await html2canvas(chartRef.current, {
-      backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
-      scale: 2,
-    });
-    const imgData = canvas.toDataURL("image/png");
-    const padding = 40;
-    const pdfWidth = canvas.width + padding * 2;
-    const pdfHeight = canvas.height + padding * 2;
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "px",
-      format: [pdfWidth, pdfHeight],
-    });
-    pdf.addImage(imgData, "PNG", padding, padding, canvas.width, canvas.height);
-    pdf.save(`${name}-chart.pdf`);
-  };
-
   return (
     <div className="p-6">
       <p className="text-[var(--color-text)] text-2xl font-semibold mb-4">
@@ -359,7 +317,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           <button
             ref={buttonRef}
             onClick={() => setOpen((prev) => !prev)}
-            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center"
+            className="px-4 py-2 w-36 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex justify-between items-center cursor-pointer"
           >
             <span className="flex items-center">
               {chartIcons[chartType]}
@@ -392,7 +350,7 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
                       setChartType(option);
                       setOpen(false);
                     }}
-                    className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] ${
+                    className={`px-4 py-2 text-sm w-full text-left flex items-center text-[var(--color-text)] hover:bg-[var(--color-muted)] cursor-pointer ${
                       option === chartType ? "font-semibold" : ""
                     }`}
                   >
@@ -405,8 +363,11 @@ function DynamicChartComponent({ data, name }: DynamicChartProps) {
           )}
         </div>
         <button
-          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center"
-          onClick={handleExportPDF}
+          className="px-4 py-2 rounded-md bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-muted)] flex items-center cursor-pointer"
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            handleExportPDF(chartRef, name, isDarkMode);
+          }}
         >
           <Download size={16} className="mr-2" />
           <span>Export</span>
