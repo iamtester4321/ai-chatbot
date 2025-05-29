@@ -1,6 +1,5 @@
 import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { fetchSuggestions } from "../../actions/chat.actions";
 import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
@@ -14,6 +13,8 @@ const PromptInput = ({
   handleFormSubmit,
   chatId,
   shareId,
+  isSharedChat,
+  onInteractWithSharedChat,
 }: PromptInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,8 +25,6 @@ const PromptInput = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
-  const isSharedChat = location.pathname.startsWith("/share/");
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -159,11 +158,12 @@ const PromptInput = ({
     }
   };
 
+  // Only auto-focus if not a shared chat
   useEffect(() => {
-    if (textareaRef.current) {
+    if (!isSharedChat && textareaRef.current) {
       textareaRef.current.focus();
     }
-  }, []);
+  }, [isSharedChat]);
 
   const handleFormSubmitWithFocus = async (e: React.FormEvent) => {
     await handleFormSubmit(e);
@@ -171,6 +171,12 @@ const PromptInput = ({
       textareaRef.current.style.height = "48px";
       textareaRef.current.style.overflowY = "hidden";
       textareaRef.current.focus();
+    }
+  };
+
+  const handleFocus = () => {
+    if (isSharedChat && onInteractWithSharedChat) {
+      onInteractWithSharedChat();
     }
   };
 
@@ -195,6 +201,7 @@ const PromptInput = ({
               handleChangeWithSuggestions(e);
             }}
             onKeyDown={handleKeyDown}
+            onFocus={handleFocus}
             rows={1}
           />
         </div>

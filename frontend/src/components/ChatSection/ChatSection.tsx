@@ -98,19 +98,25 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
     if (shareId) {
       const loadMessagesByShareId = async () => {
         dispatch(setIsLoading(true));
-        const { success, data, error } = await fetchMessagesByShareId(shareId);
-
-        dispatch(setChatName(data.name));
+        const {
+          success,
+          data,
+          error: fetchError,
+        } = await fetchMessagesByShareId(shareId);
 
         dispatch(setIsLoading(false));
 
         if (success && data) {
           setsourceChatId(data.id);
+          dispatch(setChatName(data.name));
           dispatch(setMessages(data.messages));
           const lMsg = data.messages[data.messages.length - 1];
           dispatch(setMode(lMsg.for));
+          setError(null); // clear any previous error
         } else {
-          console.error(error);
+          console.error(fetchError);
+          setError("This shared chat doesn't exist or has been removed.");
+          dispatch(setMessages([])); // optional: clear existing messages
         }
       };
 
@@ -206,7 +212,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
             <ChatSkeleton />
           )}
         </div>
-      ) : error && chatId !== generatedChatId ? (
+      ) : error && (chatId !== generatedChatId || shareId) ? (
         <Error message={error} onNewChat={handleNewChat} />
       ) : (
         <>
