@@ -25,7 +25,7 @@ const PromptInput = ({
 }: PromptInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const mode = useAppSelector((state) => state.chat.mode);
+  const {mode, messages} = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -56,25 +56,45 @@ const PromptInput = ({
       window.SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = "en-US";
       recognition.onresult = (event) => {
-        if (event.results[0].isFinal) {
-          const transcript = event.results[0][0].transcript;
-          const currentText = textareaRef.current?.value || "";
-          handleInputChange({
-            target: { value: `${currentText} ${transcript}`.trim() },
-          } as any);
-        }
-      };
+  let transcript = "";
+
+  for (let i = event.resultIndex; i < event.results.length; ++i) {
+    const result = event.results[i];
+    if (result.isFinal) {
+      transcript += result[0].transcript;
+    }
+  }
+
+  if (transcript.trim()) {
+    const currentText = textareaRef.current?.value || "";
+    handleInputChange({
+      target: { value: `${currentText} ${transcript}`.trim() },
+    } as any);
+  }
+};
       recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };
+
       recognition.onend = () => {
-        setIsListening(false);
+        if (isListening && !isStopping) {
+          setTimeout(() => recognition.start(), 200);
+        } else {
+          setIsListening(false);
+          setIsStopping(false);
+          micButtonRef.current?.classList.remove(
+            "bg-red-600",
+            "border-red-600",
+            "text-white"
+          );
+        }
       };
+
       recognitionRef.current = recognition;
     }
   }, []);
@@ -134,48 +154,15 @@ const PromptInput = ({
         "border-red-600",
         "text-white"
       );
-      setTimeout(() => {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 2000);
+      recognitionRef.current.stop();
     } else {
       recognitionRef.current.start();
       setIsListening(true);
-      const redTimeout = setTimeout(() => {
-        setIsStopping(true);
-        micButtonRef.current?.classList.add(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 8000);
-      const stopTimeout = setTimeout(() => {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 10000);
-      recognitionRef.current.onend = () => {
-        clearTimeout(redTimeout);
-        clearTimeout(stopTimeout);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-        setIsListening(false);
-      };
+      micButtonRef.current?.classList.remove(
+        "bg-red-600",
+        "border-red-600",
+        "text-white"
+      );
     }
   };
 
@@ -252,7 +239,6 @@ const PromptInput = ({
     }
   };
 
-  // Only auto-focus if not a shared chat
   useEffect(() => {
     if (!isSharedChat && textareaRef.current) {
       textareaRef.current.focus();
@@ -329,6 +315,7 @@ const PromptInput = ({
               Chart
             </button>
           </div>
+
           <div className="flex items-center gap-2">
             <div className="relative">
               {isListening && !isStopping && (
@@ -357,6 +344,7 @@ const PromptInput = ({
                 />
               </button>
             </div>
+
             {input.length > 0 ? (
               <button
                 type="submit"
@@ -395,10 +383,7 @@ const PromptInput = ({
         />
       )}
 
-      {/* Voice Modal */}
-      {showVoiceModal && (
-        <VoiceModal onClose={() => setShowVoiceModal(false)} />
-      )}
+      {showVoiceModal && <VoiceModal onClose={() => setShowVoiceModal(false)} />}
     </div>
   );
 };
