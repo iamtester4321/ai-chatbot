@@ -1,8 +1,9 @@
 import {
   ArrowUpRight,
+  AudioLines,
   BarChart2,
   MessageSquare,
-  Mic 
+  Mic,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { fetchSuggestions } from "../../actions/chat.actions";
@@ -10,6 +11,7 @@ import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import SuggestionBox from "../inputSuggestion/SuggestionBox";
+import VoiceModal from "../Modal/VoiceModal";
 
 const PromptInput = ({
   input,
@@ -30,10 +32,11 @@ const PromptInput = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
-    const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const micButtonRef = useRef<HTMLButtonElement>(null);
   const [isStopping, setIsStopping] = useState(false);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -48,7 +51,7 @@ const PromptInput = ({
     }
   }, [showSuggestions]);
 
-    useEffect(() => {
+  useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -122,7 +125,7 @@ const PromptInput = ({
     }, 2000);
   };
 
-    const toggleListening = () => {
+  const toggleListening = () => {
     if (!recognitionRef.current) return;
     if (isListening) {
       setIsStopping(true);
@@ -326,7 +329,7 @@ const PromptInput = ({
               Chart
             </button>
           </div>
-                    <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div className="relative">
               {isListening && !isStopping && (
                 <>
@@ -354,15 +357,31 @@ const PromptInput = ({
                 />
               </button>
             </div>
-            <button
-              type="submit"
-              disabled={isLoading || input.trim() === "" || isListening}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"            
-              title="Send message"
+            {input.length > 0 ? (
+              <button
+                type="submit"
+                disabled={isLoading || input.trim() === "" || isListening}
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+                title="Send message"
               >
-              <ArrowUpRight size={18} color="var(--color-button-text)" />
-            </button>
-            </div>
+                <ArrowUpRight size={18} color="var(--color-button-text)" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => !isListening && setShowVoiceModal(true)}
+                disabled={isListening}
+                className={`bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 ${
+                  isListening
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer hover:scale-105"
+                }`}
+                title={isListening ? "Mic is active" : "Open voice modal"}
+              >
+                <AudioLines size={18} color="var(--color-button-text)" />
+              </button>
+            )}
+          </div>
         </div>
       </form>
 
@@ -374,6 +393,11 @@ const PromptInput = ({
           suggestionBoxRef={suggestionBoxRef}
           onSelect={handleSuggestionSelect}
         />
+      )}
+
+      {/* Voice Modal */}
+      {showVoiceModal && (
+        <VoiceModal onClose={() => setShowVoiceModal(false)} />
       )}
     </div>
   );
