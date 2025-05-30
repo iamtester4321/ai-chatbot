@@ -1,4 +1,9 @@
-import { ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
+import {
+  ArrowUpRight,
+  AudioLines,
+  BarChart2,
+  MessageSquare,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { fetchSuggestions } from "../../actions/chat.actions";
@@ -6,6 +11,7 @@ import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import SuggestionBox from "../inputSuggestion/SuggestionBox";
+import VoiceModal from "../Modal/VoiceModal";
 
 const PromptInput = ({
   input,
@@ -26,6 +32,7 @@ const PromptInput = ({
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const isSharedChat = location.pathname.startsWith("/share/");
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -184,7 +191,7 @@ const PromptInput = ({
         <div className="relative w-full">
           <textarea
             ref={textareaRef}
-            className="bg-transparent [color:var(--color-text)] text-base placeholder-[color:var(--color-disabled-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
+            className="bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
             placeholder={`Ask anything in ${
               mode === "chat" ? "chat" : "chart"
             } mode...`}
@@ -205,11 +212,11 @@ const PromptInput = ({
               type="button"
               onClick={() => handleModeChange("chat")}
               className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
-        ${
-          mode === "chat"
-            ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
-            : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
-        }`}
+              ${
+                mode === "chat"
+                  ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+                  : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+              }`}
             >
               <MessageSquare size={16} />
               Chat
@@ -218,24 +225,33 @@ const PromptInput = ({
               type="button"
               onClick={() => handleModeChange("chart")}
               className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
-        ${
-          mode === "chart"
-            ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
-            : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
-        }`}
+              ${
+                mode === "chart"
+                  ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+                  : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+              }`}
             >
               <BarChart2 size={16} />
               Chart
             </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading || input.trim() === ""}
-            className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowUpRight size={18} color="var(--color-button-text)" />
-          </button>
+          {input.length > 0 ? (
+            <button
+              type="submit"
+              disabled={isLoading || input.trim() === ""}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ArrowUpRight size={18} color="var(--color-button-text)" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowVoiceModal(true)}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer"
+            >
+              <AudioLines size={18} color="var(--color-button-text)" />
+            </button>
+          )}
         </div>
       </form>
 
@@ -247,6 +263,11 @@ const PromptInput = ({
           suggestionBoxRef={suggestionBoxRef}
           onSelect={handleSuggestionSelect}
         />
+      )}
+
+      {/* Voice Modal */}
+      {showVoiceModal && (
+        <VoiceModal onClose={() => setShowVoiceModal(false)} />
       )}
     </div>
   );

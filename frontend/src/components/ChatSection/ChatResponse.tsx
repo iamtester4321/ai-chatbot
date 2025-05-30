@@ -1,4 +1,10 @@
-import { Archive, BarChart3, MessageSquare } from "lucide-react";
+import {
+  ArchiveRestore,
+  BarChart3,
+  Loader2,
+  MessageSquare,
+  MessageSquareMore
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -9,14 +15,13 @@ import {
 } from "../../actions/message.actions";
 import useToast from "../../hooks/useToast";
 import { ChatResponseProps } from "../../lib/types";
-import { setIsArchived } from "../../store/features/chat/chatSlice";
+import { setIsArchived, setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
 import { Skeleton } from "../Loaders";
 import StreamLoader from "../Loaders/StreamLoader";
 import ChatMessageThread from "./ChatMessageThread";
 import PromptInput from "./PromptInput";
-import { Loader2 } from "lucide-react";
 
 const ChatResponse = ({
   messages,
@@ -38,9 +43,7 @@ const ChatResponse = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isSharedChat = location.pathname.startsWith("/share/");
-
-  const [localMode, setLocalMode] = useState<"chat" | "chart">(globalMode);
-
+  const mode = useAppSelector((state) => state.chat.mode);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isUnarchiving, setIsUnarchiving] = useState(false);
   const [isCreatingFromSource, setIsCreatingFromSource] = useState(false);
@@ -160,13 +163,14 @@ const ChatResponse = ({
     }
   };
 
-  const filteredMessages = isSharedChat
-    ? messages.filter((msg) =>
-        localMode === "chat"
-          ? (msg as any).for !== "chart"
-          : (msg as any).for === "chart"
-      )
-    : messages;
+  const filteredMessages =
+    isSharedChat || isArchived
+      ? messages.filter((msg) =>
+          mode === "chat"
+            ? (msg as any).for !== "chart"
+            : (msg as any).for === "chart"
+        )
+      : messages;
 
   return (
     <div className="w-full h-full bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
@@ -183,8 +187,7 @@ const ChatResponse = ({
 
           {filteredMessages.length === 0 && (
             <div className="w-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-              {localMode === "chart" ||
-              (!isSharedChat && globalMode === "chart") ? (
+              {mode === "chart" || (!isSharedChat && globalMode === "chart") ? (
                 <BarChart3
                   size={48}
                   className="mb-4 text-[var(--color-disabled-text)]"
@@ -196,14 +199,12 @@ const ChatResponse = ({
                 />
               )}
               <p className="text-lg sm:text-xl font-medium">
-                No {localMode === "chart" ? "charts" : "messages"} yet.
+                No {mode === "chart" ? "charts" : "messages"} yet.
               </p>
               <p className="text-sm sm:text-base mt-2">
                 Start{" "}
-                {localMode === "chart"
-                  ? "generating charts"
-                  : "the conversation"}{" "}
-                by typing a prompt below.
+                {mode === "chart" ? "generating charts" : "the conversation"} by
+                typing a prompt below.
               </p>
             </div>
           )}
@@ -231,7 +232,7 @@ const ChatResponse = ({
             <div className="prose prose-invert max-w-none mt-6">
               <MarkdownRenderer
                 content={chatResponse}
-                flag={localMode === "chart"}
+                flag={mode === "chart"}
               />
             </div>
           )}
@@ -243,36 +244,67 @@ const ChatResponse = ({
       </div>
 
       <div className="bg-[var(--color-bg)] px-4 py-4 border-t border-[var(--color-border)]">
-
         {isArchived ? (
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => handleRestoreChat(chatId)}
-              disabled={isUnarchiving}
-              className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
-            >
-              {isUnarchiving ? (
-                <>
-                  <Loader2 size={16} className="mr-2 animate-spin" />{" "}
-                  Restoring...
-                </>
-              ) : (
-                <>
-                  <Archive size={16} /> Restore Chat
-                </>
-              )}
-            </button>
-          </div>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center bg-[var(--color-muted)] rounded-2xl p-1 w-fit">
+                <button
+                  type="button"
+                  onClick={() => dispatch(setMode("chat"))}
+                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
+  ${
+    mode === "chat"
+      ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+      : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+  }`}
+                >
+                  <MessageSquare size={16} />
+                  Chat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => dispatch(setMode("chart"))}
+                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
+  ${
+    mode === "chart"
+      ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
+      : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
+  }`}
+                >
+                  <BarChart3 size={16} />
+                  Chart
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => handleRestoreChat(chatId)}
+                disabled={isUnarchiving}
+                className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
+              >
+                {isUnarchiving ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />{" "}
+                    Restoring...
+                  </>
+                ) : (
+                  <>
+                    <ArchiveRestore size={16} /> Restore Chat
+                  </>
+                )}
+              </button>
+            </div>
+          </>
         ) : isSharedChat && user ? (
           <>
             <div className="flex justify-center mb-6">
               <div className="flex items-center bg-[var(--color-muted)] rounded-2xl p-1 w-fit">
                 <button
                   type="button"
-                  onClick={() => setLocalMode("chat")}
+                  onClick={() => dispatch(setMode("chat"))}
                   className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
       ${
-        localMode === "chat"
+        mode === "chat"
           ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
           : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
       }`}
@@ -282,10 +314,10 @@ const ChatResponse = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLocalMode("chart")}
+                  onClick={() => dispatch(setMode("chart"))}
                   className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
       ${
-        localMode === "chart"
+        mode === "chart"
           ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
           : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
       }`}
@@ -307,7 +339,11 @@ const ChatResponse = ({
                     Creating...
                   </>
                 ) : (
-                  <>Interact with this chat</>
+                  <>
+                    {" "}
+                    <MessageSquareMore size={16} />
+                    Interact with this chat
+                  </>
                 )}
               </button>
             </div>

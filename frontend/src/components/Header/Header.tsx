@@ -140,7 +140,7 @@ export default function Header({
 
   return (
     <header
-      className="sticky top-0 w-full z-[1000] py-3 px-4 border-b flex items-center justify-between"
+      className="sticky top-0 w-full z-[100] py-3 px-4 border-b flex items-center justify-between"
       style={{
         backgroundColor: "var(--color-bg)",
         color: "var(--color-text)",
