@@ -7,11 +7,7 @@ import {
 import { redisClient } from "../config/redis";
 import { SHARE_CACHE_PREFIX, USER_CHATS_PREFIX } from "../constants/redisKeys";
 
-import {
-  getShareVersion,
-  updateShareVersion,
-  updateUserVersion,
-} from "../utils/cache.utils";
+import { updateShareVersion, updateUserVersion } from "../utils/cache.utils";
 
 export const generateShareIdService = async (
   id: string,
@@ -36,18 +32,9 @@ export const generateShareIdService = async (
 
 export const findShareById = async (shareId: string) => {
   const cacheKey = `${SHARE_CACHE_PREFIX}${shareId}`;
-  const versionKey = await getShareVersion(shareId);
-
-  const [cached] = await Promise.all([redisClient.get(cacheKey)]);
-
-  if (cached && versionKey) {
-    const parsed = JSON.parse(cached);
-    if (parsed._version === versionKey) {
-      return parsed.data;
-    }
-  }
 
   const dbShare = await getShareById(shareId);
+
   if (dbShare) {
     const newVersion = await updateShareVersion(shareId);
     await redisClient.set(

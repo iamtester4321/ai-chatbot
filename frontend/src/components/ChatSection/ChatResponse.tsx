@@ -3,7 +3,6 @@ import {
   BarChart3,
   Loader2,
   MessageSquare,
-  MessageSquareMore
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -37,17 +36,15 @@ const ChatResponse = ({
 }: ChatResponseProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
-  const globalMode = useAppSelector((state) => state.chat.mode);
+  const mode = useAppSelector((state) => state.chat.mode);
   const isArchived = useAppSelector((state) => state.chat.isArchived);
   const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const isSharedChat = location.pathname.startsWith("/share/");
-  const mode = useAppSelector((state) => state.chat.mode);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isUnarchiving, setIsUnarchiving] = useState(false);
   const [isCreatingFromSource, setIsCreatingFromSource] = useState(false);
-
   const showToast = useToast();
 
   const [likedMessages, setLikedMessages] = useState<{
@@ -58,16 +55,16 @@ const ChatResponse = ({
   }>({});
 
   useEffect(() => {
-    const newLikedMessages: { [key: string]: boolean } = {};
-    const newDislikedMessages: { [key: string]: boolean } = {};
+    const newLiked: { [key: string]: boolean } = {};
+    const newDisliked: { [key: string]: boolean } = {};
     messages.forEach((msg) => {
       if (msg.id) {
-        newLikedMessages[msg.id] = msg.isLiked || false;
-        newDislikedMessages[msg.id] = msg.isDisliked || false;
+        newLiked[msg.id] = msg.isLiked || false;
+        newDisliked[msg.id] = msg.isDisliked || false;
       }
     });
-    setLikedMessages(newLikedMessages);
-    setDislikedMessages(newDislikedMessages);
+    setLikedMessages(newLiked);
+    setDislikedMessages(newDisliked);
   }, [messages]);
 
   const handleLike = async (messageId: string | undefined) => {
@@ -142,6 +139,7 @@ const ChatResponse = ({
       return;
     }
     try {
+      if (isCreatingFromSource) return;
       setIsCreatingFromSource(true);
       const newChatId = uuidv4();
       const result = await createChatFromSource(
@@ -150,13 +148,9 @@ const ChatResponse = ({
         messages
       );
       if (result.success) {
-        showToast.success("Chat created from shared source");
         navigate(`/chat/${newChatId}`);
-      } else {
-        showToast.error(result.message || "Failed to create chat from source");
       }
     } catch (error) {
-      showToast.error("An error occurred while creating the chat");
       console.error("Error:", error);
     } finally {
       setIsCreatingFromSource(false);
@@ -176,7 +170,6 @@ const ChatResponse = ({
     <div className="w-full h-full bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-border)] scrollbar-track-transparent scrollbar-thumb-rounded-md">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
-          {/* Skeleton Loader for chatName */}
           {user && !chatName ? (
             <Skeleton className="w-1/2 h-8 mb-4 sm:mb-6" />
           ) : (
@@ -187,7 +180,7 @@ const ChatResponse = ({
 
           {filteredMessages.length === 0 && (
             <div className="w-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-              {mode === "chart" || (!isSharedChat && globalMode === "chart") ? (
+              {mode === "chart" || !isSharedChat ? (
                 <BarChart3
                   size={48}
                   className="mb-4 text-[var(--color-disabled-text)]"
@@ -238,7 +231,6 @@ const ChatResponse = ({
           )}
 
           {isLoading && <StreamLoader />}
-
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -295,66 +287,16 @@ const ChatResponse = ({
               </button>
             </div>
           </>
-        ) : isSharedChat && user ? (
-          <>
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center bg-[var(--color-muted)] rounded-2xl p-1 w-fit">
-                <button
-                  type="button"
-                  onClick={() => dispatch(setMode("chat"))}
-                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
-      ${
-        mode === "chat"
-          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
-          : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
-      }`}
-                >
-                  <MessageSquare size={16} />
-                  Chat
-                </button>
-                <button
-                  type="button"
-                  onClick={() => dispatch(setMode("chart"))}
-                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-xl transition-all cursor-pointer
-      ${
-        mode === "chart"
-          ? "bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-sm"
-          : "text-[color:var(--color-disabled-text)] hover:text-[color:var(--color-text)]"
-      }`}
-                >
-                  <BarChart3 size={16} />
-                  Chart
-                </button>
-              </div>
-            </div>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleCreateChatFromSource}
-                disabled={isCreatingFromSource}
-                className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-button-text)] px-6 py-2 rounded-full font-semibold hover:bg-[var(--color-primary-hover)] transition cursor-pointer"
-              >
-                {isCreatingFromSource ? (
-                  <>
-                    <Loader2 size={16} className="mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    {" "}
-                    <MessageSquareMore size={16} />
-                    Interact with this chat
-                  </>
-                )}
-              </button>
-            </div>
-          </>
-        ) : (
+        ): (
           <PromptInput
             input={input}
             handleInputChange={handleInputChange}
             handleFormSubmit={handleFormSubmit}
             isLoading={isLoading}
             chatId={chatId}
+            shareId={sourceChatId ?? undefined}
+            isSharedChat={isSharedChat}
+            onInteractWithSharedChat={handleCreateChatFromSource}
           />
         )}
       </div>

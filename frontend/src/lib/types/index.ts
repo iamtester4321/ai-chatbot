@@ -146,6 +146,8 @@ export type PromptInputProps = {
   chatId?: string;
   shareId?: string;
   sourceChatId?: string | null;
+  isSharedChat?: boolean;
+  onInteractWithSharedChat?: () => void;
 };
 
 export type Message = {
