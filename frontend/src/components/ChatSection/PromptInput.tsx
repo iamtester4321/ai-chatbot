@@ -4,6 +4,7 @@ import {
   BarChart2,
   MessageSquare,
   Mic,
+  MicOff,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { fetchSuggestions } from "../../actions/chat.actions";
@@ -25,7 +26,7 @@ const PromptInput = ({
 }: PromptInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const {mode, messages} = useAppSelector((state) => state.chat);
+  const { mode } = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -60,22 +61,22 @@ const PromptInput = ({
       recognition.interimResults = true;
       recognition.lang = "en-US";
       recognition.onresult = (event) => {
-  let transcript = "";
+        let transcript = "";
 
-  for (let i = event.resultIndex; i < event.results.length; ++i) {
-    const result = event.results[i];
-    if (result.isFinal) {
-      transcript += result[0].transcript;
-    }
-  }
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcript += result[0].transcript;
+          }
+        }
 
-  if (transcript.trim()) {
-    const currentText = textareaRef.current?.value || "";
-    handleInputChange({
-      target: { value: `${currentText} ${transcript}`.trim() },
-    } as any);
-  }
-};
+        if (transcript.trim()) {
+          const currentText = textareaRef.current?.value || "";
+          handleInputChange({
+            target: { value: `${currentText} ${transcript}`.trim() },
+          } as any);
+        }
+      };
       recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
@@ -171,7 +172,7 @@ const PromptInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isLoading && e.key === "Enter" && !e.shiftKey) {
+    if ((isLoading || isListening) && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       return;
     }
@@ -260,6 +261,38 @@ const PromptInput = ({
     }
   };
 
+  useEffect(() => {
+  const handleGlobalUserInteraction = (event: MouseEvent | KeyboardEvent | FocusEvent) => {
+    const micButton = micButtonRef.current;
+    const textarea = textareaRef.current;
+
+    const target = event.target as Node;
+
+    if (
+      isListening &&
+      target &&
+      micButton &&
+      textarea &&
+      !micButton.contains(target) &&
+      !textarea.contains(target)
+    ) {
+      setIsStopping(true);
+      recognitionRef.current?.stop();
+    }
+  };
+
+  document.addEventListener("mousedown", handleGlobalUserInteraction);
+  document.addEventListener("keydown", handleGlobalUserInteraction);
+  document.addEventListener("focusin", handleGlobalUserInteraction);
+
+  return () => {
+    document.removeEventListener("mousedown", handleGlobalUserInteraction);
+    document.removeEventListener("keydown", handleGlobalUserInteraction);
+    document.removeEventListener("focusin", handleGlobalUserInteraction);
+  };
+}, [isListening]);
+
+
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <form
@@ -270,7 +303,10 @@ const PromptInput = ({
         <div className="relative w-full">
           <textarea
             ref={textareaRef}
-            className="bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
+            // className="bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
+            className={`bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent ${
+              isListening ? "opacity-70 cursor-not-allowed" : ""
+            }`}
             placeholder={`Ask anything in ${
               mode === "chat" ? "chat" : "chart"
             } mode...`}
@@ -283,6 +319,7 @@ const PromptInput = ({
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             rows={1}
+            readOnly={isListening}
           />
         </div>
 
@@ -320,9 +357,9 @@ const PromptInput = ({
             <div className="relative">
               {isListening && !isStopping && (
                 <>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-20 animate-ping"></div>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-30 animate-pulse scale-110"></div>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-10 animate-ping delay-75 scale-125"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-20 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-30 animate-pulse scale-110"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-10 animate-ping delay-75 scale-125"></div>
                 </>
               )}
               <button
@@ -331,17 +368,26 @@ const PromptInput = ({
                 onClick={toggleListening}
                 className={`relative rounded-full w-[40px] h-[36px] flex items-center justify-center transition-all duration-300 ${
                   isListening
-                    ? "bg-[var(--color-primary)] text-[var(--color-button-text)] scale-110 animate-pulse shadow-lg shadow-[var(--color-primary)]/25"
+                    ? "bg-red-600 text-[var(--color-button-text)] scale-110 animate-pulse shadow-lg shadow-[var(--color-primary)]/25"
                     : "bg-transparent text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-muted)] hover:scale-105"
                 }`}
                 title={isListening ? "Stop recording" : "Start voice input"}
               >
-                <Mic
-                  size={16}
-                  className={`transition-transform duration-200 ${
-                    isListening ? "scale-110" : ""
-                  }`}
-                />
+                {isListening ? (
+                  <MicOff
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      isListening ? "scale-110" : ""
+                    }`}
+                  />
+                ) : (
+                  <Mic
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      isListening ? "scale-110" : ""
+                    }`}
+                  />
+                )}
               </button>
             </div>
 
@@ -383,7 +429,9 @@ const PromptInput = ({
         />
       )}
 
-      {showVoiceModal && <VoiceModal onClose={() => setShowVoiceModal(false)} />}
+      {showVoiceModal && (
+        <VoiceModal onClose={() => setShowVoiceModal(false)} />
+      )}
     </div>
   );
 };
