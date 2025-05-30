@@ -1,8 +1,8 @@
 import {
   ArrowUpRight,
-  AudioLines,
   BarChart2,
   MessageSquare,
+  Mic 
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { fetchSuggestions } from "../../actions/chat.actions";
@@ -10,7 +10,6 @@ import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import SuggestionBox from "../inputSuggestion/SuggestionBox";
-import VoiceModal from "../Modal/VoiceModal";
 
 const PromptInput = ({
   input,
@@ -31,7 +30,10 @@ const PromptInput = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
-  const [showVoiceModal, setShowVoiceModal] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const micButtonRef = useRef<HTMLButtonElement>(null);
+  const [isStopping, setIsStopping] = useState(false);
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -45,6 +47,34 @@ const PromptInput = ({
       });
     }
   }, [showSuggestions]);
+
+    useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+      recognition.onresult = (event) => {
+        if (event.results[0].isFinal) {
+          const transcript = event.results[0][0].transcript;
+          const currentText = textareaRef.current?.value || "";
+          handleInputChange({
+            target: { value: `${currentText} ${transcript}`.trim() },
+          } as any);
+        }
+      };
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,6 +120,60 @@ const PromptInput = ({
         setSuggestions([]);
       }
     }, 2000);
+  };
+
+    const toggleListening = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      setIsStopping(true);
+      micButtonRef.current?.classList.add(
+        "bg-red-600",
+        "border-red-600",
+        "text-white"
+      );
+      setTimeout(() => {
+        recognitionRef.current?.stop();
+        setIsListening(false);
+        setIsStopping(false);
+        micButtonRef.current?.classList.remove(
+          "bg-red-600",
+          "border-red-600",
+          "text-white"
+        );
+      }, 2000);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+      const redTimeout = setTimeout(() => {
+        setIsStopping(true);
+        micButtonRef.current?.classList.add(
+          "bg-red-600",
+          "border-red-600",
+          "text-white"
+        );
+      }, 8000);
+      const stopTimeout = setTimeout(() => {
+        recognitionRef.current?.stop();
+        setIsListening(false);
+        setIsStopping(false);
+        micButtonRef.current?.classList.remove(
+          "bg-red-600",
+          "border-red-600",
+          "text-white"
+        );
+      }, 10000);
+      recognitionRef.current.onend = () => {
+        clearTimeout(redTimeout);
+        clearTimeout(stopTimeout);
+        setIsStopping(false);
+        micButtonRef.current?.classList.remove(
+          "bg-red-600",
+          "border-red-600",
+          "text-white"
+        );
+        setIsListening(false);
+      };
+    }
   };
 
   const handleModeChange = (newMode: "chat" | "chart") => {
@@ -242,23 +326,43 @@ const PromptInput = ({
               Chart
             </button>
           </div>
-          {input.length > 0 ? (
+                    <div className="flex items-center gap-2">
+            <div className="relative">
+              {isListening && !isStopping && (
+                <>
+                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-20 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-30 animate-pulse scale-110"></div>
+                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-10 animate-ping delay-75 scale-125"></div>
+                </>
+              )}
+              <button
+                type="button"
+                ref={micButtonRef}
+                onClick={toggleListening}
+                className={`relative rounded-full w-[40px] h-[36px] flex items-center justify-center transition-all duration-300 ${
+                  isListening
+                    ? "bg-[var(--color-primary)] text-[var(--color-button-text)] scale-110 animate-pulse shadow-lg shadow-[var(--color-primary)]/25"
+                    : "bg-transparent text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-muted)] hover:scale-105"
+                }`}
+                title={isListening ? "Stop recording" : "Start voice input"}
+              >
+                <Mic
+                  size={16}
+                  className={`transition-transform duration-200 ${
+                    isListening ? "scale-110" : ""
+                  }`}
+                />
+              </button>
+            </div>
             <button
               type="submit"
-              disabled={isLoading || input.trim() === ""}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              disabled={isLoading || input.trim() === "" || isListening}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"            
+              title="Send message"
+              >
               <ArrowUpRight size={18} color="var(--color-button-text)" />
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowVoiceModal(true)}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer"
-            >
-              <AudioLines size={18} color="var(--color-button-text)" />
-            </button>
-          )}
+            </div>
         </div>
       </form>
 
@@ -270,11 +374,6 @@ const PromptInput = ({
           suggestionBoxRef={suggestionBoxRef}
           onSelect={handleSuggestionSelect}
         />
-      )}
-
-      {/* Voice Modal */}
-      {showVoiceModal && (
-        <VoiceModal onClose={() => setShowVoiceModal(false)} />
       )}
     </div>
   );
