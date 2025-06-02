@@ -327,27 +327,3 @@ export const renameChat = asyncHandler(async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-// export const handleCreateChatFromSource = async (req: any, res: any) => {
-//   const userId = req.user?.id;
-//   const newChatId = req.params.chatId;
-//   const sourceChatId = req.body.sourceChatId;
-
-//   if (!userId || !sourceChatId) {
-//     return res
-//       .status(400)
-//       .json({ success: false, error: "Missing required fields." });
-//   }
-
-//   const result = await createChatFromSourceChat(
-//     userId,
-//     newChatId,
-//     sourceChatId
-//   );
-
-//   if (result.success) {
-//     return res.status(201).json({ success: true });
-//   } else {
-//     return res.status(500).json({ success: false, error: result.error });
-//   }
-// };

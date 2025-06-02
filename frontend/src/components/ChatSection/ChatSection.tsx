@@ -112,11 +112,11 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
           dispatch(setMessages(data.messages));
           const lMsg = data.messages[data.messages.length - 1];
           dispatch(setMode(lMsg.for));
-          setError(null); // clear any previous error
+          setError(null);
         } else {
           console.error(fetchError);
           setError("This shared chat doesn't exist or has been removed.");
-          dispatch(setMessages([])); // optional: clear existing messages
+          dispatch(setMessages([])); 
         }
       };
 
@@ -190,10 +190,10 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
     }
   }, [isLoading, currentResponse, messages.length]);
 
-  // Get mode from Redux
+
   const mode = useAppSelector((state) => state.chat.mode);
 
-  // Filter messages by mode
+
   const chatMessages = messages.filter((msg) => (msg as any).for !== "chart");
   const chartMessages = messages.filter((msg) => (msg as any).for === "chart");
 

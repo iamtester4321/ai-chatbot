@@ -19,10 +19,11 @@ export default function HeaderTitle({ toggleSidebar }: HeaderTitleProps) {
       >
         <Sidebar size={20} />
       </button>
-      <Link to="/chat">
-        <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs">
-          Aivora
-        </h1>
+      <Link
+        to="/chat"
+        className="text-xl font-semibold truncate max-w-[200px] sm:max-w-xs"
+      >
+        Aivora
       </Link>
     </div>
   );
