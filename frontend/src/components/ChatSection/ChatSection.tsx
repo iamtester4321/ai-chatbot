@@ -73,7 +73,7 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
           }
         }
       };
-
+      setsourceChatId(null)
       loadMessages();
     } else {
       dispatch(setMessages([]));
