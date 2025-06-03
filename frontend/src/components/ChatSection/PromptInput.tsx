@@ -2,7 +2,8 @@ import {
   ArrowUpRight,
   BarChart2,
   MessageSquare,
-  Mic 
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { fetchSuggestions } from "../../actions/chat.actions";
@@ -23,14 +24,14 @@ const PromptInput = ({
 }: PromptInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const mode = useAppSelector((state) => state.chat.mode);
+  const { mode } = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const suggestionBoxRef = useRef<HTMLDivElement>(null);
-    const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const micButtonRef = useRef<HTMLButtonElement>(null);
   const [isStopping, setIsStopping] = useState(false);
@@ -48,17 +49,25 @@ const PromptInput = ({
     }
   }, [showSuggestions]);
 
-    useEffect(() => {
+  useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = "en-US";
       recognition.onresult = (event) => {
-        if (event.results[0].isFinal) {
-          const transcript = event.results[0][0].transcript;
+        let transcript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcript += result[0].transcript;
+          }
+        }
+
+        if (transcript.trim()) {
           const currentText = textareaRef.current?.value || "";
           handleInputChange({
             target: { value: `${currentText} ${transcript}`.trim() },
@@ -69,9 +78,21 @@ const PromptInput = ({
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };
+
       recognition.onend = () => {
-        setIsListening(false);
+        if (isListening && !isStopping) {
+          setTimeout(() => recognition.start(), 200);
+        } else {
+          setIsListening(false);
+          setIsStopping(false);
+          micButtonRef.current?.classList.remove(
+            "bg-red-600",
+            "border-red-600",
+            "text-white"
+          );
+        }
       };
+
       recognitionRef.current = recognition;
     }
   }, []);
@@ -122,7 +143,7 @@ const PromptInput = ({
     }, 2000);
   };
 
-    const toggleListening = () => {
+  const toggleListening = () => {
     if (!recognitionRef.current) return;
     if (isListening) {
       setIsStopping(true);
@@ -131,48 +152,15 @@ const PromptInput = ({
         "border-red-600",
         "text-white"
       );
-      setTimeout(() => {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 2000);
+      recognitionRef.current.stop();
     } else {
       recognitionRef.current.start();
       setIsListening(true);
-      const redTimeout = setTimeout(() => {
-        setIsStopping(true);
-        micButtonRef.current?.classList.add(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 8000);
-      const stopTimeout = setTimeout(() => {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-      }, 10000);
-      recognitionRef.current.onend = () => {
-        clearTimeout(redTimeout);
-        clearTimeout(stopTimeout);
-        setIsStopping(false);
-        micButtonRef.current?.classList.remove(
-          "bg-red-600",
-          "border-red-600",
-          "text-white"
-        );
-        setIsListening(false);
-      };
+      micButtonRef.current?.classList.remove(
+        "bg-red-600",
+        "border-red-600",
+        "text-white"
+      );
     }
   };
 
@@ -181,7 +169,7 @@ const PromptInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isLoading && e.key === "Enter" && !e.shiftKey) {
+    if ((isLoading || isListening) && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       return;
     }
@@ -249,7 +237,6 @@ const PromptInput = ({
     }
   };
 
-  // Only auto-focus if not a shared chat
   useEffect(() => {
     if (!isSharedChat && textareaRef.current) {
       textareaRef.current.focus();
@@ -271,6 +258,39 @@ const PromptInput = ({
     }
   };
 
+  useEffect(() => {
+    const handleGlobalUserInteraction = (
+      event: MouseEvent | KeyboardEvent | FocusEvent
+    ) => {
+      const micButton = micButtonRef.current;
+      const textarea = textareaRef.current;
+
+      const target = event.target as Node;
+
+      if (
+        isListening &&
+        target &&
+        micButton &&
+        textarea &&
+        !micButton.contains(target) &&
+        !textarea.contains(target)
+      ) {
+        setIsStopping(true);
+        recognitionRef.current?.stop();
+      }
+    };
+
+    document.addEventListener("mousedown", handleGlobalUserInteraction);
+    document.addEventListener("keydown", handleGlobalUserInteraction);
+    document.addEventListener("focusin", handleGlobalUserInteraction);
+
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalUserInteraction);
+      document.removeEventListener("keydown", handleGlobalUserInteraction);
+      document.removeEventListener("focusin", handleGlobalUserInteraction);
+    };
+  }, [isListening]);
+
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <form
@@ -281,7 +301,9 @@ const PromptInput = ({
         <div className="relative w-full">
           <textarea
             ref={textareaRef}
-            className="bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
+            className={`bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent ${
+              isListening ? "opacity-70 cursor-not-allowed" : ""
+            }`}
             placeholder={`Ask anything in ${
               mode === "chat" ? "chat" : "chart"
             } mode...`}
@@ -294,6 +316,7 @@ const PromptInput = ({
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             rows={1}
+            readOnly={isListening}
           />
         </div>
 
@@ -326,13 +349,14 @@ const PromptInput = ({
               Chart
             </button>
           </div>
-                    <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2">
             <div className="relative">
               {isListening && !isStopping && (
                 <>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-20 animate-ping"></div>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-30 animate-pulse scale-110"></div>
-                  <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-10 animate-ping delay-75 scale-125"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-20 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-30 animate-pulse scale-110"></div>
+                  <div className="absolute inset-0 rounded-full bg-red-600 opacity-10 animate-ping delay-75 scale-125"></div>
                 </>
               )}
               <button
@@ -341,28 +365,38 @@ const PromptInput = ({
                 onClick={toggleListening}
                 className={`relative rounded-full w-[40px] h-[36px] flex items-center justify-center transition-all duration-300 ${
                   isListening
-                    ? "bg-[var(--color-primary)] text-[var(--color-button-text)] scale-110 animate-pulse shadow-lg shadow-[var(--color-primary)]/25"
+                    ? "bg-red-600 text-[var(--color-button-text)] scale-110 animate-pulse shadow-lg shadow-[var(--color-primary)]/25"
                     : "bg-transparent text-[var(--color-disabled-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-muted)] hover:scale-105"
                 }`}
                 title={isListening ? "Stop recording" : "Start voice input"}
               >
-                <Mic
-                  size={16}
-                  className={`transition-transform duration-200 ${
-                    isListening ? "scale-110" : ""
-                  }`}
-                />
+                {isListening ? (
+                  <MicOff
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      isListening ? "scale-110" : ""
+                    }`}
+                  />
+                ) : (
+                  <Mic
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      isListening ? "scale-110" : ""
+                    }`}
+                  />
+                )}
               </button>
             </div>
+
             <button
               type="submit"
               disabled={isLoading || input.trim() === "" || isListening}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"            
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
               title="Send message"
-              >
+            >
               <ArrowUpRight size={18} color="var(--color-button-text)" />
             </button>
-            </div>
+          </div>
         </div>
       </form>
 
