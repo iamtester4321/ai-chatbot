@@ -303,7 +303,6 @@ const PromptInput = ({
         <div className="relative w-full">
           <textarea
             ref={textareaRef}
-            // className="bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent"
             className={`bg-transparent text-base placeholder-[color:var(--color-disabled-text)] text-[var(--color-text)] outline-none min-h-[48px] px-1 resize-none w-full scrollbar-thin scrollbar-thumb-[var(--color-disabled-text)] scrollbar-track-transparent ${
               isListening ? "opacity-70 cursor-not-allowed" : ""
             }`}
