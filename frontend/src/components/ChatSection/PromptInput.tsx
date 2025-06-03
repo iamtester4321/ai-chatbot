@@ -1,6 +1,5 @@
 import {
   ArrowUpRight,
-  AudioLines,
   BarChart2,
   MessageSquare,
   Mic,
@@ -12,7 +11,6 @@ import { PromptInputProps } from "../../lib/types";
 import { setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import SuggestionBox from "../inputSuggestion/SuggestionBox";
-import VoiceModal from "../Modal/VoiceModal";
 
 const PromptInput = ({
   input,
@@ -37,7 +35,6 @@ const PromptInput = ({
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const micButtonRef = useRef<HTMLButtonElement>(null);
   const [isStopping, setIsStopping] = useState(false);
-  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   useEffect(() => {
     suggestionRefs.current = suggestions.map(() => null);
@@ -262,36 +259,37 @@ const PromptInput = ({
   };
 
   useEffect(() => {
-  const handleGlobalUserInteraction = (event: MouseEvent | KeyboardEvent | FocusEvent) => {
-    const micButton = micButtonRef.current;
-    const textarea = textareaRef.current;
+    const handleGlobalUserInteraction = (
+      event: MouseEvent | KeyboardEvent | FocusEvent
+    ) => {
+      const micButton = micButtonRef.current;
+      const textarea = textareaRef.current;
 
-    const target = event.target as Node;
+      const target = event.target as Node;
 
-    if (
-      isListening &&
-      target &&
-      micButton &&
-      textarea &&
-      !micButton.contains(target) &&
-      !textarea.contains(target)
-    ) {
-      setIsStopping(true);
-      recognitionRef.current?.stop();
-    }
-  };
+      if (
+        isListening &&
+        target &&
+        micButton &&
+        textarea &&
+        !micButton.contains(target) &&
+        !textarea.contains(target)
+      ) {
+        setIsStopping(true);
+        recognitionRef.current?.stop();
+      }
+    };
 
-  document.addEventListener("mousedown", handleGlobalUserInteraction);
-  document.addEventListener("keydown", handleGlobalUserInteraction);
-  document.addEventListener("focusin", handleGlobalUserInteraction);
+    document.addEventListener("mousedown", handleGlobalUserInteraction);
+    document.addEventListener("keydown", handleGlobalUserInteraction);
+    document.addEventListener("focusin", handleGlobalUserInteraction);
 
-  return () => {
-    document.removeEventListener("mousedown", handleGlobalUserInteraction);
-    document.removeEventListener("keydown", handleGlobalUserInteraction);
-    document.removeEventListener("focusin", handleGlobalUserInteraction);
-  };
-}, [isListening]);
-
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalUserInteraction);
+      document.removeEventListener("keydown", handleGlobalUserInteraction);
+      document.removeEventListener("focusin", handleGlobalUserInteraction);
+    };
+  }, [isListening]);
 
   return (
     <div className="relative w-full max-w-3xl mx-auto">
@@ -390,30 +388,14 @@ const PromptInput = ({
               </button>
             </div>
 
-            {input.length > 0 ? (
-              <button
-                type="submit"
-                disabled={isLoading || input.trim() === "" || isListening}
-                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
-                title="Send message"
-              >
-                <ArrowUpRight size={18} color="var(--color-button-text)" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => !isListening && setShowVoiceModal(true)}
-                disabled={isListening}
-                className={`bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 ${
-                  isListening
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer hover:scale-105"
-                }`}
-                title={isListening ? "Mic is active" : "Open voice modal"}
-              >
-                <AudioLines size={18} color="var(--color-button-text)" />
-              </button>
-            )}
+            <button
+              type="submit"
+              disabled={isLoading || input.trim() === "" || isListening}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl w-[40px] h-[36px] flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+              title="Send message"
+            >
+              <ArrowUpRight size={18} color="var(--color-button-text)" />
+            </button>
           </div>
         </div>
       </form>
@@ -426,10 +408,6 @@ const PromptInput = ({
           suggestionBoxRef={suggestionBoxRef}
           onSelect={handleSuggestionSelect}
         />
-      )}
-
-      {showVoiceModal && (
-        <VoiceModal onClose={() => setShowVoiceModal(false)} />
       )}
     </div>
   );

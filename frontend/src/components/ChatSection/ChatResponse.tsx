@@ -178,7 +178,7 @@ const ChatResponse = ({
             </h2>
           )}
 
-          {filteredMessages.length === 0 && (
+          {filteredMessages.length === 0 && !isLoading && (
             <div className="w-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
               {mode === "chart" || !isSharedChat ? (
                 <BarChart3
