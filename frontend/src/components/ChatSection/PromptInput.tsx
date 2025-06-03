@@ -51,7 +51,7 @@ const PromptInput = ({
 
   useEffect(() => {
     const SpeechRecognition =
-      window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      window.SpeechRecognition || (window).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -71,7 +71,7 @@ const PromptInput = ({
           const currentText = textareaRef.current?.value || "";
           handleInputChange({
             target: { value: `${currentText} ${transcript}`.trim() },
-          } as any);
+          } as React.ChangeEvent<HTMLTextAreaElement>);
         }
       };
       recognition.onerror = (event) => {
@@ -219,7 +219,9 @@ const PromptInput = ({
   }, [selectedSuggestionIndex]);
 
   const handleSuggestionSelect = (suggestion: string) => {
-    handleInputChange({ target: { value: suggestion } } as any);
+    handleInputChange({
+      target: { value: suggestion }
+    } as React.ChangeEvent<HTMLTextAreaElement>);
     setShowSuggestions(false);
     textareaRef.current?.focus();
   };

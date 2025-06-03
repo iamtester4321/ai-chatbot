@@ -20,6 +20,7 @@ import Error from "../Common/Error";
 import ChatSkeleton from "../Loaders/ChatSkeleton";
 import ChatResponse from "./ChatResponse";
 import PromptInput from "./PromptInput";
+import { Message } from "../../lib/types";
 
 const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const navigate = useNavigate();
@@ -135,7 +136,16 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
       } as React.ChangeEvent<HTMLInputElement>;
 
       handleInputChange(event);
-      handleSubmit(new Event("submit") as any);
+      const form = document.createElement("form");
+      const formEvent = { 
+        ...new Event("submit", { bubbles: true, cancelable: true }),
+        currentTarget: form,
+        target: form,
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        nativeEvent: new Event("submit"),
+      } as unknown as React.FormEvent<HTMLFormElement>;
+      handleSubmit(formEvent);
       sessionStorage.removeItem("initialPrompt");
     }
   }, [chatId, messages.length, handleInputChange, handleSubmit]);
@@ -172,7 +182,16 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const handleRegenerate = async () => {
     setShowRegenerate(false);
     dispatch(setIsLoading(true));
-    await handleSubmit(new Event("submit") as any);
+    const form = document.createElement("form");
+    const formEvent = { 
+      ...new Event("submit", { bubbles: true, cancelable: true }),
+      currentTarget: form,
+      target: form,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      nativeEvent: new Event("submit"),
+    } as unknown as React.FormEvent<HTMLFormElement>;
+    await handleSubmit(formEvent);
     dispatch(setIsLoading(false));
   };
 
@@ -194,8 +213,8 @@ const ChatSection = ({ isMobile }: { isMobile: boolean }) => {
   const mode = useAppSelector((state) => state.chat.mode);
 
 
-  const chatMessages = messages.filter((msg) => (msg as any).for !== "chart");
-  const chartMessages = messages.filter((msg) => (msg as any).for === "chart");
+  const chatMessages = messages.filter((msg) => (msg as Message).for !== "chart");
+  const chartMessages = messages.filter((msg) => (msg as Message).for === "chart");
 
   return (
     <div className="bg-background-primary text-text-primary flex-1 h-full overflow-y-screen">

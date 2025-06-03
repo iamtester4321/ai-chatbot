@@ -13,7 +13,7 @@ import {
   updateLikeStatus,
 } from "../../actions/message.actions";
 import useToast from "../../hooks/useToast";
-import { ChatResponseProps } from "../../lib/types";
+import { ChatResponseProps, Message } from "../../lib/types";
 import { setIsArchived, setMode } from "../../store/features/chat/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import MarkdownRenderer from "../../utils/responseRenderer";
@@ -161,8 +161,8 @@ const ChatResponse = ({
     isSharedChat || isArchived
       ? messages.filter((msg) =>
           mode === "chat"
-            ? (msg as any).for !== "chart"
-            : (msg as any).for === "chart"
+            ? (msg as Message).for !== "chart"
+            : (msg as Message).for === "chart"
         )
       : messages;
 
